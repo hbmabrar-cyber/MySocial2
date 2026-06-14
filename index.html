@@ -4,7 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GoChat V2</title>
-  <style>
+
+<style>
+  /* লাইট মোড (সাদা ব্যাকগ্রাউন্ড) কালার */
+body.light-mode {
+    --bg: #ffffff;
+    --surface: #f0f2f5;
+    --card: #ffffff;
+    --border: #cccccc;
+    --text: #000000;
+    --muted: #666666;
+}
+
 /* সেটিংস মেনু স্টাইল */
 .settings-menu { display: none; position: absolute; top: 60px; right: 20px; background: var(--card); border-radius: 12px; padding: 10px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 .settings-menu.open { display: block; }
@@ -16,9 +27,7 @@
 .modal-box { background: var(--card); padding: 20px; border-radius: 15px; width: 80%; max-width: 300px; text-align: center; }
 .modal-box input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
 .btn-primary { background: var(--accent); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; }
-  </style>
   
-<style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
 --bg:#0f0f13;--surface:#1a1a24;--card:#22222f;--border:#2e2e3f;

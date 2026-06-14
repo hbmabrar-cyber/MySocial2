@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GoChat V2</title>
+  <style>
+/* সেটিংস মেনু স্টাইল */
+.settings-menu { display: none; position: absolute; top: 60px; right: 20px; background: var(--card); border-radius: 12px; padding: 10px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+.settings-menu.open { display: block; }
+.setting-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid var(--border); }
+.setting-item:hover { background: var(--surface); }
+
+/* মোডাল স্টাইল */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; }
+.modal-box { background: var(--card); padding: 20px; border-radius: 15px; width: 80%; max-width: 300px; text-align: center; }
+.modal-box input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+.btn-primary { background: var(--accent); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; }
+  </style>
+  
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -116,6 +130,27 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 </style>
 </head>
 <body>
+  <div class="topbar">
+    <div class="topbar-logo">✦ GoChat</div>
+    <div class="icon-btn" onclick="toggleSettings()">⚙️</div>
+    
+    <div class="settings-menu" id="settings-menu">
+        <div class="setting-item" onclick="toggleDarkMode()">🌓 ডার্ক মোড</div>
+        <div class="setting-item" onclick="openAccountModal()">👤 অ্যাকাউন্ট তথ্য</div>
+        <div class="setting-item" style="color:var(--danger)" onclick="doLogout()">🚪 লগ আউট</div>
+    </div>
+</div>
+
+<div id="account-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>অ্যাকাউন্ট এডিট</h3>
+        <input type="text" id="edit-name" placeholder="আপনার নাম">
+        <input type="date" id="edit-dob">
+        <button class="btn-primary" onclick="saveAccountInfo()">সংরক্ষণ করুন</button>
+        <button class="btn-secondary" onclick="closeAccountModal()">বাতিল</button>
+    </div>
+</div>
+  
 <div id="auth-screen">
   <div class="auth-box">
     <div class="auth-logo">✦ GoChat</div>
@@ -297,6 +332,48 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+// ডার্ক মোড টগল
+function toggleDarkMode() {
+    document.body.classList.toggle('light-mode');
+}
+
+// সেটিংস মেনু ওপেন/ক্লোজ
+function toggleSettings() {
+    document.getElementById('settings-menu').classList.toggle('open');
+}
+
+// অ্যাকাউন্ট মোডাল ওপেন/ক্লোজ
+function openAccountModal() {
+    document.getElementById('account-modal').style.display = 'flex';
+    toggleSettings();
+}
+function closeAccountModal() {
+    document.getElementById('account-modal').style.display = 'none';
+}
+
+// তথ্য সংরক্ষণ
+function saveAccountInfo() {
+    const name = document.getElementById('edit-name').value;
+    const dob = document.getElementById('edit-dob').value;
+    
+    // লোকাল স্টোরেজে সেভ করা (যাতে অ্যাপ রিফ্রেশ করলেও হারাবে না)
+    localStorage.setItem('userName', name);
+    localStorage.setItem('userDOB', dob);
+    
+    alert("তথ্য আপডেট হয়েছে!");
+    closeAccountModal();
+    // প্রোফাইলে আপডেট করার কোড এখানে কল করবেন
+}
+
+// লগ আউট
+function doLogout() {
+    if(confirm("আপনি কি নিশ্চিত লগ আউট করতে চান?")) {
+        window.location.href = "login.html"; // আপনার লগইন পেজের লিংক দিন
+    }
+}
+  </script>
+  
           <script>
 // ==========================================
 // IMPORTANT: ADMIN EMAIL FOR VERIFIED BADGE

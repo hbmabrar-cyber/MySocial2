@@ -123,7 +123,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <body>
   <div id="auth-screen">
   <div class="auth-box">
-    <div class="auth-logo">✦ GoChat V2</div>
+    <div class="auth-logo">✦ GoChat</div>
     <div class="auth-sub">Your own social space</div>
     <div class="auth-tabs">
       <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</div>
@@ -135,7 +135,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       <button class="btn-primary" onclick="doLogin()">Login</button>
     </div>
     <div id="register-form" style="display:none">
-      <div class="input-group"><label>Name</label><input type="text" id="reg-name" placeholder="Your name"></div>
+      <div class="input-group"><label>Name (No Emojis allowed)</label><input type="text" id="reg-name" placeholder="Your real name"></div>
       <div class="input-group"><label>Email</label><input type="email" id="reg-email" placeholder="example@gmail.com"></div>
       <div class="input-group"><label>Password</label><input type="password" id="reg-pass" placeholder="At least 6 characters"></div>
       <button class="btn-primary" onclick="doRegister()">Create Account</button>
@@ -150,7 +150,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
     <div class="icon-btn" onclick="toggleSettingsMenu()">⚙️
       <div class="settings-menu" id="settings-menu">
         <div class="setting-item" onclick="toggleDarkMode()">🌓 ডার্ক মোড</div>
-        <div class="setting-item" onclick="openAccountModal()">👤 অ্যাকাউন্ট তথ্য</div>
         <div class="setting-item" style="color:var(--danger)" onclick="doLogout()">🚪 লগ আউট</div>
       </div>
     </div>
@@ -199,10 +198,45 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
         <label class="avatar-edit-btn" for="avatar-input">✏️</label>
         <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
       </div>
-      <div class="profile-name" id="profile-name-display">Loading...</div>
-      <div class="profile-bio" id="profile-bio-display">No bio yet</div>
-      <div class="profile-stats" id="profile-friends-count"></div>
-      <div class="profile-personal-details" id="profile-details-display"></div>
+      
+      <div id="profile-display-section">
+          <div class="profile-name" id="profile-name-display">Loading...</div>
+          <div class="profile-bio" id="profile-bio-display">No bio yet</div>
+          <div class="profile-stats" id="profile-friends-count"></div>
+          <div class="profile-personal-details" id="profile-details-display"></div>
+          <button class="btn-outline" onclick="openProfileEdit()" style="margin-top:10px; padding:6px 16px; font-size:12px;">✏️ Edit Profile</button>
+      </div>
+
+      <div id="profile-edit-section" style="display:none; text-align:left; background:var(--bg); padding:16px; border-radius:12px; margin-top:15px; border:1px solid var(--border);">
+         <div style="font-weight:700; margin-bottom:12px; text-align:center; font-size:14px; color:var(--text);">Edit Profile Information</div>
+         <div class="input-group"><label>Name (No Emojis allowed)</label><input type="text" id="edit-name"></div>
+         <div class="input-group"><label>Bio</label><input type="text" id="edit-bio" placeholder="Write a short bio..."></div>
+         <div class="input-group"><label>Gender</label>
+            <select id="edit-gender">
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+         </div>
+         <div class="input-group"><label>Home Town</label><input type="text" id="edit-hometown" placeholder="City, Country"></div>
+         <div class="input-group"><label>Current Location</label><input type="text" id="edit-location" placeholder="City, Country"></div>
+         <div class="input-group"><label>Relationship Status</label>
+            <select id="edit-relationship" onchange="togglePartnerField()">
+              <option value="">Select Status</option>
+              <option value="Single">Single</option>
+              <option value="In a relationship">In a relationship</option>
+              <option value="Married">Married</option>
+            </select>
+         </div>
+         <div class="input-group" id="partner-field-wrap" style="display:none;">
+            <label>Partner's Name</label>
+            <input type="text" id="edit-partner" placeholder="Name of your partner">
+         </div>
+         <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn-primary" onclick="saveProfileChanges()" style="margin-top:0;">Save</button>
+            <button class="btn-outline" style="width:100%;" onclick="closeProfileEdit()">Cancel</button>
+         </div>
+      </div>
     </div>
     <div class="section-title">My Posts</div>
     <div id="my-posts-list"></div>
@@ -267,32 +301,12 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   </div>
 </div>
 
-<div class="modal-overlay" id="account-modal">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeAccountModal()">✕</button>
-    <div class="modal-title">Account Information</div>
-    <div class="input-group"><label>Change Name</label><input type="text" id="edit-name"></div>
-    <div class="input-group"><label>Birthday</label><input type="date" id="edit-dob"></div>
-    <div class="input-group"><label>Location</label><input type="text" id="edit-location" placeholder="City, Country"></div>
-    <div class="input-group">
-      <label>Relationship</label>
-      <select id="edit-relationship">
-        <option value="">Select Status</option>
-        <option value="Single">Single</option>
-        <option value="In a relationship">In a relationship</option>
-        <option value="Married">Married</option>
-      </select>
-    </div>
-    <button class="btn-primary" onclick="saveAccountInfo()">Save Changes</button>
-  </div>
-</div>
-
 <div id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-      <script>
+                <script>
 firebase.initializeApp({
   apiKey:"AIzaSyCb5kNVWdeSEqMgCONh3HiiJfUSOgEnIQo",
   authDomain:"my-social-app-4bb92.firebaseapp.com",
@@ -317,27 +331,29 @@ function avatarInitial(name){return name?name[0].toUpperCase():'?';}
 function timeAgo(ts){if(!ts)return'';const ms=ts.toMillis?ts.toMillis():(ts.seconds?ts.seconds*1000:ts);const diff=Date.now()-ms;const m=Math.floor(diff/60000);const h=Math.floor(diff/3600000);if(m<1)return'Just now';if(m<60)return m+' min ago';if(h<24)return h+' hours ago';return Math.floor(h/24)+' days ago';}
 function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('auth-msg').className='auth-msg';}
 
-async function doRegister(){const name=document.getElementById('reg-name').value.trim();const email=document.getElementById('reg-email').value.trim();const pass=document.getElementById('reg-pass').value;const msg=document.getElementById('auth-msg');if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:name});await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],dob:'',createdAt:firebase.firestore.FieldValue.serverTimestamp()});msg.textContent='Account created successfully!';msg.className='auth-msg success';}catch(e){msg.textContent='Error: '+e.message;msg.className='auth-msg error';}}
+// Emoji Checker
+function hasEmoji(str) { return /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu.test(str); }
+
+async function doRegister(){
+    const name=document.getElementById('reg-name').value.trim();
+    const email=document.getElementById('reg-email').value.trim();
+    const pass=document.getElementById('reg-pass').value;
+    const msg=document.getElementById('auth-msg');
+    
+    if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}
+    if(hasEmoji(name)){msg.textContent='নামে কোনো ইমোজি ব্যবহার করা যাবে না!';msg.className='auth-msg error';return;}
+    
+    try{
+        const cred=await auth.createUserWithEmailAndPassword(email,pass);
+        await cred.user.updateProfile({displayName:name});
+        await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',partnerName:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+        msg.textContent='Account created successfully!';msg.className='auth-msg success';
+    }catch(e){msg.textContent='Error: '+e.message;msg.className='auth-msg error';}
+}
 async function doLogin(){const email=document.getElementById('login-email').value.trim();const pass=document.getElementById('login-pass').value;const msg=document.getElementById('auth-msg');try{await auth.signInWithEmailAndPassword(email,pass);}catch(e){msg.textContent='Incorrect email or password.';msg.className='auth-msg error';}}
 async function doLogout(){await auth.signOut();}
 
-auth.onAuthStateChanged(async(user)=>{if(user){currentUser=user;const snap=await db.collection('users').doc(user.uid).get();currentUserData=snap.exists?snap.data():{name:user.displayName||'User',friends:[],sentRequests:[],receivedRequests:[],dob:'',location:'',relationship:''};document.getElementById('auth-screen').style.display='none';document.getElementById('app-screen').style.display='block';loadUserUI();loadFeed();loadMessages();cleanupExpiredPosts();}else{currentUser=null;currentUserData=null;document.getElementById('auth-screen').style.display='flex';document.getElementById('app-screen').style.display='none';if(feedUnsub)feedUnsub();}});
-
-function loadUserUI(){
-    const name=currentUserData.name||currentUser.displayName||'User';
-    const av=currentUserData.avatar;
-    document.getElementById('composer-avatar').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);
-    document.getElementById('profile-name-display').innerHTML=name;
-    document.getElementById('profile-bio-display').textContent=currentUserData.bio||'No bio yet';
-    document.getElementById('profile-avatar-big').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);
-    const fCount = currentUserData.friends ? currentUserData.friends.length : 0;
-    document.getElementById('profile-friends-count').innerHTML = fCount + ' <span style="color:var(--accent2); font-weight:normal; cursor:pointer; text-decoration:underline;" onclick="openFriendsList()">Friends</span>';
-    let detailsHtml = '';
-    if(currentUserData.location) detailsHtml += `<div class="detail-item">📍 Lives in <strong>${currentUserData.location}</strong></div>`;
-    if(currentUserData.relationship) detailsHtml += `<div class="detail-item">💞 <strong>${currentUserData.relationship}</strong></div>`;
-    if(currentUserData.dob) detailsHtml += `<div class="detail-item">🎂 জন্মদিন: <strong>${currentUserData.dob}</strong></div>`;
-    document.getElementById('profile-details-display').innerHTML = detailsHtml;
-}
+auth.onAuthStateChanged(async(user)=>{if(user){currentUser=user;const snap=await db.collection('users').doc(user.uid).get();currentUserData=snap.exists?snap.data():{name:user.displayName||'User',friends:[],sentRequests:[],receivedRequests:[],location:'',hometown:'',gender:'',relationship:'',partnerName:''};document.getElementById('auth-screen').style.display='none';document.getElementById('app-screen').style.display='block';loadUserUI();loadFeed();loadMessages();cleanupExpiredPosts();}else{currentUser=null;currentUserData=null;document.getElementById('auth-screen').style.display='flex';document.getElementById('app-screen').style.display='none';if(feedUnsub)feedUnsub();}});
 
 function showPage(page){
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -349,7 +365,7 @@ function showPage(page){
     if(page==='search'){ loadFriendRequests(); }
 }
 function previewImage(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{document.getElementById('compose-img-preview').style.display='block';document.getElementById('compose-preview-img').src=e.target.result;};reader.readAsDataURL(file);}
-        async function submitPost(){
+                  async function submitPost(){
     const text=document.getElementById('post-text').value.trim();
     const imgFile=document.getElementById('post-img-input').files[0];
     if(!text&&!imgFile){showToast('Write something!');return;}
@@ -470,8 +486,114 @@ async function submitReply(postId, commentId) {
         input.value = '';
         toggleReplyBox(postId, commentId);
     } catch(e) { showToast("Error adding reply!"); }
+          }
+                  // --- নতুন প্রোফাইল এডিট লজিক ---
+function togglePartnerField() {
+    const rel = document.getElementById('edit-relationship').value;
+    if(rel === 'In a relationship' || rel === 'Married') {
+        document.getElementById('partner-field-wrap').style.display = 'block';
+    } else {
+        document.getElementById('partner-field-wrap').style.display = 'none';
+        document.getElementById('edit-partner').value = '';
+    }
+}
+
+function openProfileEdit() {
+    document.getElementById('profile-display-section').style.display = 'none';
+    document.getElementById('profile-edit-section').style.display = 'block';
+    
+    document.getElementById('edit-name').value = currentUserData.name || '';
+    document.getElementById('edit-bio').value = currentUserData.bio || '';
+    document.getElementById('edit-gender').value = currentUserData.gender || '';
+    document.getElementById('edit-hometown').value = currentUserData.hometown || '';
+    document.getElementById('edit-location').value = currentUserData.location || '';
+    document.getElementById('edit-relationship').value = currentUserData.relationship || '';
+    document.getElementById('edit-partner').value = currentUserData.partnerName || '';
+    togglePartnerField();
+}
+
+function closeProfileEdit() {
+    document.getElementById('profile-display-section').style.display = 'block';
+    document.getElementById('profile-edit-section').style.display = 'none';
+}
+
+async function saveProfileChanges() {
+    const name = document.getElementById('edit-name').value.trim();
+    const bio = document.getElementById('edit-bio').value.trim();
+    const gender = document.getElementById('edit-gender').value;
+    const hometown = document.getElementById('edit-hometown').value.trim();
+    const location = document.getElementById('edit-location').value.trim();
+    const relationship = document.getElementById('edit-relationship').value;
+    const partnerName = document.getElementById('edit-partner').value.trim();
+    
+    if(!name) { showToast('Name is required!'); return; }
+    if(hasEmoji(name)) { showToast('নামের মধ্যে কোনো ইমোজি ব্যবহার করা যাবে না!'); return; }
+    
+    try {
+        showToast('Saving details...');
+        await db.collection('users').doc(currentUser.uid).set({ name, bio, gender, hometown, location, relationship, partnerName }, { merge: true });
+        
+        currentUserData.name = name; currentUserData.bio = bio; currentUserData.gender = gender;
+        currentUserData.hometown = hometown; currentUserData.location = location;
+        currentUserData.relationship = relationship; currentUserData.partnerName = partnerName;
+        
+        loadUserUI(); closeProfileEdit(); showToast('Profile Updated Successfully! 🎉');
+    } catch(e) { showToast('Error saving data.'); }
+}
+
+function loadUserUI(){
+    const name=currentUserData.name||currentUser.displayName||'User';
+    const av=currentUserData.avatar;
+    document.getElementById('composer-avatar').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);
+    document.getElementById('profile-name-display').innerHTML=name;
+    document.getElementById('profile-bio-display').textContent=currentUserData.bio||'';
+    document.getElementById('profile-avatar-big').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);
+    const fCount = currentUserData.friends ? currentUserData.friends.length : 0;
+    document.getElementById('profile-friends-count').innerHTML = fCount + ' <span style="color:var(--accent2); font-weight:normal; cursor:pointer; text-decoration:underline;" onclick="openFriendsList()">Friends</span>';
+    
+    let detailsHtml = '';
+    if(currentUserData.gender) detailsHtml += `<div class="detail-item">👤 <strong>${currentUserData.gender}</strong></div>`;
+    if(currentUserData.location) detailsHtml += `<div class="detail-item">📍 Lives in <strong>${currentUserData.location}</strong></div>`;
+    if(currentUserData.hometown) detailsHtml += `<div class="detail-item">🏡 From <strong>${currentUserData.hometown}</strong></div>`;
+    
+    if(currentUserData.relationship) {
+        if((currentUserData.relationship === 'In a relationship' || currentUserData.relationship === 'Married') && currentUserData.partnerName) {
+            detailsHtml += `<div class="detail-item">💞 <strong>${currentUserData.relationship}</strong> with <strong>${currentUserData.partnerName}</strong></div>`;
+        } else {
+            detailsHtml += `<div class="detail-item">💞 <strong>${currentUserData.relationship}</strong></div>`;
         }
-        async function searchUsers() {
+    }
+    document.getElementById('profile-details-display').innerHTML = detailsHtml;
+}
+
+async function viewUserProfile(uid) {
+    if(uid === currentUser.uid) { showPage('profile'); return; }
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-other-profile').classList.add('active');
+    const snap = await db.collection('users').doc(uid).get();
+    if(snap.exists) {
+        const data = snap.data(); const name = data.name || 'User';
+        document.getElementById('other-profile-name').innerHTML = name;
+        document.getElementById('other-profile-bio').innerHTML = data.bio || '';
+        document.getElementById('other-profile-friends-count').innerHTML = (data.friends ? data.friends.length : 0) + ' Friends';
+        
+        let dHtml = '';
+        if(data.gender) dHtml += `<div class="detail-item">👤 <strong>${data.gender}</strong></div>`;
+        if(data.location) dHtml += `<div class="detail-item">📍 Lives in <strong>${data.location}</strong></div>`;
+        if(data.hometown) dHtml += `<div class="detail-item">🏡 From <strong>${data.hometown}</strong></div>`;
+        if(data.relationship) {
+            if((data.relationship === 'In a relationship' || data.relationship === 'Married') && data.partnerName) {
+                dHtml += `<div class="detail-item">💞 <strong>${data.relationship}</strong> with <strong>${data.partnerName}</strong></div>`;
+            } else { dHtml += `<div class="detail-item">💞 <strong>${data.relationship}</strong></div>`; }
+        }
+        document.getElementById('other-profile-details').innerHTML = dHtml;
+        const isFriend = currentUserData.friends && currentUserData.friends.includes(uid);
+        document.getElementById('other-msg-btn').innerHTML = isFriend ? '✓ Friends | 💬 Message' : '💬 Send Message';
+        document.getElementById('other-msg-btn').onclick = () => openChatByUid(uid, name, data.avatar||'');
+    }
+}
+// ------------------------------------
+
+async function searchUsers() {
     const q = document.getElementById('search-input').value.trim().toLowerCase();const list = document.getElementById('search-results-list');
     if(!q) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Search users...</div>'; return; }
     const snap = await db.collection('users').get();let html = '';
@@ -523,44 +645,6 @@ async function openFriendsList() {
     list.innerHTML = html;
 }
 
-function openAccountModal() {
-    document.getElementById('edit-name').value = currentUserData.name || '';
-    document.getElementById('edit-dob').value = currentUserData.dob || '';
-    document.getElementById('edit-location').value = currentUserData.location || '';
-    document.getElementById('edit-relationship').value = currentUserData.relationship || '';
-    document.getElementById('account-modal').classList.add('open');toggleSettingsMenu();
-}
-function closeAccountModal() { document.getElementById('account-modal').classList.remove('open'); }
-async function saveAccountInfo() {
-    const name = document.getElementById('edit-name').value.trim();const dob = document.getElementById('edit-dob').value;
-    const location = document.getElementById('edit-location').value.trim();const relationship = document.getElementById('edit-relationship').value;
-    if(!name) { showToast('Name is required!'); return; }
-    try {
-        await db.collection('users').doc(currentUser.uid).set({ name, dob, location, relationship }, { merge: true });
-        currentUserData.name = name; currentUserData.dob = dob; currentUserData.location = location; currentUserData.relationship = relationship;
-        loadUserUI(); closeAccountModal(); showToast('Account Info Updated! 🎉');
-    } catch(e) { showToast('Error saving data.'); }
-}
-
-async function viewUserProfile(uid) {
-    if(uid === currentUser.uid) { showPage('profile'); return; }
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-other-profile').classList.add('active');
-    const snap = await db.collection('users').doc(uid).get();
-    if(snap.exists) {
-        const data = snap.data(); const name = data.name || 'User';
-        document.getElementById('other-profile-name').innerHTML = name;
-        document.getElementById('other-profile-friends-count').innerHTML = (data.friends ? data.friends.length : 0) + ' Friends';
-        let dHtml = '';
-        if(data.location) dHtml += `<div class="detail-item">📍 Lives in <strong>${data.location}</strong></div>`;
-        if(data.relationship) dHtml += `<div class="detail-item">💞 <strong>${data.relationship}</strong></div>`;
-        if(data.dob) dHtml += `<div class="detail-item">🎂 জন্মদিন: <strong>${data.dob}</strong></div>`;
-        document.getElementById('other-profile-details').innerHTML = dHtml;
-        const isFriend = currentUserData.friends && currentUserData.friends.includes(uid);
-        document.getElementById('other-msg-btn').innerHTML = isFriend ? '✓ Friends | 💬 Message' : '💬 Send Message';
-        document.getElementById('other-msg-btn').onclick = () => openChatByUid(uid, name, data.avatar||'');
-    }
-}
-function closeUserProfile() { showPage('feed'); }
 async function deletePost(postId){if(!confirm('Delete post?'))return;await db.collection('posts').doc(postId).delete();showToast('Deleted.');}
 async function cleanupExpiredPosts(){const snap=await db.collection('posts').get();const now=Date.now();snap.forEach(d=>{const exp=d.data().expiresAt; if(exp && (exp.toMillis?exp.toMillis():new Date(exp).getTime())<now) d.ref.delete();});}
 setInterval(cleanupExpiredPosts,5*60000);

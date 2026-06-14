@@ -193,11 +193,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 
   <div class="page" id="page-messages">
     <div class="section-title">Messages</div>
-    <div style="padding:12px 16px;">
-      <button class="btn-primary" onclick="openNewMsg()" style="border-radius:20px;padding:10px 20px;font-size:13px;width:auto;">✉ New Message</button>
-    </div>
-    <div id="msg-list"></div>
-  </div>
 
   <div class="page" id="page-profile">
     <div class="profile-header">
@@ -292,15 +287,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   <div class="chat-input-bar">
     <input type="text" id="chat-input" placeholder="Type a message...">
     <button class="chat-send-btn" onclick="sendMsg()">➤</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="new-msg-modal">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeNewMsg()">✕</button>
-    <div class="modal-title">New Message</div>
-    <input type="email" id="new-msg-email" placeholder="Enter recipient's email">
-    <button class="btn-primary" onclick="startNewChat()">Start Chat</button>
   </div>
 </div>
 

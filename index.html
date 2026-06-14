@@ -352,19 +352,43 @@ function toggleSettings() {
     document.getElementById('settings-menu').classList.toggle('open');
 }
 
-// অ্যাকাউন্ট মোডাল ওপেন/ক্লোজ
+// অ্যাকাউন্ট মোডাল ওপেন করার সময় বর্তমান নাম ও জন্মতারিখ বসানো
 function openAccountModal() {
+    document.getElementById('edit-name').value = currentUserData.name || '';
+    document.getElementById('edit-dob').value = currentUserData.dob || '';
     document.getElementById('account-modal').style.display = 'flex';
     toggleSettings();
 }
+
 function closeAccountModal() {
     document.getElementById('account-modal').style.display = 'none';
 }
 
-// তথ্য সংরক্ষণ
-function saveAccountInfo() {
-    const name = document.getElementById('edit-name').value;
+// ফায়ারবেস ডাটাবেসে নাম ও জন্মতারিখ লাইভ সেভ করা
+async function saveAccountInfo() {
+    const name = document.getElementById('edit-name').value.trim();
     const dob = document.getElementById('edit-dob').value;
+    
+    if(!name) { showToast('নাম দেওয়া বাধ্যতামূলক!'); return; }
+    
+    try {
+        showToast('সংরক্ষণ হচ্ছে...');
+        // এটি সরাসরি ফায়ারবেস ডাটাবেসে সেভ করবে
+        await db.collection('users').doc(currentUser.uid).set({
+            name: name,
+            dob: dob
+        }, { merge: true });
+        
+        currentUserData.name = name;
+        currentUserData.dob = dob;
+        
+        loadUserUI(); // নিজের প্রোফাইল রিফ্রেশ করা
+        closeAccountModal();
+        showToast('তথ্য সফলভাবে ডাটাবেসে আপডেট হয়েছে! 🎉');
+    } catch(e) {
+        showToast('ত্রুটি: তথ্য সেভ করা যায়নি।');
+    }
+}
     
     // লোকাল স্টোরেজে সেভ করা (যাতে অ্যাপ রিফ্রেশ করলেও হারাবে না)
     localStorage.setItem('userName', name);
@@ -424,10 +448,24 @@ function loadUserUI(){
     const name=currentUserData.name||currentUser.displayName||'User';
     const av=currentUserData.avatar;
     document.getElementById('composer-avatar').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);
-    document.getElementById('profile-name-display').innerHTML=name + getVerifiedBadge(currentUser.email);
+    document.getElementById('profile-name-display').innerHTML=name + getVerifiedBadge(currentUserData.verified);
     document.getElementById('profile-bio-display').textContent=currentUserData.bio||'No bio yet';
     document.getElementById('profile-avatar-big').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);
+    const fCount = currentUserData.friends ? currentUserData.friends.length : 0;
+    document.getElementById('profile-friends-count').innerHTML = fCount + ' <span style="color:var(--accent2); font-weight:normal; cursor:pointer; text-decoration:underline;" onclick="openFriendsList()">Friends</span>';
     
+    let detailsHtml = '';
+    if(currentUserData.location) detailsHtml += `<div class="detail-item">📍 Lives in <strong>${currentUserData.location}</strong></div>`;
+    if(currentUserData.hometown) detailsHtml += `<div class="detail-item">🏡 From <strong>${currentUserData.hometown}</strong></div>`;
+    if(currentUserData.relationship) detailsHtml += `<div class="detail-item">💞 <strong>${currentUserData.relationship}</strong></div>`;
+    if(currentUserData.gender) detailsHtml += `<div class="detail-item">👤 <strong>${currentUserData.gender}</strong></div>`;
+    
+    // নিজের প্রোফাইলে জন্মদিন দেখানোর নতুন কোড
+    if(currentUserData.dob) detailsHtml += `<div class="detail-item">🎂 জন্মদিন: <strong>${currentUserData.dob}</strong></div>`;
+    
+    document.getElementById('profile-details-display').innerHTML = detailsHtml;
+}
+            
     // Friends Count for Self Profile
     const fCount = currentUserData.friends ? currentUserData.friends.length : 0;
     document.getElementById('profile-friends-count').innerHTML = fCount + ' <span style="color:var(--accent2); font-weight:normal; cursor:pointer; text-decoration:underline;" onclick="openFriendsList()">Friends (View List)</span>';
@@ -687,6 +725,8 @@ async function viewUserProfile(uid) {
         if(data.location) detailsHtml += `<div class="detail-item">📍 Lives in <strong>${data.location}</strong></div>`;
         if(data.hometown) detailsHtml += `<div class="detail-item">🏡 From <strong>${data.hometown}</strong></div>`;
         if(data.relationship) detailsHtml += `<div class="detail-item">💞 <strong>${data.relationship}</strong></div>`;
+        if(data.dob) detailsHtml += `<div class="detail-item">🎂 জন্মদিন: <strong>${data.dob}</strong></div>`;
+      
         if(data.gender) detailsHtml += `<div class="detail-item">👤 <strong>${data.gender}</strong></div>`;
         document.getElementById('other-profile-details').innerHTML = detailsHtml;
 

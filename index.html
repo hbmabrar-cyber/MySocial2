@@ -363,15 +363,83 @@ function previewImage(input){const file=input.files[0];if(!file)return;const rea
     }catch(e){showToast('Error uploading post.');}
 }
 function toBase64(file){return new Promise((resolve)=>{const reader=new FileReader();reader.onload=e=>resolve(e.target.result);reader.readAsDataURL(file);});}
-
 function loadFeed(){
     const feedList=document.getElementById('feed-list');
     feedUnsub=db.collection('posts').orderBy('createdAt','desc').onSnapshot((snap)=>{
+        
+        // লোডিং লেখাটি লুকিয়ে ফেলার কোড
+        document.getElementById('feed-loading').style.display='none'; 
+        
         const now=Date.now();const posts=snap.docs.filter(d=>{const data=d.data();if(!data.expiresAt)return true;const expMs=data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime();return expMs>now;});
         if(posts.length===0){feedList.innerHTML='<div class="empty-feed">No posts yet</div>';return;}
         feedList.innerHTML=posts.map(d=>{
             const p=d.data();const av=p.avatar?'<img src="'+p.avatar+'">':avatarInitial(p.name||'?');
             
+            // Comments & Replies Display Logic
+            const commentsList = p.comments || [];
+            const commentsHtml = commentsList.map(c => {
+                const repliesHtml = (c.replies || []).map(r => `<div class="reply-item"><span class="comment-author">${r.name}</span> <span>${r.text}</span></div>`).join('');
+                return `<div class="comment-item">
+                    <div><span class="comment-author" style="cursor:pointer;" onclick="viewUserProfile('${c.uid}')">${c.name}</span> <span>${c.text}</span></div>
+                    <button class="reply-btn" onclick="toggleReplyBox('${d.id}', '${c.id}')">↳ Reply</button>
+                    ${repliesHtml ? `<div class="reply-list">${repliesHtml}</div>` : ''}
+                    <div class="reply-input-wrap" id="reply-box-${d.id}-${c.id}">
+                        <input type="text" id="reply-input-${d.id}-${c.id}" placeholder="Write a reply...">
+                        <button onclick="submitReply('${d.id}', '${c.id}')">Send</button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // লাইক চেক করার কোড
+            const isLiked = p.likedBy && p.likedBy.includes(currentUser.uid);
+            const likeColor = isLiked ? '#ff4f4f' : 'var(--muted)';
+
+            return `<div class="post-card">
+              <div class="post-header">
+                <div class="avatar" style="width:36px;height:36px;cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${av}</div>
+                <div><div class="post-name" style="cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${p.name||'User'}</div></div>
+              </div>
+              ${p.text?`<div class="post-text">${p.text}</div>`:''}
+              ${p.imgUrl?`<img class="post-img" src="${p.imgUrl}">`:''}
+              
+              <div class="post-actions">
+                <button class="post-action-btn" style="color:${likeColor};" onclick="toggleLike('${d.id}')">❤️ ${p.likes||0}</button>
+                
+                ${p.uid!==currentUser.uid?`<button class="post-action-btn" onclick="openChatByUid('${p.uid}','${p.name||'User'}','${p.avatar||''}')">💬 Message</button>`:`<button class="post-action-btn" onclick="deletePost('${d.id}')">🗑 Delete</button>`}
+              </div>
+              
+              <div class="comments-section">
+                ${commentsHtml ? `<div class="comment-list">${commentsHtml}</div>` : ''}
+                <div class="comment-input-wrap">
+                  <input type="text" id="comment-input-${d.id}" placeholder="Write a comment...">
+                  <button onclick="submitComment('${d.id}')">Send</button>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+    });
+}
+
+// লাইক দেওয়ার ফাংশন
+async function toggleLike(postId) {
+    const postRef = db.collection('posts').doc(postId);
+    const doc = await postRef.get();
+    if(doc.exists) {
+        const p = doc.data();
+        let likedBy = p.likedBy || [];
+        let likes = p.likes || 0;
+        if(likedBy.includes(currentUser.uid)) {
+            likedBy = likedBy.filter(id => id !== currentUser.uid);
+            likes = Math.max(0, likes - 1);
+        } else {
+            likedBy.push(currentUser.uid);
+            likes++;
+        }
+        await postRef.update({ likes, likedBy });
+    }
+}
+        
+
             // Comments & Replies Display Logic
             const commentsList = p.comments || [];
             const commentsHtml = commentsList.map(c => {

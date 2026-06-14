@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GoChat</title>
+<title>GoChat V2</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -118,7 +118,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <body>
 <div id="auth-screen">
   <div class="auth-box">
-    <div class="auth-logo">✦ GoChat</div>
+    <div class="auth-logo">✦ GoChat V2</div>
     <div class="auth-sub">Your own social space</div>
     <div class="auth-tabs">
       <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</div>
@@ -265,4 +265,4 @@ function expiresIn(expMs){const r=expMs-Date.now();if(r<=0)return'Deleting...';c
 function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('auth-msg').className='auth-msg';}
 
 async function doRegister(){const name=document.getElementById('reg-name').value.trim();const email=document.getElementById('reg-email').value.trim();const pass=document.getElementById('reg-pass').value;const msg=document.getElementById('auth-msg');if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:name});await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',gender:'',avatar:'',createdAt:firebase.firestore.FieldValue.serverTimestamp()});msg.textContent='Account created successfully!';msg.className='auth-msg success';}catch(e){msg.textContent=e.code==='auth/email-already-in-use'?'This email is already registered.':'Error: '+e.message;msg.className='auth-msg error';}}
-async function doLogin(){const email=document.getElementById('login-email').value.trim();const pass=document.getElementById('login-pass').value;const msg=document.getElementById
+async function doLogin(){const email=document.getElementById('login-email').value.trim();const pass=document.getElementById('login-pass').value;const msg=document.getEleme

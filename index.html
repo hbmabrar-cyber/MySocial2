@@ -181,8 +181,8 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-seri
     <div id="my-posts-list"></div>
   </div>
   <div class="bottom-nav">
-    <div class="nav-item active" id="nav-feed" onclick="showPage('feed')">🏠</div>
-    <div class="nav-item" id="nav-messages" onclick="showPage('messages')">✉️</div>
+    <div class="nav-item active" id="nav-feed" onclick="showPage('feed')">🏚</div>
+    <div class="nav-item" id="nav-messages" onclick="showPage('messages')">📨</div>
     <div class="nav-item" id="nav-profile" onclick="showPage('profile')">👤</div>
   </div>
 </div>
@@ -231,4 +231,4 @@ async function doRegister(){const name=document.getElementById('reg-name').value
 async function doLogin(){const email=document.getElementById('login-email').value.trim();const pass=document.getElementById('login-pass').value;const msg=document.getElementById('auth-msg');try{await auth.signInWithEmailAndPassword(email,pass);}catch(e){msg.textContent='ইমেইল বা পাসওয়ার্ড ভুল।';msg.className='auth-msg error';}}
 async function doLogout(){await auth.signOut();}
 auth.onAuthStateChanged(async(user)=>{if(user){currentUser=user;const snap=await db.collection('users').doc(user.uid).get();currentUserData=snap.exists?snap.data():{name:user.displayName||'User',bio:'',avatar:''};document.getElementById('auth-screen').style.display='none';document.getElementById('app-screen').style.display='block';loadUserUI();loadFeed();loadMessages();cleanupExpiredPosts();}else{currentUser=null;currentUserData=null;document.getElementById('auth-screen').style.display='flex';document.getElementById('app-screen').style.display='none';if(feedUnsub)feedUnsub();}});
-function loadUserUI(){const name=currentUserData.name||currentUser.displayName||'User';const av=currentUserData.avatar;document.getElementById('composer-avatar').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);document.getElementById('profile-name-display').textContent=name;document.getElementById('profile-bio-display').textContent=currentUserData.bio||'কোনো বায়ো নেই';document.getElementById('profil
+function loadUserUI(){const name=currentUserData.name||currentUser.displayName||'User';const av=currentUserData.avatar;document.getElementById('composer-avatar').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);document.getElementById('profile-name-display').textContent=name;document.getElementById('profile-bio-display').textContent=currentUserData.bio||'কোনো বায়ো নেই';document.getElementById('profile

@@ -84,7 +84,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:#fff;overflow:hidden;border:3px solid var(--accent);}
 .profile-avatar img{width:100%;height:100%;object-fit:cover;}
 .avatar-edit-btn{position:absolute;bottom:0;right:0;width:26px;height:26px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;border:2px solid var(--bg);}
-.profile-name{font-size:20px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;justify-content:center;}
+.profile-name{font-size:20px;font-weight:800;margin-bottom:2px;display:flex;align-items:center;justify-content:center;}
 .profile-bio{font-size:13px;color:var(--text);margin-bottom:8px;}
 .profile-stats{font-size:15px;font-weight:800;color:var(--text);margin-bottom:12px;}
 .profile-stats span{font-size:13px;font-weight:normal;color:var(--muted);}
@@ -92,7 +92,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .detail-item{display:flex;gap:6px;align-items:center;}
 .profile-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
 .btn-outline{padding:8px 20px;background:transparent;color:var(--accent2);border:1px solid var(--accent);border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;}
-.msg-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;}
+.msg-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer; position:relative;}
 .msg-info{flex:1;}
 .msg-name{font-weight:700;font-size:14px;margin-bottom:2px;}
 .msg-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
@@ -101,7 +101,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 #chat-screen.open{display:flex;}
 .chat-topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:12px;}
 .chat-back{font-size:20px;cursor:pointer;color:var(--accent2);}
-.chat-name{font-weight:700;font-size:16px;}
+.chat-name{font-weight:700;font-size:16px;flex:1;}
 .chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
 .chat-bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;}
 .chat-bubble.mine{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
@@ -118,6 +118,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .loading{text-align:center;padding:30px;color:var(--muted);font-size:13px;}
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid var(--border);}
 #toast.show{opacity:1;}
+.verified-icon{color:#1DA1F2; margin-left:4px; font-size:14px;}
+.online-dot{width:12px;height:12px;background:var(--success);border-radius:50%;display:inline-block;border:2px solid var(--surface);position:absolute;bottom:0;right:0;}
+.unsend-btn{background:none;border:none;color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;margin-left:8px;}
 </style>
 </head>
 <body>
@@ -204,6 +207,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       
       <div id="profile-display-section">
           <div class="profile-name" id="profile-name-display">Loading...</div>
+          <div id="profile-my-status"></div>
           <div class="profile-bio" id="profile-bio-display">No bio yet</div>
           <div class="profile-stats" id="profile-friends-count"></div>
           <div class="profile-personal-details" id="profile-details-display"></div>
@@ -255,6 +259,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
         <div class="profile-avatar" id="other-profile-avatar">?</div>
       </div>
       <div class="profile-name" id="other-profile-name">Loading...</div>
+      <div id="other-profile-status"></div>
       <div class="profile-bio" id="other-profile-bio"></div>
       <div class="profile-stats" id="other-profile-friends-count"></div>
       <div class="profile-personal-details" id="other-profile-details"></div>
@@ -278,8 +283,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <div id="chat-screen">
   <div class="chat-topbar">
     <div class="chat-back" onclick="closeChat()">←</div>
-    <div class="avatar" id="chat-avatar" style="width:36px;height:36px;font-size:14px;">?</div>
-    <div class="chat-name" id="chat-name">Chat</div>
+    <div class="avatar" id="chat-avatar" style="width:36px;height:36px;font-size:14px;position:relative;">?</div>
+    <div class="chat-name" id="chat-name-display" style="flex:1;">Chat</div>
   </div>
   <div class="chat-messages" id="chat-messages"></div>
   <div class="chat-input-bar">
@@ -310,7 +315,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-                                   <script>
+      <script>
+// আপনার ইমেইল এখানে দিন, তাহলে আপনার নামের পাশে অটোমেটিক ভেরিফাইড নীল টিক চলে আসবে
+const MY_SPECIAL_EMAIL = "hmdabrar70@gmail.com"; 
+
 firebase.initializeApp({
   apiKey:"AIzaSyCb5kNVWdeSEqMgCONh3HiiJfUSOgEnIQo",
   authDomain:"my-social-app-4bb92.firebaseapp.com",
@@ -325,38 +333,38 @@ const db=firebase.firestore();
 let currentUser=null,currentUserData=null,currentChatId=null,currentChatUser=null,feedUnsub=null,chatUnsub=null;
 
 if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
-function toggleDarkMode() {
-    document.body.classList.toggle('light-mode');
-    localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
-}
+function toggleDarkMode() { document.body.classList.toggle('light-mode'); localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark'); }
 function toggleSettingsMenu() { document.getElementById('settings-menu').classList.toggle('open'); }
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 function avatarInitial(name){return name?name[0].toUpperCase():'?';}
 function timeAgo(ts){if(!ts)return'Just now';const ms=ts.toMillis?ts.toMillis():(ts.seconds?ts.seconds*1000:ts);const diff=Date.now()-ms;const m=Math.floor(diff/60000);const h=Math.floor(diff/3600000);if(m<1)return'Just now';if(m<60)return m+' min ago';if(h<24)return h+' hours ago';return Math.floor(h/24)+' days ago';}
 function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('auth-msg').className='auth-msg';}
-
 function hasEmoji(str) { return /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu.test(str); }
 
+// ভেরিফাইড ব্যাজ চেক করা
+function getVerifiedBadge(email) { return email === MY_SPECIAL_EMAIL ? '<span class="verified-icon" title="Verified Account">✔</span>' : ''; }
+
+// অনলাইন স্ট্যাটাস আপডেট
+function setOnlineStatus(status) {
+    if(currentUser) db.collection('users').doc(currentUser.uid).update({ online: status, lastActive: Date.now() });
+}
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') setOnlineStatus(true); else setOnlineStatus(false); });
+
 async function doRegister(){
-    const name=document.getElementById('reg-name').value.trim();
-    const email=document.getElementById('reg-email').value.trim();
-    const pass=document.getElementById('reg-pass').value;
-    const msg=document.getElementById('auth-msg');
-    
+    const name=document.getElementById('reg-name').value.trim(); const email=document.getElementById('reg-email').value.trim(); const pass=document.getElementById('reg-pass').value; const msg=document.getElementById('auth-msg');
     if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}
     if(hasEmoji(name)){msg.textContent='নামে কোনো ইমোজি ব্যবহার করা যাবে না!';msg.className='auth-msg error';return;}
-    
     try{
         const cred=await auth.createUserWithEmailAndPassword(email,pass);
         await cred.user.updateProfile({displayName:name});
-        await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',partnerName:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+        await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',partnerName:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],online:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
         msg.textContent='Account created successfully!';msg.className='auth-msg success';
     }catch(e){msg.textContent='Error: '+e.message;msg.className='auth-msg error';}
 }
 async function doLogin(){const email=document.getElementById('login-email').value.trim();const pass=document.getElementById('login-pass').value;const msg=document.getElementById('auth-msg');try{await auth.signInWithEmailAndPassword(email,pass);}catch(e){msg.textContent='Incorrect email or password.';msg.className='auth-msg error';}}
-async function doLogout(){await auth.signOut();}
+async function doLogout(){ setOnlineStatus(false); await auth.signOut(); }
 
-auth.onAuthStateChanged(async(user)=>{if(user){currentUser=user;const snap=await db.collection('users').doc(user.uid).get();currentUserData=snap.exists?snap.data():{name:user.displayName||'User',friends:[],sentRequests:[],receivedRequests:[],location:'',hometown:'',gender:'',relationship:'',partnerName:''};document.getElementById('auth-screen').style.display='none';document.getElementById('app-screen').style.display='block';loadUserUI();loadFeed();loadMessages();cleanupExpiredPosts();}else{currentUser=null;currentUserData=null;document.getElementById('auth-screen').style.display='flex';document.getElementById('app-screen').style.display='none';if(feedUnsub)feedUnsub();}});
+auth.onAuthStateChanged(async(user)=>{if(user){currentUser=user;setOnlineStatus(true);const snap=await db.collection('users').doc(user.uid).get();currentUserData=snap.exists?snap.data():{name:user.displayName||'User',email:user.email,friends:[],sentRequests:[],receivedRequests:[],location:'',hometown:'',gender:'',relationship:'',partnerName:''};document.getElementById('auth-screen').style.display='none';document.getElementById('app-screen').style.display='block';loadUserUI();loadFeed();loadMessages();cleanupExpiredPosts();}else{currentUser=null;currentUserData=null;document.getElementById('auth-screen').style.display='flex';document.getElementById('app-screen').style.display='none';if(feedUnsub)feedUnsub();}});
 
 function showPage(page){
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -368,7 +376,7 @@ function showPage(page){
     if(page==='search'){ loadFriendRequests(); }
 }
 function previewImage(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{document.getElementById('compose-img-preview').style.display='block';document.getElementById('compose-preview-img').src=e.target.result;};reader.readAsDataURL(file);}
-                                 async function submitPost(){
+        async function submitPost(){
     const title=document.getElementById('post-title').value.trim();
     const text=document.getElementById('post-text').value.trim();
     const imgFile=document.getElementById('post-img-input').files[0];
@@ -376,7 +384,7 @@ function previewImage(input){const file=input.files[0];if(!file)return;const rea
     let imgUrl='';if(imgFile){showToast('Uploading photo...');imgUrl=await toBase64(imgFile);}
     try{
         const expireAt=new Date(Date.now()+5*3600000);
-        await db.collection('posts').add({uid:currentUser.uid,name:currentUserData.name||currentUser.displayName,avatar:currentUserData.avatar||'',title,text,imgUrl,likes:0,likedBy:[],comments:[],createdAt:firebase.firestore.FieldValue.serverTimestamp(),expiresAt:expireAt});
+        await db.collection('posts').add({uid:currentUser.uid,name:currentUserData.name||currentUser.displayName,email:currentUserData.email,avatar:currentUserData.avatar||'',title,text,imgUrl,likes:0,likedBy:[],comments:[],createdAt:firebase.firestore.FieldValue.serverTimestamp(),expiresAt:expireAt});
         document.getElementById('post-title').value='';document.getElementById('post-text').value='';document.getElementById('post-img-input').value='';document.getElementById('compose-img-preview').style.display='none';showToast('Posted! ✦');
     }catch(e){showToast('Error uploading post.');}
 }
@@ -390,6 +398,7 @@ function loadFeed(){
         if(posts.length===0){feedList.innerHTML='<div class="empty-feed">No posts yet</div>';return;}
         feedList.innerHTML=posts.map(d=>{
             const p=d.data();const av=p.avatar?'<img src="'+p.avatar+'">':avatarInitial(p.name||'?');
+            const vBadge = getVerifiedBadge(p.email);
             
             const commentsList = p.comments || [];
             const commentsHtml = commentsList.map(c => {
@@ -411,7 +420,7 @@ function loadFeed(){
             return `<div class="post-card">
               <div class="post-header">
                 <div class="avatar" style="width:36px;height:36px;cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${av}</div>
-                <div><div class="post-name" style="cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${p.name||'User'}</div></div>
+                <div><div class="post-name" style="cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${p.name||'User'} ${vBadge}</div></div>
               </div>
               ${p.title?`<div style="font-weight:800; font-size:15px; margin-bottom:6px; color:var(--text);">${p.title}</div>`:''}
               ${p.text?`<div class="post-text">${p.text}</div>`:''}
@@ -465,9 +474,7 @@ async function submitComment(postId) {
     } catch(e) { showToast("Error adding comment!"); }
 }
 
-function toggleReplyBox(postId, commentId) {
-    document.getElementById(`reply-box-${postId}-${commentId}`).classList.toggle('open');
-}
+function toggleReplyBox(postId, commentId) { document.getElementById(`reply-box-${postId}-${commentId}`).classList.toggle('open'); }
 
 async function submitReply(postId, commentId) {
     const input = document.getElementById(`reply-input-${postId}-${commentId}`);
@@ -489,60 +496,38 @@ async function submitReply(postId, commentId) {
         input.value = '';
         toggleReplyBox(postId, commentId);
     } catch(e) { showToast("Error adding reply!"); }
-              }
-          function togglePartnerField() {
+        }
+        function togglePartnerField() {
     const rel = document.getElementById('edit-relationship').value;
-    if(rel === 'In a relationship' || rel === 'Married') {
-        document.getElementById('partner-field-wrap').style.display = 'block';
-    } else {
-        document.getElementById('partner-field-wrap').style.display = 'none';
-        document.getElementById('edit-partner').value = '';
-    }
+    if(rel === 'In a relationship' || rel === 'Married') { document.getElementById('partner-field-wrap').style.display = 'block'; } else { document.getElementById('partner-field-wrap').style.display = 'none'; document.getElementById('edit-partner').value = ''; }
 }
-
 function openProfileEdit() {
-    document.getElementById('profile-display-section').style.display = 'none';
-    document.getElementById('profile-edit-section').style.display = 'block';
-    document.getElementById('edit-name').value = currentUserData.name || '';
-    document.getElementById('edit-bio').value = currentUserData.bio || '';
-    document.getElementById('edit-gender').value = currentUserData.gender || '';
-    document.getElementById('edit-hometown').value = currentUserData.hometown || '';
-    document.getElementById('edit-location').value = currentUserData.location || '';
-    document.getElementById('edit-relationship').value = currentUserData.relationship || '';
-    document.getElementById('edit-partner').value = currentUserData.partnerName || '';
-    togglePartnerField();
+    document.getElementById('profile-display-section').style.display = 'none'; document.getElementById('profile-edit-section').style.display = 'block';
+    document.getElementById('edit-name').value = currentUserData.name || ''; document.getElementById('edit-bio').value = currentUserData.bio || '';
+    document.getElementById('edit-gender').value = currentUserData.gender || ''; document.getElementById('edit-hometown').value = currentUserData.hometown || '';
+    document.getElementById('edit-location').value = currentUserData.location || ''; document.getElementById('edit-relationship').value = currentUserData.relationship || '';
+    document.getElementById('edit-partner').value = currentUserData.partnerName || ''; togglePartnerField();
 }
-
-function closeProfileEdit() {
-    document.getElementById('profile-display-section').style.display = 'block';
-    document.getElementById('profile-edit-section').style.display = 'none';
-}
+function closeProfileEdit() { document.getElementById('profile-display-section').style.display = 'block'; document.getElementById('profile-edit-section').style.display = 'none'; }
 
 async function saveProfileChanges() {
-    const name = document.getElementById('edit-name').value.trim();
-    const bio = document.getElementById('edit-bio').value.trim();
-    const gender = document.getElementById('edit-gender').value;
-    const hometown = document.getElementById('edit-hometown').value.trim();
-    const location = document.getElementById('edit-location').value.trim();
-    const relationship = document.getElementById('edit-relationship').value;
-    const partnerName = document.getElementById('edit-partner').value.trim();
+    const name = document.getElementById('edit-name').value.trim(); const bio = document.getElementById('edit-bio').value.trim(); const gender = document.getElementById('edit-gender').value;
+    const hometown = document.getElementById('edit-hometown').value.trim(); const location = document.getElementById('edit-location').value.trim(); const relationship = document.getElementById('edit-relationship').value; const partnerName = document.getElementById('edit-partner').value.trim();
     if(!name) { showToast('Name is required!'); return; }
     if(hasEmoji(name)) { showToast('নামের মধ্যে কোনো ইমোজি ব্যবহার করা যাবে না!'); return; }
     try {
         showToast('Saving details...');
         await db.collection('users').doc(currentUser.uid).set({ name, bio, gender, hometown, location, relationship, partnerName }, { merge: true });
-        currentUserData.name = name; currentUserData.bio = bio; currentUserData.gender = gender;
-        currentUserData.hometown = hometown; currentUserData.location = location;
-        currentUserData.relationship = relationship; currentUserData.partnerName = partnerName;
+        currentUserData.name = name; currentUserData.bio = bio; currentUserData.gender = gender; currentUserData.hometown = hometown; currentUserData.location = location; currentUserData.relationship = relationship; currentUserData.partnerName = partnerName;
         loadUserUI(); closeProfileEdit(); showToast('Profile Updated Successfully! 🎉');
     } catch(e) { showToast('Error saving data.'); }
 }
 
 function loadUserUI(){
-    const name=currentUserData.name||currentUser.displayName||'User';
-    const av=currentUserData.avatar;
+    const name=currentUserData.name||currentUser.displayName||'User'; const av=currentUserData.avatar;
     document.getElementById('composer-avatar').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);
-    document.getElementById('profile-name-display').innerHTML=name;
+    document.getElementById('profile-name-display').innerHTML=name + getVerifiedBadge(currentUserData.email);
+    document.getElementById('profile-my-status').innerHTML='<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:8px;">● Active Now</div>';
     document.getElementById('profile-bio-display').textContent=currentUserData.bio||'';
     document.getElementById('profile-avatar-big').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);
     const fCount = currentUserData.friends ? currentUserData.friends.length : 0;
@@ -552,9 +537,7 @@ function loadUserUI(){
     if(currentUserData.location) detailsHtml += `<div class="detail-item">📍 Lives in <strong>${currentUserData.location}</strong></div>`;
     if(currentUserData.hometown) detailsHtml += `<div class="detail-item">🏡 From <strong>${currentUserData.hometown}</strong></div>`;
     if(currentUserData.relationship) {
-        if((currentUserData.relationship === 'In a relationship' || currentUserData.relationship === 'Married') && currentUserData.partnerName) {
-            detailsHtml += `<div class="detail-item">💞 <strong>${currentUserData.relationship}</strong> with <strong>${currentUserData.partnerName}</strong></div>`;
-        } else { detailsHtml += `<div class="detail-item">💞 <strong>${currentUserData.relationship}</strong></div>`; }
+        if((currentUserData.relationship === 'In a relationship' || currentUserData.relationship === 'Married') && currentUserData.partnerName) { detailsHtml += `<div class="detail-item">💞 <strong>${currentUserData.relationship}</strong> with <strong>${currentUserData.partnerName}</strong></div>`; } else { detailsHtml += `<div class="detail-item">💞 <strong>${currentUserData.relationship}</strong></div>`; }
     }
     document.getElementById('profile-details-display').innerHTML = detailsHtml;
 }
@@ -565,7 +548,12 @@ async function viewUserProfile(uid) {
     const snap = await db.collection('users').doc(uid).get();
     if(snap.exists) {
         const data = snap.data(); const name = data.name || 'User';
-        document.getElementById('other-profile-name').innerHTML = name;
+        document.getElementById('other-profile-name').innerHTML = name + getVerifiedBadge(data.email);
+        
+        // অনলাইন স্ট্যাটাস
+        const isOnline = data.online;
+        document.getElementById('other-profile-status').innerHTML = isOnline ? '<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:8px;">● Active Now</div>' : '<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">Offline</div>';
+        
         document.getElementById('other-profile-bio').innerHTML = data.bio || '';
         document.getElementById('other-profile-friends-count').innerHTML = (data.friends ? data.friends.length : 0) + ' Friends';
         let dHtml = '';
@@ -573,33 +561,26 @@ async function viewUserProfile(uid) {
         if(data.location) dHtml += `<div class="detail-item">📍 Lives in <strong>${data.location}</strong></div>`;
         if(data.hometown) dHtml += `<div class="detail-item">🏡 From <strong>${data.hometown}</strong></div>`;
         if(data.relationship) {
-            if((data.relationship === 'In a relationship' || data.relationship === 'Married') && data.partnerName) {
-                dHtml += `<div class="detail-item">💞 <strong>${data.relationship}</strong> with <strong>${data.partnerName}</strong></div>`;
-            } else { dHtml += `<div class="detail-item">💞 <strong>${data.relationship}</strong></div>`; }
+            if((data.relationship === 'In a relationship' || data.relationship === 'Married') && data.partnerName) { dHtml += `<div class="detail-item">💞 <strong>${data.relationship}</strong> with <strong>${data.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item">💞 <strong>${data.relationship}</strong></div>`; }
         }
         document.getElementById('other-profile-details').innerHTML = dHtml;
         
-        // আনফ্রেন্ড লজিক
         const isFriend = currentUserData.friends && currentUserData.friends.includes(uid);
         if(isFriend) {
             document.getElementById('other-msg-btn').innerHTML = '💬 Message';
             document.getElementById('other-unfriend-btn').style.display = 'inline-block';
             document.getElementById('other-unfriend-btn').onclick = () => unfriendUser(uid);
-        } else {
-            document.getElementById('other-msg-btn').innerHTML = '💬 Send Message';
-            document.getElementById('other-unfriend-btn').style.display = 'none';
-        }
-        document.getElementById('other-msg-btn').onclick = () => openChatByUid(uid, name, data.avatar||'');
+        } else { document.getElementById('other-msg-btn').innerHTML = '💬 Send Message'; document.getElementById('other-unfriend-btn').style.display = 'none'; }
+        document.getElementById('other-msg-btn').onclick = () => openChatByUid(uid, name, data.avatar||'', isOnline, data.email);
     }
 }
 
 async function unfriendUser(uid) {
-    if(!confirm('আপনি কি নিশ্চিত যে তাকে আনফ্রেন্ড করতে চান?')) return;
+    if(!confirm('Are you sure you want to unfriend?')) return;
     await db.collection('users').doc(currentUser.uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(uid) });
     await db.collection('users').doc(uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) });
     if(currentUserData.friends) currentUserData.friends = currentUserData.friends.filter(id => id !== uid);
-    showToast('Unfriended Successfully!');
-    viewUserProfile(uid); 
+    showToast('Unfriended Successfully!'); viewUserProfile(uid); 
 }
 
 async function searchUsers() {
@@ -615,33 +596,16 @@ async function searchUsers() {
             else if(received.includes(d.id)) btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="acceptRequest('${d.id}')">Accept</button>`;
             else btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="sendRequest('${d.id}')">Add Friend</button>`;
             const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name);
-            html += `<div class="msg-item"><div class="avatar" style="width:40px;height:40px;cursor:pointer;" onclick="viewUserProfile('${d.id}')">${av}</div><div class="msg-info" onclick="viewUserProfile('${d.id}')">${u.name}</div><div>${btnHtml}</div></div>`;
+            const dot = u.online ? '<div class="online-dot"></div>' : '';
+            html += `<div class="msg-item"><div class="avatar" style="width:40px;height:40px;cursor:pointer;position:relative;" onclick="viewUserProfile('${d.id}')">${av}${dot}</div><div class="msg-info" onclick="viewUserProfile('${d.id}')">${u.name} ${getVerifiedBadge(u.email)}</div><div>${btnHtml}</div></div>`;
         }
     });
     list.innerHTML = html || '<div style="text-align:center; padding:20px;">No users found.</div>';
 }
 
-async function sendRequest(targetUid) {
-    await db.collection('users').doc(currentUser.uid).update({ sentRequests: firebase.firestore.FieldValue.arrayUnion(targetUid) });
-    await db.collection('users').doc(targetUid).update({ receivedRequests: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) });
-    if(!currentUserData.sentRequests) currentUserData.sentRequests=[]; currentUserData.sentRequests.push(targetUid);
-    searchUsers();showToast('Friend request sent!');
-}
-async function acceptRequest(requesterUid) {
-    await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) });
-    await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) });
-    if(currentUserData.receivedRequests) currentUserData.receivedRequests = currentUserData.receivedRequests.filter(id=>id!==requesterUid);
-    if(!currentUserData.friends) currentUserData.friends=[]; currentUserData.friends.push(requesterUid);
-    loadFriendRequests();searchUsers();showToast('Connected as friends!');
-}
-function loadFriendRequests() {
-    const reqs = currentUserData.receivedRequests || [];const list = document.getElementById('friend-requests-list');
-    if(reqs.length === 0) { list.innerHTML = '<div style="padding:10px; color:var(--muted); font-size:12px; text-align:center;">No requests</div>'; return; }
-    db.collection('users').get().then(snap => {
-        let html = '';snap.forEach(d => { if(reqs.includes(d.id)) { const u = d.data(); html += `<div class="msg-item"><div>${u.name}</div><button class="btn-primary" style="padding:4px 8px; font-size:10px; width:auto;" onclick="acceptRequest('${d.id}')">Accept</button></div>`; } });
-        list.innerHTML = html;
-    });
-}
+async function sendRequest(targetUid) { await db.collection('users').doc(currentUser.uid).update({ sentRequests: firebase.firestore.FieldValue.arrayUnion(targetUid) }); await db.collection('users').doc(targetUid).update({ receivedRequests: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); if(!currentUserData.sentRequests) currentUserData.sentRequests=[]; currentUserData.sentRequests.push(targetUid); searchUsers();showToast('Friend request sent!'); }
+async function acceptRequest(requesterUid) { await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); if(currentUserData.receivedRequests) currentUserData.receivedRequests = currentUserData.receivedRequests.filter(id=>id!==requesterUid); if(!currentUserData.friends) currentUserData.friends=[]; currentUserData.friends.push(requesterUid); loadFriendRequests();searchUsers();showToast('Connected as friends!'); }
+function loadFriendRequests() { const reqs = currentUserData.receivedRequests || [];const list = document.getElementById('friend-requests-list'); if(reqs.length === 0) { list.innerHTML = '<div style="padding:10px; color:var(--muted); font-size:12px; text-align:center;">No requests</div>'; return; } db.collection('users').get().then(snap => { let html = '';snap.forEach(d => { if(reqs.includes(d.id)) { const u = d.data(); html += `<div class="msg-item"><div>${u.name}</div><button class="btn-primary" style="padding:4px 8px; font-size:10px; width:auto;" onclick="acceptRequest('${d.id}')">Accept</button></div>`; } }); list.innerHTML = html; }); }
 
 async function openFriendsList() {
     document.getElementById('friends-list-modal').classList.add('open');const list = document.getElementById('friends-list-content');const friends = currentUserData.friends || [];
@@ -649,7 +613,10 @@ async function openFriendsList() {
     list.innerHTML = 'Loading...';let html = '';
     for(let i=0; i<friends.length; i++) {
         const snap = await db.collection('users').doc(friends[i]).get();
-        if(snap.exists) { const u = snap.data(); html += `<div class="msg-item"><div>${u.name}</div></div>`; }
+        if(snap.exists) { 
+            const u = snap.data(); const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name); const dot = u.online ? '<div class="online-dot"></div>' : '';
+            html += `<div class="msg-item" onclick="viewUserProfile('${snap.id}')"><div class="avatar" style="width:36px;height:36px;position:relative;">${av}${dot}</div><div>${u.name} ${getVerifiedBadge(u.email)}</div></div>`; 
+        }
     }
     list.innerHTML = html;
 }
@@ -658,41 +625,70 @@ async function deletePost(postId){if(!confirm('Delete post?'))return;await db.co
 async function cleanupExpiredPosts(){const snap=await db.collection('posts').get();const now=Date.now();snap.forEach(d=>{const exp=d.data().expiresAt; if(exp && (exp.toMillis?exp.toMillis():new Date(exp).getTime())<now) d.ref.delete();});}
 setInterval(cleanupExpiredPosts,5*60000);
 
-async function loadMyPosts(){const list=document.getElementById('my-posts-list');list.innerHTML='<div class="loading">Loading...</div>';const snap=await db.collection('posts').orderBy('createdAt','desc').get();const now=Date.now();const mine=snap.docs.filter(d=>{if(d.data().uid!==currentUser.uid)return false;const data=d.data();if(!data.expiresAt)return true;const expMs=data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime();return expMs>now;});if(mine.length===0){list.innerHTML='<div class="empty-feed">No posts yet</div>';return;}list.innerHTML=mine.map(d=>{const p=d.data();return'<div class="post-card"><div class="post-header"><div class="post-name">'+(p.text?p.text.substring(0,40)+(p.text.length>40?'...':''):'Photo post')+'</div><div class="post-time">'+timeAgo(p.createdAt)+'</div></div>'+(p.imgUrl?'<img class="post-img" src="'+p.imgUrl+'" style="max-height:180px;">':'')+'<div class="post-actions"><button class="post-action-btn" onclick="deletePost(\''+d.id+'\')">🗑 Delete</button></div></div>';}).join('');}
+async function loadMyPosts(){const list=document.getElementById('my-posts-list');list.innerHTML='<div class="loading">Loading...</div>';const snap=await db.collection('posts').orderBy('createdAt','desc').get();const now=Date.now();const mine=snap.docs.filter(d=>{if(d.data().uid!==currentUser.uid)return false;const data=d.data();if(!data.expiresAt)return true;const expMs=data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime();return expMs>now;});if(mine.length===0){list.innerHTML='<div class="empty-feed">No posts yet</div>';return;}list.innerHTML=mine.map(d=>{const p=d.data();return'<div class="post-card"><div class="post-header"><div class="post-name">'+(p.title?p.title:(p.text?p.text.substring(0,40):'Photo post'))+'</div><div class="post-time">'+timeAgo(p.createdAt)+'</div></div>'+(p.imgUrl?'<img class="post-img" src="'+p.imgUrl+'" style="max-height:180px;">':'')+'<div class="post-actions"><button class="post-action-btn" onclick="deletePost(\''+d.id+'\')">🗑 Delete</button></div></div>';}).join('');}
 function uploadAvatar(input){const file=input.files[0];if(!file)return;showToast('Uploading...');const reader=new FileReader();reader.onload=async e=>{const base64=e.target.result;await db.collection('users').doc(currentUser.uid).set({avatar:base64},{merge:true});currentUserData.avatar=base64;loadUserUI();showToast('Profile photo updated!');};reader.readAsDataURL(file);}
-async function loadMessages(){const list=document.getElementById('msg-list');list.innerHTML='<div class="loading">Loading...</div>';const snap=await db.collection('chats').get();const myChats=snap.docs.filter(d=>d.id.includes(currentUser.uid));if(myChats.length===0){list.innerHTML='<div class="empty-feed">No messages yet</div>';return;}list.innerHTML=myChats.map(d=>{const data=d.data();const otherUid=d.id.replace(currentUser.uid,'').replace('_','');const otherName=(data.names&&data.names[otherUid])?data.names[otherUid]:'User';const otherAvatar=(data.avatars&&data.avatars[otherUid])?data.avatars[otherUid]:'';const av=otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName);return'<div class="msg-item" onclick="openChatById(\''+d.id+'\',\''+otherUid+'\',\''+otherName+'\',\''+otherAvatar+'\')">'+'<div class="avatar" style="width:44px;height:44px;">'+av+'</div>'+'<div class="msg-info"><div class="msg-name">'+otherName+'</div><div class="msg-preview">'+(data.lastMsg||'...')+'</div></div>'+'<div class="msg-time">'+(data.lastAt?timeAgo(data.lastAt):'')+'</div></div>';}).join('');}
+
+async function loadMessages(){
+    const list=document.getElementById('msg-list');list.innerHTML='<div class="loading">Loading...</div>';
+    const snap=await db.collection('chats').get();const myChats=snap.docs.filter(d=>d.id.includes(currentUser.uid));
+    if(myChats.length===0){list.innerHTML='<div class="empty-feed">No messages yet</div>';return;}
+    
+    let html = '';
+    for(let d of myChats) {
+        const data=d.data(); const otherUid=d.id.replace(currentUser.uid,'').replace('_','');
+        const otherName=(data.names&&data.names[otherUid])?data.names[otherUid]:'User';
+        const otherAvatar=(data.avatars&&data.avatars[otherUid])?data.avatars[otherUid]:'';
+        
+        const userSnap = await db.collection('users').doc(otherUid).get();
+        const isOnline = userSnap.exists && userSnap.data().online;
+        const email = userSnap.exists ? userSnap.data().email : '';
+        
+        const av=otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName);
+        const dot = isOnline ? '<div class="online-dot"></div>' : '';
+        
+        html += '<div class="msg-item" onclick="openChatById(\''+d.id+'\',\''+otherUid+'\',\''+otherName+'\',\''+otherAvatar+'\','+isOnline+',\''+email+'\')">'+'<div class="avatar" style="width:44px;height:44px;position:relative;">'+av+dot+'</div>'+'<div class="msg-info"><div class="msg-name">'+otherName+' '+getVerifiedBadge(email)+'</div><div class="msg-preview">'+(data.lastMsg||'...')+'</div></div>'+'<div class="msg-time">'+(data.lastAt?timeAgo(data.lastAt):'')+'</div></div>';
+    }
+    list.innerHTML = html;
+}
+
 function openNewMsg(){document.getElementById('new-msg-modal').classList.add('open');}
 function closeNewMsg(){document.getElementById('new-msg-modal').classList.remove('open');document.getElementById('new-msg-email').value='';}
-async function startNewChat(){const email=document.getElementById('new-msg-email').value.trim();if(!email){showToast('Enter an email!');return;}if(email===currentUser.email){showToast('You cannot message yourself!');return;}const snap=await db.collection('users').where('email','==',email).get();if(snap.empty){showToast('No user found with this email.');return;}const otherDoc=snap.docs[0];const otherData=otherDoc.data();closeNewMsg();openChatById([currentUser.uid,otherDoc.id].sort().join('_'),otherDoc.id,otherData.name,otherData.avatar||'');}
-function openChatByUid(uid,name,avatar){openChatById([currentUser.uid,uid].sort().join('_'),uid,name,avatar);}
+async function startNewChat(){const email=document.getElementById('new-msg-email').value.trim();if(!email){showToast('Enter an email!');return;}if(email===currentUser.email){showToast('You cannot message yourself!');return;}const snap=await db.collection('users').where('email','==',email).get();if(snap.empty){showToast('No user found with this email.');return;}const otherDoc=snap.docs[0];const otherData=otherDoc.data();closeNewMsg();openChatById([currentUser.uid,otherDoc.id].sort().join('_'),otherDoc.id,otherData.name,otherData.avatar||'',otherData.online,otherData.email);}
+function openChatByUid(uid,name,avatar,isOnline=false,email=''){openChatById([currentUser.uid,uid].sort().join('_'),uid,name,avatar,isOnline,email);}
 
-// মেসেজ সিন (Seen) লজিক
-function openChatById(chatId,otherUid,otherName,otherAvatar){
+async function unsendMessage(msgId) {
+    if(!confirm('Remove message for everyone?')) return;
+    await db.collection('chats').doc(currentChatId).collection('messages').doc(msgId).delete();
+}
+
+function openChatById(chatId,otherUid,otherName,otherAvatar,isOnline=false,email=''){
     currentChatId=chatId;currentChatUser={uid:otherUid,name:otherName,avatar:otherAvatar};
-    document.getElementById('chat-name').textContent=otherName;
+    const vBadge = getVerifiedBadge(email);
+    document.getElementById('chat-name-display').innerHTML=`<div style="font-size:16px;">${otherName} ${vBadge}</div>${isOnline?'<div style="font-size:11px;color:var(--success);font-weight:normal;">Active Now</div>':''}`;
     const av=document.getElementById('chat-avatar');
-    av.innerHTML=otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName);
+    const dot = isOnline ? '<div class="online-dot" style="bottom:-2px;right:-2px;"></div>' : '';
+    av.innerHTML = (otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName)) + dot;
+    
     document.getElementById('chat-screen').classList.add('open');
     document.getElementById('chat-messages').innerHTML='<div class="loading">Loading...</div>';
     if(chatUnsub)chatUnsub();
     
     chatUnsub=db.collection('chats').doc(chatId).collection('messages').orderBy('createdAt','asc').onSnapshot(snap=>{
-        const msgs=snap.docs;
-        let unreadDocs = [];
+        const msgs=snap.docs; let unreadDocs = [];
         let html = msgs.length === 0 ? '<div style="text-align:center;color:var(--muted);padding:40px;font-size:13px;">Send the first message!</div>' : msgs.map(d=>{
-            const m=d.data();
-            const mine=m.uid===currentUser.uid;
+            const m=d.data(); const mine=m.uid===currentUser.uid;
             if(!mine && m.read===false) unreadDocs.push(d.ref);
             
             let seenStatus = '';
             if(mine) { seenStatus = m.read ? '<span style="color:#0084ff;font-size:12px;font-weight:bold;">✓✓</span>' : '<span style="color:var(--muted);font-size:12px;font-weight:bold;">✓</span>'; }
             
-            return '<div style="display:flex;flex-direction:column;align-items:'+(mine?'flex-end':'flex-start')+';"><div class="chat-bubble '+(mine?'mine':'theirs')+'">'+m.text+'</div><div style="align-self:'+(mine?'flex-end':'flex-start')+';color:var(--muted);font-size:10px;margin-top:2px;display:flex;gap:4px;align-items:center;">'+timeAgo(m.createdAt)+' '+seenStatus+'</div></div>';
+            const unsendBtn = mine ? `<button class="unsend-btn" onclick="unsendMessage('${d.id}')">🗑 Unsend</button>` : '';
+            
+            return '<div style="display:flex;flex-direction:column;align-items:'+(mine?'flex-end':'flex-start')+';"><div class="chat-bubble '+(mine?'mine':'theirs')+'">'+m.text+'</div><div style="align-self:'+(mine?'flex-end':'flex-start')+';color:var(--muted);font-size:10px;margin-top:2px;display:flex;gap:4px;align-items:center;">'+timeAgo(m.createdAt)+' '+seenStatus+unsendBtn+'</div></div>';
         }).join('');
         
         document.getElementById('chat-messages').innerHTML = html;
         const cm=document.getElementById('chat-messages');cm.scrollTop=cm.scrollHeight;
-        
         if(unreadDocs.length > 0) { unreadDocs.forEach(ref => ref.update({read: true})); }
     });
 }

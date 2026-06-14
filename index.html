@@ -21,8 +21,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .auth-tab.active{background:var(--accent);color:#fff;}
 .input-group{margin-bottom:14px;}
 .input-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;}
-.input-group input{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;}
-.input-group input:focus{border-color:var(--accent);}
+.input-group input,.input-group select{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;}
+.input-group input:focus,.input-group select:focus{border-color:var(--accent);}
+.input-group select option{background:var(--bg);}
 .btn-primary{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;}
 .auth-msg{text-align:center;font-size:13px;margin-top:14px;padding:10px;border-radius:8px;display:none;}
 .auth-msg.error{background:#ff4f4f22;color:var(--danger);display:block;}
@@ -50,36 +51,37 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .timer-info span{color:var(--accent2);font-weight:600;}
 .post-card{background:var(--surface);border-bottom:1px solid var(--border);padding:16px;}
 .post-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.post-name{font-weight:700;font-size:14px;display:flex;align-items:center;}
+.post-name{font-weight:700;font-size:14px;}
+.verified-badge{color:#6c63ff;font-size:14px;margin-left:4px;}
 .post-time{font-size:11px;color:var(--muted);margin-left:auto;}
 .post-expires{font-size:10px;color:var(--danger);display:block;}
 .post-text{font-size:14px;line-height:1.6;margin-bottom:10px;}
 .post-img{width:100%;border-radius:12px;margin-bottom:10px;max-height:300px;object-fit:cover;}
-.post-actions{display:flex;gap:16px; margin-bottom:10px;}
+.post-actions{display:flex;gap:16px;}
 .post-action-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;padding:4px 0;}
 .post-action-btn.liked{color:#ff6b81;}
-/* Comments CSS */
-.comments-section{border-top:1px solid var(--border);padding-top:10px;}
-.comment-list{max-height:150px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;}
-.comment-item{background:var(--bg);padding:8px 10px;border-radius:10px;font-size:12px;display:flex;flex-direction:column;}
-.comment-author{font-weight:700;color:var(--accent2);margin-bottom:2px;}
-.comment-input-wrap{display:flex;gap:8px;}
-.comment-input-wrap input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:8px 12px;color:var(--text);font-size:12px;outline:none;}
-.comment-input-wrap button{background:var(--accent);color:#fff;border:none;border-radius:20px;padding:0 14px;font-size:12px;cursor:pointer;font-weight:600;}
-
 .empty-feed{text-align:center;padding:60px 20px;color:var(--muted);}
 .empty-feed .empty-icon{font-size:48px;margin-bottom:12px;}
+.comment-section{padding:10px 16px;border-top:1px solid var(--border);background:var(--bg);}
+.comment-item{display:flex;gap:8px;margin-bottom:10px;align-items:flex-start;}
+.comment-bubble{background:var(--card);border-radius:12px;padding:8px 12px;flex:1;}
+.comment-name{font-weight:700;font-size:12px;margin-bottom:2px;display:flex;align-items:center;gap:4px;}
+.comment-text{font-size:13px;color:var(--text);}
+.comment-input-row{display:flex;gap:8px;margin-top:8px;align-items:center;}
+.comment-input-row input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:8px 14px;color:var(--text);font-size:13px;outline:none;font-family:inherit;}
+.comment-send{width:32px;height:32px;background:var(--accent);border:none;border-radius:50%;color:#fff;font-size:14px;cursor:pointer;}
 .profile-header{background:var(--surface);padding:24px 16px;border-bottom:1px solid var(--border);text-align:center;}
 .profile-avatar-wrap{position:relative;display:inline-block;margin-bottom:12px;}
 .profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:#fff;overflow:hidden;border:3px solid var(--accent);}
 .profile-avatar img{width:100%;height:100%;object-fit:cover;}
 .avatar-edit-btn{position:absolute;bottom:0;right:0;width:26px;height:26px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;border:2px solid var(--bg);}
-.profile-name{font-size:20px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;justify-content:center;}
-.profile-bio{font-size:13px;color:var(--text);margin-bottom:8px;}
-.profile-personal-details{font-size:12px;color:var(--muted);margin-bottom:16px;display:flex;flex-direction:column;gap:4px;align-items:center;}
-.detail-item{display:flex;gap:6px;align-items:center;}
+.profile-name{font-size:20px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:6px;}
+.profile-bio{font-size:13px;color:var(--muted);margin-bottom:8px;}
+.profile-details{font-size:12px;color:var(--muted);margin-bottom:16px;display:flex;flex-direction:column;gap:4px;align-items:center;}
+.profile-details span{display:flex;align-items:center;gap:4px;}
 .profile-edit-form{display:none;}
-.profile-edit-form input, .profile-edit-form select, .profile-edit-form textarea{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;margin-bottom:10px;font-family:inherit;}
+.profile-edit-form input,.profile-edit-form select,.profile-edit-form textarea{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;margin-bottom:10px;font-family:inherit;}
+.profile-edit-form select option{background:var(--bg);}
 .profile-btns{display:flex;gap:10px;justify-content:center;}
 .btn-outline{padding:8px 20px;background:transparent;color:var(--accent2);border:1px solid var(--accent);border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;}
 .btn-danger-outline{padding:8px 20px;background:transparent;color:var(--danger);border:1px solid var(--danger);border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;}
@@ -112,7 +114,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 @keyframes spin{to{transform:rotate(360deg);}}
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid var(--border);}
 #toast.show{opacity:1;}
-.verified-icon { color: #1DA1F2; margin-left: 5px; font-size: 16px; }
 </style>
 </head>
 <body>
@@ -133,6 +134,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       <div class="input-group"><label>Name</label><input type="text" id="reg-name" placeholder="Your name"></div>
       <div class="input-group"><label>Email</label><input type="email" id="reg-email" placeholder="example@gmail.com"></div>
       <div class="input-group"><label>Password</label><input type="password" id="reg-pass" placeholder="At least 6 characters"></div>
+      <div class="input-group"><label>Gender</label>
+        <select id="reg-gender">
+          <option value="">Select gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
       <button class="btn-primary" onclick="doRegister()">Create Account</button>
     </div>
     <div id="auth-msg" class="auth-msg"></div>
@@ -156,7 +165,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
         <button class="compose-btn" onclick="submitPost()">Post ✦</button>
       </div>
     </div>
-    <div class="timer-info">⏱ Posts will be automatically deleted after <span>5 hours</span></div>
+    <div class="timer-info">⏱ Posts auto-delete after <span>5 hours</span></div>
     <div id="feed-loading" class="loading"><span class="spinner"></span>Loading...</div>
     <div id="feed-list"></div>
   </div>
@@ -176,30 +185,26 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       </div>
       <div class="profile-name" id="profile-name-display">Loading...</div>
       <div class="profile-bio" id="profile-bio-display">No bio yet</div>
-      
-      <div class="profile-personal-details" id="profile-details-display"></div>
-
+      <div class="profile-details" id="profile-details-display"></div>
       <div class="profile-edit-form" id="profile-edit-form">
         <input type="text" id="edit-name" placeholder="Your name">
-        <textarea id="edit-bio" placeholder="Write a short bio..." rows="2" style="resize:none;"></textarea>
-        
-        <input type="text" id="edit-location" placeholder="📍 Current Location (e.g. Dhaka)">
-        <input type="text" id="edit-hometown" placeholder="🏡 Home Town">
+        <textarea id="edit-bio" placeholder="Write something about yourself..." rows="2" style="resize:none;width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;margin-bottom:10px;font-family:inherit;"></textarea>
+        <input type="text" id="edit-location" placeholder="📍 Current location">
+        <input type="text" id="edit-hometown" placeholder="⾕ Home town">
         <select id="edit-relationship">
-          <option value="">💞 Relationship Status</option>
+          <option value="">Relationship status</option>
           <option value="Single">Single</option>
           <option value="In a relationship">In a relationship</option>
           <option value="Married">Married</option>
-          <option value="Complicated">It's Complicated</option>
+          <option value="It's complicated">It's complicated</option>
         </select>
         <select id="edit-gender">
-          <option value="">👤 Gender</option>
+          <option value="">Gender</option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
-          <option value="Custom">Custom</option>
+          <option value="Other">Other</option>
         </select>
-
-        <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;">
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:6px;">
           <button class="btn-primary" onclick="saveProfile()" style="width:auto;padding:8px 24px;border-radius:20px;">Save</button>
           <button class="btn-outline" onclick="cancelEdit()">Cancel</button>
         </div>
@@ -239,42 +244,48 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   </div>
 </div>
 <div id="toast"></div>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-// ==========================================
-// IMPORTANT: ADMIN EMAIL FOR VERIFIED BADGE
-// ==========================================
-// এখানে আপনার নিজের ইমেইল ঠিকানাটি হুবহু বসাবেন।
-// তাহলে আপনি নাম পরিবর্তন করলেও আপনার অ্যাকাউন্টে সবসময় ভেরিফাইড ব্যাজ (✔) থাকবে।
-const MY_ADMIN_EMAIL = "your-email@gmail.com"; 
-// ==========================================
-
+const VERIFIED_UID='FBxtBTvZzvYHmeEnHF4vREJOFmg2';
 firebase.initializeApp({
-  apiKey:"AIzaSyCb5kNVWdeSEqMgCONh3HiiJfUSOgEnIQo",
-  authDomain:"my-social-app-4bb92.firebaseapp.com",
-  projectId:"my-social-app-4bb92",
-  storageBucket:"my-social-app-4bb92.firebasestorage.app",
-  messagingSenderId:"460346507844",
-  appId:"1:460346507844:web:78bf03761c020dc322b211"
+apiKey:"AIzaSyCb5kNVWdeSEqMgCONh3HiiJfUSOgEnIQo",
+authDomain:"my-social-app-4bb92.firebaseapp.com",
+projectId:"my-social-app-4bb92",
+storageBucket:"my-social-app-4bb92.firebasestorage.app",
+messagingSenderId:"460346507844",
+appId:"1:460346507844:web:78bf03761c020dc322b211"
 });
-
 const auth=firebase.auth();
 const db=firebase.firestore();
 let currentUser=null,currentUserData=null,currentChatId=null,currentChatUser=null,feedUnsub=null,chatUnsub=null;
-
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 function avatarInitial(name){return name?name[0].toUpperCase():'?';}
-function timeAgo(ts){if(!ts)return'';const ms=ts.toMillis?ts.toMillis():(ts.seconds?ts.seconds*1000:ts);const diff=Date.now()-ms;const m=Math.floor(diff/60000);const h=Math.floor(diff/3600000);if(m<1)return'Just now';if(m<60)return m+' min ago';if(h<24)return h+' hours ago';return Math.floor(h/24)+' days ago';}
+function isVerified(uid){return uid===VERIFIED_UID;}
+function verifiedBadge(){return'<span class="verified-badge" title="Verified">✦</span>';}
+function timeAgo(ts){if(!ts)return'';const ms=ts.toMillis?ts.toMillis():ts.seconds*1000;const diff=Date.now()-ms;const m=Math.floor(diff/60000);const h=Math.floor(diff/3600000);if(m<1)return'Just now';if(m<60)return m+' min ago';if(h<24)return h+' hours ago';return Math.floor(h/24)+' days ago';}
 function expiresIn(expMs){const r=expMs-Date.now();if(r<=0)return'Deleting...';const h=Math.floor(r/3600000);const m=Math.floor((r%3600000)/60000);return'Deletes in '+h+'h '+m+'m';}
-
-// Verified Check Function
-function getVerifiedBadge(email) {
-    return email === MY_ADMIN_EMAIL ? '<span class="verified-icon" title="Verified Account">✔</span>' : '';
-}
-
 function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('auth-msg').className='auth-msg';}
-
-async function doRegister(){const name=document.getElementById('reg-name').value.trim();const email=document.getElementById('reg-email').value.trim();const pass=document.getElementById('reg-pass').value;const msg=document.getElementById('auth-msg');if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:na
+async function doRegister(){const name=document.getElementById('reg-name').value.trim();const email=document.getElementById('reg-email').value.trim();const pass=document.getElementById('reg-pass').value;const gender=document.getElementById('reg-gender').value;const msg=document.getElementById('auth-msg');if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:name});await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',avatar:'',gender:gender||'',location:'',hometown:'',relationship:'',createdAt:firebase.firestore.FieldValue.serverTimestamp()});msg.textContent='Account created successfully!';msg.className='auth-msg success';}catch(e){msg.textContent=e.code==='auth/email-already-in-use'?'This email is already registered.':'Error: '+e.message;msg.className='auth-msg error';}}
+async function doLogin(){const email=document.getElementById('login-email').value.trim();const pass=document.getElementById('login-pass').value;const msg=document.getElementById('auth-msg');try{await auth.signInWithEmailAndPassword(email,pass);}catch(e){msg.textContent='Incorrect email or password.';msg.className='auth-msg error';}}
+async function doLogout(){await auth.signOut();}
+auth.onAuthStateChanged(async(user)=>{if(user){currentUser=user;const snap=await db.collection('users').doc(user.uid).get();currentUserData=snap.exists?snap.data():{name:user.displayName||'User',bio:'',avatar:'',gender:'',location:'',hometown:'',relationship:''};document.getElementById('auth-screen').style.display='none';document.getElementById('app-screen').style.display='block';loadUserUI();loadFeed();loadMessages();cleanupExpiredPosts();}else{currentUser=null;currentUserData=null;document.getElementById('auth-screen').style.display='flex';document.getElementById('app-screen').style.display='none';if(feedUnsub)feedUnsub();}});
+function loadUserUI(){const name=currentUserData.name||currentUser.displayName||'User';const av=currentUserData.avatar;const verified=isVerified(currentUser.uid);document.getElementById('composer-avatar').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);const nameEl=document.getElementById('profile-name-display');nameEl.innerHTML=name+(verified?verifiedBadge():'');document.getElementById('profile-bio-display').textContent=currentUserData.bio||'No bio yet';const details=[];if(currentUserData.location)details.push('<span>📍 '+currentUserData.location+'</span>');if(currentUserData.hometown)details.push('<span>⾕ '+currentUserData.hometown+'</span>');if(currentUserData.relationship)details.push('<span>💑 '+currentUserData.relationship+'</span>');if(currentUserData.gender)details.push('<span>👤 '+currentUserData.gender+'</span>');document.getElementById('profile-details-display').innerHTML=details.join('');document.getElementById('profile-avatar-big').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);}
+function showPage(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+page).classList.add('active');document.getElementById('nav-'+page).classList.add('active');if(page==='messages')loadMessages();if(page==='profile'){loadUserUI();loadMyPosts();}}
+function previewImage(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{document.getElementById('compose-img-preview').style.display='block';document.getElementById('compose-preview-img').src=e.target.result;};reader.readAsDataURL(file);}
+async function submitPost(){const text=document.getElementById('post-text').value.trim();const imgFile=document.getElementById('post-img-input').files[0];if(!text&&!imgFile){showToast('Write something or add a photo!');return;}let imgUrl='';if(imgFile){showToast('Uploading photo...');imgUrl=await toBase64(imgFile);}try{const expireAt=new Date(Date.now()+5*3600000);await db.collection('posts').add({uid:currentUser.uid,name:currentUserData.name||currentUser.displayName,avatar:currentUserData.avatar||'',text,imgUrl,likes:0,likedBy:[],comments:[],createdAt:firebase.firestore.FieldValue.serverTimestamp(),expiresAt:expireAt});document.getElementById('post-text').value='';document.getElementById('post-img-input').value='';document.getElementById('compose-img-preview').style.display='none';showToast('Posted! ✦');}catch(e){showToast('Something went wrong.');}}
+function toBase64(file){return new Promise((resolve)=>{const reader=new FileReader();reader.onload=e=>resolve(e.target.result);reader.readAsDataURL(file);});}
+function loadFeed(){const feedList=document.getElementById('feed-list');const loading=document.getElementById('feed-loading');feedUnsub=db.collection('posts').orderBy('createdAt','desc').onSnapshot((snap)=>{loading.style.display='none';const now=Date.now();const posts=snap.docs.filter(d=>{const data=d.data();if(!data.expiresAt)return true;const expMs=data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime();return expMs>now;});if(posts.length===0){feedList.innerHTML='<div class="empty-feed"><div class="empty-icon">✦</div><div>No posts yet<br><small>Be the first to post!</small></div></div>';return;}feedList.innerHTML=posts.map(d=>{const p=d.data();const av=p.avatar?'<img src="'+p.avatar+'">':avatarInitial(p.name||'?');const liked=p.likedBy&&p.likedBy.includes(currentUser.uid);const expMs=p.expiresAt?(p.expiresAt.toMillis?p.expiresAt.toMillis():new Date(p.expiresAt).getTime()):null;const verified=isVerified(p.uid);const comments=p.comments||[];const commentsHtml=comments.map(c=>{const cv=isVerified(c.uid);const cav=c.avatar?'<img src="'+c.avatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(c.name);return'<div class="comment-item"><div class="avatar" style="width:28px;height:28px;font-size:11px;">'+cav+'</div><div class="comment-bubble"><div class="comment-name">'+c.name+(cv?verifiedBadge():'')+'</div><div class="comment-text">'+c.text+'</div></div></div>';}).join('');return'<div class="post-card"><div class="post-header"><div class="avatar" style="width:36px;height:36px;font-size:14px;">'+av+'</div><div><div class="post-name" style="display:flex;align-items:center;gap:4px;">'+(p.name||'User')+(verified?verifiedBadge():'')+'</div>'+(expMs?'<span class="post-expires">⏱ '+expiresIn(expMs)+'</span>':'')+'</div><div class="post-time">'+timeAgo(p.createdAt)+'</div></div>'+(p.text?'<div class="post-text">'+p.text+'</div>':'')+(p.imgUrl?'<img class="post-img" src="'+p.imgUrl+'">':'')+'<div class="post-actions"><button class="post-action-btn '+(liked?'liked':'')+'" onclick="toggleLike(\''+d.id+'\','+liked+')">❤ '+(p.likes||0)+'</button>'+(p.uid!==currentUser.uid?'<button class="post-action-btn" onclick="openChatByUid(\''+p.uid+'\',\''+(p.name||'User')+'\',\''+(p.avatar||'')+'\')">💬 Message</button>':'<button class="post-action-btn" onclick="deletePost(\''+d.id+'\')">🗑 Delete</button>')+'</div><div class="comment-section">'+commentsHtml+'<div class="comment-input-row"><div class="avatar" style="width:28px;height:28px;font-size:11px;">'+(currentUserData.avatar?'<img src="'+currentUserData.avatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(currentUserData.name||'?'))+'</div><input type="text" placeholder="Write a comment..." id="comment-input-'+d.id+'" onkeydown="if(event.key===\'Enter\')addComment(\''+d.id+'\')"><button class="comment-send" onclick="addComment(\''+d.id+'\')">➤</button></div></div></div>';}).join('');});}
+async function addComment(postId){const input=document.getElementById('comment-input-'+postId);const text=input.value.trim();if(!text)return;input.value='';const ref=db.collection('posts').doc(postId);const snap=await ref.get();if(!snap.exists)return;const comments=snap.data().comments||[];comments.push({uid:currentUser.uid,name:currentUserData.name||currentUser.displayName,avatar:currentUserData.avatar||'',text,createdAt:new Date().toISOString()});await ref.update({comments});}
+async function toggleLike(postId,wasLiked){const ref=db.collection('posts').doc(postId);const snap=await ref.get();if(!snap.exists)return;const data=snap.data();let likedBy=data.likedBy||[];let likes=data.likes||0;if(wasLiked){likedBy=likedBy.filter(u=>u!==currentUser.uid);likes=Math.max(0,likes-1);}else{likedBy.push(currentUser.uid);likes++;}await ref.update({likedBy,likes});}
+async function deletePost(postId){if(!confirm('Delete this post?'))return;await db.collection('posts').doc(postId).delete();showToast('Post deleted.');}
+async function cleanupExpiredPosts(){const snap=await db.collection('posts').get();const now=Date.now();snap.forEach(d=>{const data=d.data();if(!data.expiresAt)return;const expMs=data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime();if(expMs<now)d.ref.delete();});}
+setInterval(cleanupExpiredPosts,5*60000);
+async function loadMyPosts(){const list=document.getElementById('my-posts-list');list.innerHTML='<div class="loading"><span class="spinner"></span>Loading...</div>';const snap=await db.collection('posts').orderBy('createdAt','desc').get();const now=Date.now();const mine=snap.docs.filter(d=>{if(d.data().uid!==currentUser.uid)return false;const data=d.data();if(!data.expiresAt)return true;const expMs=data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime();return expMs>now;});if(mine.length===0){list.innerHTML='<div class="empty-feed"><div class="empty-icon">📝</div><div>No posts yet</div></div>';return;}list.innerHTML=mine.map(d=>{const p=d.data();return'<div class="post-card"><div class="post-header"><div class="post-name">'+(p.text?p.text.substring(0,40)+(p.text.length>40?'...':''):'Photo post')+'</div><div class="post-time">'+timeAgo(p.createdAt)+'</div></div>'+(p.imgUrl?'<img class="post-img" src="'+p.imgUrl+'" style="max-height:180px;">':'')+'<div class="post-actions"><span style="color:var(--muted);font-size:13px;">❤ '+(p.likes||0)+'</span><span style="color:var(--muted);font-size:13px;margin-left:8px;">💬 '+((p.comments||[]).length)+'</span><button class="post-action-btn" onclick="deletePost(\''+d.id+'\')">🗑 Delete</button></div></div>';}).join('');}
+function editProfile(){document.getElementById('edit-name').value=currentUserData.name||'';document.getElementById('edit-bio').value=currentUserData.bio||'';document.getElementById('edit-location').value=currentUserData.location||'';document.getElementById('edit-hometown').value=currentUserData.hometown||'';document.getElementById('edit-relationship').value=currentUserData.relationship||'';document.getElementById('edit-gender').value=currentUserData.gender||'';document.getElementById('profile-edit-form').style.display='block';document.getElementById('profile-btns').style.display='none';}
+function cancelEdit(){document.getElementById('profile-edit-form').style.display='none';document.getElementById('profile-btns').style.display='flex';}
+async function saveProfile(){const name=document.getElementById('edit-name').value.trim();const bio=document.getElementById('edit-bio').value.trim();const location=document.getElementById('edit-location').value.trim();const hometown=document.getElementById('edit-hometown').value.trim();const relationship=document.getElementById('edit-relationship').value;const gender=document.getElementById('edit-gender').value;if(!name){showToast('Name is required!');return;}await db.collection('users').doc(currentUser.uid).set({name,bio,location,hometown,relationship,gender},{merge:true});currentUserData={...currentUserData,name,bio,location,hometown,relationship,gender};loadUserUI();cancelEdit();showToast('Profile updated!');}
+function uploadAvatar(input){const file=input.files[0];if(!file)return;showToast('Uploading...');const reader=new FileReader();reader.onload=async e=>{const base64=e.target.result;await db.collection('users').doc(currentUser.uid).set({avatar:base64},{merge:true});currentUserData.avatar=base64;loadUserUI();showToast('Profile photo updated!');};reader.readAsDataURL(file);}
+function getChatId(uid1,uid2){return[uid1,uid2].sort().join('_');}
+async function loadMessages(){const list=document.getElementById('msg-list');list.innerHTML='<div class="loading"><span class="spinner"></span>Loading...</div>';const snap=await db.collection('chats').get();const myChats=snap.docs.filter(d=>d.id.includes(currentUser.uid));if(myChats.length===0){list.innerHTML='<div class="empty-feed"><div class="empty-icon">💬</div><div>No messages yet<br><small>Start a new conversation</small></div></div>';return;}list.innerHTML=myChats.map(d=>{const data=d.data();const otherUid=d.id.replace(currentUser.uid,'').replace('_','');const otherName=(data.names&&data.names[otherUid])?data.names[otherUid]:'User';const otherAvatar=(data.avatars&&data.avatars[otherUid])?data.avatars[ot

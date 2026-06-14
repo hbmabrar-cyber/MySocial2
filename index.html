@@ -63,8 +63,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .post-text{font-size:14px;line-height:1.6;margin-bottom:10px;}
 .post-img{width:100%;border-radius:12px;margin-bottom:10px;max-height:300px;object-fit:cover;}
 .post-actions{display:flex;gap:16px; margin-bottom:10px;}
-.post-action-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;padding:4px 0;}
-.post-action-btn.liked{color:#ff6b81;}
+.post-action-btn{background:none;border:none;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;padding:4px 0;}
 .comments-section{border-top:1px solid var(--border);padding-top:10px;}
 .comment-list{max-height:300px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:10px;}
 .comment-item{background:var(--bg);padding:10px;border-radius:10px;font-size:12px;display:flex;flex-direction:column;}
@@ -293,7 +292,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
       <script>
 firebase.initializeApp({
   apiKey:"AIzaSyCb5kNVWdeSEqMgCONh3HiiJfUSOgEnIQo",
@@ -363,11 +361,11 @@ function previewImage(input){const file=input.files[0];if(!file)return;const rea
     }catch(e){showToast('Error uploading post.');}
 }
 function toBase64(file){return new Promise((resolve)=>{const reader=new FileReader();reader.onload=e=>resolve(e.target.result);reader.readAsDataURL(file);});}
+
 function loadFeed(){
     const feedList=document.getElementById('feed-list');
     feedUnsub=db.collection('posts').orderBy('createdAt','desc').onSnapshot((snap)=>{
         
-        // লোডিং লেখাটি লুকিয়ে ফেলার কোড
         document.getElementById('feed-loading').style.display='none'; 
         
         const now=Date.now();const posts=snap.docs.filter(d=>{const data=d.data();if(!data.expiresAt)return true;const expMs=data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime();return expMs>now;});
@@ -375,7 +373,6 @@ function loadFeed(){
         feedList.innerHTML=posts.map(d=>{
             const p=d.data();const av=p.avatar?'<img src="'+p.avatar+'">':avatarInitial(p.name||'?');
             
-            // Comments & Replies Display Logic
             const commentsList = p.comments || [];
             const commentsHtml = commentsList.map(c => {
                 const repliesHtml = (c.replies || []).map(r => `<div class="reply-item"><span class="comment-author">${r.name}</span> <span>${r.text}</span></div>`).join('');
@@ -390,7 +387,6 @@ function loadFeed(){
                 </div>`;
             }).join('');
 
-            // লাইক চেক করার কোড
             const isLiked = p.likedBy && p.likedBy.includes(currentUser.uid);
             const likeColor = isLiked ? '#ff4f4f' : 'var(--muted)';
 
@@ -404,8 +400,7 @@ function loadFeed(){
               
               <div class="post-actions">
                 <button class="post-action-btn" style="color:${likeColor};" onclick="toggleLike('${d.id}')">❤️ ${p.likes||0}</button>
-                
-                ${p.uid!==currentUser.uid?`<button class="post-action-btn" onclick="openChatByUid('${p.uid}','${p.name||'User'}','${p.avatar||''}')">💬 Message</button>`:`<button class="post-action-btn" onclick="deletePost('${d.id}')">🗑 Delete</button>`}
+                ${p.uid!==currentUser.uid?`<button class="post-action-btn" style="color:var(--muted);" onclick="openChatByUid('${p.uid}','${p.name||'User'}','${p.avatar||''}')">💬 Message</button>`:`<button class="post-action-btn" style="color:var(--muted);" onclick="deletePost('${d.id}')">🗑 Delete</button>`}
               </div>
               
               <div class="comments-section">
@@ -420,7 +415,6 @@ function loadFeed(){
     });
 }
 
-// লাইক দেওয়ার ফাংশন
 async function toggleLike(postId) {
     const postRef = db.collection('posts').doc(postId);
     const doc = await postRef.get();
@@ -438,46 +432,7 @@ async function toggleLike(postId) {
         await postRef.update({ likes, likedBy });
     }
 }
-        
 
-            // Comments & Replies Display Logic
-            const commentsList = p.comments || [];
-            const commentsHtml = commentsList.map(c => {
-                const repliesHtml = (c.replies || []).map(r => `<div class="reply-item"><span class="comment-author">${r.name}</span> <span>${r.text}</span></div>`).join('');
-                return `<div class="comment-item">
-                    <div><span class="comment-author" style="cursor:pointer;" onclick="viewUserProfile('${c.uid}')">${c.name}</span> <span>${c.text}</span></div>
-                    <button class="reply-btn" onclick="toggleReplyBox('${d.id}', '${c.id}')">↳ Reply</button>
-                    ${repliesHtml ? `<div class="reply-list">${repliesHtml}</div>` : ''}
-                    <div class="reply-input-wrap" id="reply-box-${d.id}-${c.id}">
-                        <input type="text" id="reply-input-${d.id}-${c.id}" placeholder="Write a reply...">
-                        <button onclick="submitReply('${d.id}', '${c.id}')">Send</button>
-                    </div>
-                </div>`;
-            }).join('');
-
-            return `<div class="post-card">
-              <div class="post-header">
-                <div class="avatar" style="width:36px;height:36px;cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${av}</div>
-                <div><div class="post-name" style="cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${p.name||'User'}</div></div>
-              </div>
-              ${p.text?`<div class="post-text">${p.text}</div>`:''}
-              ${p.imgUrl?`<img class="post-img" src="${p.imgUrl}">`:''}
-              <div class="post-actions">
-                ${p.uid!==currentUser.uid?`<button class="post-action-btn" onclick="openChatByUid('${p.uid}','${p.name||'User'}','${p.avatar||''}')">💬 Message</button>`:`<button class="post-action-btn" onclick="deletePost('${d.id}')">🗑 Delete</button>`}
-              </div>
-              <div class="comments-section">
-                ${commentsHtml ? `<div class="comment-list">${commentsHtml}</div>` : ''}
-                <div class="comment-input-wrap">
-                  <input type="text" id="comment-input-${d.id}" placeholder="Write a comment...">
-                  <button onclick="submitComment('${d.id}')">Send</button>
-                </div>
-              </div>
-            </div>`;
-        }).join('');
-    });
-}
-
-// COMMENT & REPLY SYSTEM
 async function submitComment(postId) {
     const input = document.getElementById('comment-input-' + postId);
     const text = input.value.trim();
@@ -515,9 +470,8 @@ async function submitReply(postId, commentId) {
         input.value = '';
         toggleReplyBox(postId, commentId);
     } catch(e) { showToast("Error adding reply!"); }
-}
-
-async function searchUsers() {
+        }
+        async function searchUsers() {
     const q = document.getElementById('search-input').value.trim().toLowerCase();const list = document.getElementById('search-results-list');
     if(!q) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Search users...</div>'; return; }
     const snap = await db.collection('users').get();let html = '';

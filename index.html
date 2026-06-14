@@ -74,6 +74,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .avatar-edit-btn{position:absolute;bottom:0;right:0;width:26px;height:26px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;border:2px solid var(--bg);}
 .profile-name{font-size:20px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;justify-content:center;}
 .profile-bio{font-size:13px;color:var(--text);margin-bottom:8px;}
+.profile-stats{font-size:15px;font-weight:800;color:var(--text);margin-bottom:12px;}
+.profile-stats span{font-size:13px;font-weight:normal;color:var(--muted);}
 .profile-personal-details{font-size:12px;color:var(--muted);margin-bottom:16px;display:flex;flex-direction:column;gap:4px;align-items:center;}
 .detail-item{display:flex;gap:6px;align-items:center;}
 .profile-edit-form{display:none;}
@@ -188,12 +190,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       <div class="profile-name" id="profile-name-display">Loading...</div>
       <div class="profile-bio" id="profile-bio-display">No bio yet</div>
       
+      <!-- New Friends Count Display for Own Profile -->
+      <div class="profile-stats" id="profile-friends-count"></div>
+
       <div class="profile-personal-details" id="profile-details-display"></div>
 
       <div class="profile-edit-form" id="profile-edit-form">
         <input type="text" id="edit-name" placeholder="Your name">
         <textarea id="edit-bio" placeholder="Write a short bio..." rows="2" style="resize:none;"></textarea>
-        
         <input type="text" id="edit-location" placeholder="📍 Current Location">
         <input type="text" id="edit-hometown" placeholder="🏡 Home Town">
         <select id="edit-relationship">
@@ -235,6 +239,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       </div>
       <div class="profile-name" id="other-profile-name">Loading...</div>
       <div class="profile-bio" id="other-profile-bio"></div>
+      
+      <!-- New Friends Count Display for Other Profile -->
+      <div class="profile-stats" id="other-profile-friends-count"></div>
+
       <div class="profile-personal-details" id="other-profile-details"></div>
       <div class="profile-btns" style="margin-top:10px;">
         <button class="btn-primary" id="other-msg-btn" style="width:auto;padding:8px 24px;border-radius:20px;font-size:13px;">💬 Send Message</button>
@@ -274,16 +282,26 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   </div>
 </div>
 
+<!-- Modal for viewing Friends List -->
+<div class="modal-overlay" id="friends-list-modal">
+  <div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;">
+    <button class="modal-close" onclick="document.getElementById('friends-list-modal').classList.remove('open')">✕</button>
+    <div class="modal-title">My Friends</div>
+    <div id="friends-list-content" style="overflow-y:auto; flex:1; margin-top:10px;"></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
+<!-- Firebase Scripts -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-      <script>
+  <script>
 // ==========================================
 // IMPORTANT: ADMIN EMAIL FOR VERIFIED BADGE
 // ==========================================
-const MY_ADMIN_EMAIL = "hmdabrar70@gmail.com"; // এখানে আপনার নিজের ইমেইলটি বসিয়ে দিন
+const MY_ADMIN_EMAIL = "your-email@gmail.com"; // এখানে আপনার নিজের ইমেইলটি বসিয়ে দিন
 // ==========================================
 
 firebase.initializeApp({
@@ -323,6 +341,11 @@ function loadUserUI(){
     document.getElementById('profile-name-display').innerHTML=name + getVerifiedBadge(currentUser.email);
     document.getElementById('profile-bio-display').textContent=currentUserData.bio||'No bio yet';
     document.getElementById('profile-avatar-big').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);
+    
+    // Friends Count for Self Profile
+    const fCount = currentUserData.friends ? currentUserData.friends.length : 0;
+    document.getElementById('profile-friends-count').innerHTML = fCount + ' <span style="color:var(--accent2); font-weight:normal; cursor:pointer; text-decoration:underline;" onclick="openFriendsList()">Friends (View List)</span>';
+
     let detailsHtml = '';
     if(currentUserData.location) detailsHtml += `<div class="detail-item">📍 Lives in <strong>${currentUserData.location}</strong></div>`;
     if(currentUserData.hometown) detailsHtml += `<div class="detail-item">🏡 From <strong>${currentUserData.hometown}</strong></div>`;
@@ -520,6 +543,33 @@ function loadFriendRequests() {
     });
 }
 
+async function openFriendsList() {
+    document.getElementById('friends-list-modal').classList.add('open');
+    const list = document.getElementById('friends-list-content');
+    const friends = currentUserData.friends || [];
+    if(friends.length === 0) {
+        list.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px;">No friends yet</div>';
+        return;
+    }
+    list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
+    
+    let html = '';
+    for(let i=0; i<friends.length; i++) {
+        const snap = await db.collection('users').doc(friends[i]).get();
+        if(snap.exists) {
+            const u = snap.data();
+            const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name);
+            html += `<div class="msg-item" style="align-items:center;">
+                <div class="avatar" style="width:40px;height:40px; cursor:pointer;" onclick="viewUserProfile('${snap.id}'); document.getElementById('friends-list-modal').classList.remove('open');">${av}</div>
+                <div class="msg-info" style="cursor:pointer;" onclick="viewUserProfile('${snap.id}'); document.getElementById('friends-list-modal').classList.remove('open');">
+                    <div class="msg-name">${u.name} ${getVerifiedBadge(u.email)}</div>
+                </div>
+            </div>`;
+        }
+    }
+    list.innerHTML = html;
+}
+
 // ==========================================
 // PROFILE SYSTEM
 // ==========================================
@@ -532,6 +582,7 @@ async function viewUserProfile(uid) {
     document.getElementById('other-profile-name').textContent = 'Loading...';
     document.getElementById('other-profile-bio').textContent = '';
     document.getElementById('other-profile-details').innerHTML = '';
+    document.getElementById('other-profile-friends-count').innerHTML = '';
     document.getElementById('other-user-posts-list').innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
 
     const snap = await db.collection('users').doc(uid).get();
@@ -543,14 +594,23 @@ async function viewUserProfile(uid) {
         document.getElementById('other-profile-avatar').innerHTML = data.avatar ? '<img src="'+data.avatar+'">' : avatarInitial(name);
         document.getElementById('other-profile-bio').textContent = data.bio || 'No bio yet';
         
+        const fCount = data.friends ? data.friends.length : 0;
+        document.getElementById('other-profile-friends-count').innerHTML = fCount + ' <span style="color:var(--muted); font-weight:normal;">Friends</span>';
+
         let detailsHtml = '';
         if(data.location) detailsHtml += `<div class="detail-item">📍 Lives in <strong>${data.location}</strong></div>`;
-        if(data.hometown) detailsHtml += `<div class="detail-item">🏡 From <strong>${data.hometown}</strong></div>`;
+                if(data.hometown) detailsHtml += `<div class="detail-item">🏡 From <strong>${data.hometown}</strong></div>`;
         if(data.relationship) detailsHtml += `<div class="detail-item">💞 <strong>${data.relationship}</strong></div>`;
         if(data.gender) detailsHtml += `<div class="detail-item">👤 <strong>${data.gender}</strong></div>`;
         document.getElementById('other-profile-details').innerHTML = detailsHtml;
 
+        const isFriend = currentUserData.friends && currentUserData.friends.includes(uid);
         const msgBtn = document.getElementById('other-msg-btn');
+        if(isFriend) {
+            msgBtn.innerHTML = '✓ Friends &nbsp;|&nbsp; 💬 Message';
+        } else {
+            msgBtn.innerHTML = '💬 Send Message';
+        }
         msgBtn.onclick = () => openChatByUid(uid, name, data.avatar||'');
     }
 

@@ -58,6 +58,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .post-actions{display:flex;gap:16px; margin-bottom:10px;}
 .post-action-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;padding:4px 0;}
 .post-action-btn.liked{color:#ff6b81;}
+
 /* Comments CSS */
 .comments-section{border-top:1px solid var(--border);padding-top:10px;}
 .comment-list{max-height:150px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;}
@@ -112,7 +113,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 @keyframes spin{to{transform:rotate(360deg);}}
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid var(--border);}
 #toast.show{opacity:1;}
-.verified-icon { color: #1DA1F2; margin-left: 5px; font-size: 16px; }
 </style>
 </head>
 <body>
@@ -244,12 +244,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-// ==========================================
-// IMPORTANT: ADMIN EMAIL FOR VERIFIED BADGE
-// ==========================================
-const MY_ADMIN_EMAIL = "hmdabrar70@gmail.com"; 
-// ==========================================
-
 firebase.initializeApp({
   apiKey:"AIzaSyCb5kNVWdeSEqMgCONh3HiiJfUSOgEnIQo",
   authDomain:"my-social-app-4bb92.firebaseapp.com",
@@ -268,11 +262,7 @@ function avatarInitial(name){return name?name[0].toUpperCase():'?';}
 function timeAgo(ts){if(!ts)return'';const ms=ts.toMillis?ts.toMillis():(ts.seconds?ts.seconds*1000:ts);const diff=Date.now()-ms;const m=Math.floor(diff/60000);const h=Math.floor(diff/3600000);if(m<1)return'Just now';if(m<60)return m+' min ago';if(h<24)return h+' hours ago';return Math.floor(h/24)+' days ago';}
 function expiresIn(expMs){const r=expMs-Date.now();if(r<=0)return'Deleting...';const h=Math.floor(r/3600000);const m=Math.floor((r%3600000)/60000);return'Deletes in '+h+'h '+m+'m';}
 
-// Verified Check Function
-function getVerifiedBadge(email) {
-    return email === MY_ADMIN_EMAIL ? '<span class="verified-icon" title="Verified Account">✔</span>' : '';
-}
-
 function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('auth-msg').className='auth-msg';}
 
-async function doRegister(){const name=document.getElementById('reg-name').value.trim();const email=document.getElementById('reg-email').value.trim();const pass=document.getElementById('reg-pass').value;const msg=document.getElementById('auth-msg');if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:na
+async function doRegister(){const name=document.getElementById('reg-name').value.trim();const email=document.getElementById('reg-email').value.trim();const pass=document.getElementById('reg-pass').value;const msg=document.getElementById('auth-msg');if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:name});await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',gender:'',avatar:'',createdAt:firebase.firestore.FieldValue.serverTimestamp()});msg.textContent='Account created successfully!';msg.className='auth-msg success';}catch(e){msg.textContent=e.code==='auth/email-already-in-use'?'This email is already registered.':'Error: '+e.message;msg.className='auth-msg error';}}
+async function doLogin(){const email=document.getElementById('login-email').value.trim();const pass=document.getElementById('login-pass').value;const msg=document.getElementById

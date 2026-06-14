@@ -118,7 +118,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <body>
 <div id="auth-screen">
   <div class="auth-box">
-    <div class="auth-logo">✦ GoChat</div>
+    <div class="auth-logo">✦ GoChat V2</div>
     <div class="auth-sub">Your own social space</div>
     <div class="auth-tabs">
       <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</div>
@@ -189,8 +189,12 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       </div>
       <div class="profile-name" id="profile-name-display">Loading...</div>
       <div class="profile-bio" id="profile-bio-display">No bio yet</div>
+      
+      <!-- New Friends Count Display for Own Profile -->
       <div class="profile-stats" id="profile-friends-count"></div>
+
       <div class="profile-personal-details" id="profile-details-display"></div>
+
       <div class="profile-edit-form" id="profile-edit-form">
         <input type="text" id="edit-name" placeholder="Your name">
         <textarea id="edit-bio" placeholder="Write a short bio..." rows="2" style="resize:none;"></textarea>
@@ -209,6 +213,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
           <option value="Female">Female</option>
           <option value="Custom">Custom</option>
         </select>
+
         <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;">
           <button class="btn-primary" onclick="saveProfile()" style="width:auto;padding:8px 24px;border-radius:20px;">Save</button>
           <button class="btn-outline" onclick="cancelEdit()">Cancel</button>
@@ -217,7 +222,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       <div class="profile-btns" id="profile-btns">
         <button class="btn-outline" onclick="editProfile()">✏ Edit Profile</button>
         <button class="btn-danger-outline" onclick="doLogout()">Logout</button>
-        <button class="btn-outline" id="admin-panel-btn" style="display:none;" onclick="showPage('admin')">🛡 Admin</button>
       </div>
     </div>
     <div class="section-title">My Posts</div>
@@ -235,7 +239,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       </div>
       <div class="profile-name" id="other-profile-name">Loading...</div>
       <div class="profile-bio" id="other-profile-bio"></div>
+      
+      <!-- New Friends Count Display for Other Profile -->
       <div class="profile-stats" id="other-profile-friends-count"></div>
+
       <div class="profile-personal-details" id="other-profile-details"></div>
       <div class="profile-btns" style="margin-top:10px;">
         <button class="btn-primary" id="other-msg-btn" style="width:auto;padding:8px 24px;border-radius:20px;font-size:13px;">💬 Send Message</button>
@@ -243,11 +250,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
     </div>
     <div class="section-title" style="margin-top:10px;">Recent Posts</div>
     <div id="other-user-posts-list"></div>
-  </div>
-
-  <div class="page" id="page-admin">
-    <div class="section-title">Admin Dashboard</div>
-    <div id="admin-user-list"></div>
   </div>
 
   <div class="bottom-nav">
@@ -271,6 +273,16 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   </div>
 </div>
 
+<div class="modal-overlay" id="new-msg-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeNewMsg()">✕</button>
+    <div class="modal-title">New Message</div>
+    <input type="email" id="new-msg-email" placeholder="Enter recipient's email">
+    <button class="btn-primary" onclick="startNewChat()">Start Chat</button>
+  </div>
+</div>
+
+<!-- Modal for viewing Friends List -->
 <div class="modal-overlay" id="friends-list-modal">
   <div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;">
     <button class="modal-close" onclick="document.getElementById('friends-list-modal').classList.remove('open')">✕</button>
@@ -281,12 +293,16 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 
 <div id="toast"></div>
 
+<!-- Firebase Scripts -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script>
-// ADMIN EMAIL
-const MY_ADMIN_EMAIL = "your-email@gmail.com"; 
+          <script>
+// ==========================================
+// IMPORTANT: ADMIN EMAIL FOR VERIFIED BADGE
+// ==========================================
+const MY_ADMIN_EMAIL = "your-email@gmail.com"; // এখানে আপনার নিজের ইমেইলটি বসিয়ে দিন
+// ==========================================
 
 firebase.initializeApp({
   apiKey:"AIzaSyCb5kNVWdeSEqMgCONh3HiiJfUSOgEnIQo",
@@ -306,27 +322,30 @@ function avatarInitial(name){return name?name[0].toUpperCase():'?';}
 function timeAgo(ts){if(!ts)return'';const ms=ts.toMillis?ts.toMillis():(ts.seconds?ts.seconds*1000:ts);const diff=Date.now()-ms;const m=Math.floor(diff/60000);const h=Math.floor(diff/3600000);if(m<1)return'Just now';if(m<60)return m+' min ago';if(h<24)return h+' hours ago';return Math.floor(h/24)+' days ago';}
 function expiresIn(expMs){const r=expMs-Date.now();if(r<=0)return'Deleting...';const h=Math.floor(r/3600000);const m=Math.floor((r%3600000)/60000);return'Deletes in '+h+'h '+m+'m';}
 
-function getVerifiedBadge(isVerified) {
-    return isVerified ? '<span class="verified-icon" title="Verified Account">✔</span>' : '';
+function getVerifiedBadge(email) {
+    return (email && email.toLowerCase() === MY_ADMIN_EMAIL.toLowerCase()) ? '<span class="verified-icon" title="Verified Account">✔</span>' : '';
 }
 
 function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('auth-msg').className='auth-msg';}
 
-async function doRegister(){const name=document.getElementById('reg-name').value.trim();const email=document.getElementById('reg-email').value.trim();const pass=document.getElementById('reg-pass').value;const msg=document.getElementById('auth-msg');if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:name});await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],verified:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});msg.textContent='Account created successfully!';msg.className='auth-msg success';}catch(e){msg.textContent=e.code==='auth/email-already-in-use'?'This email is already registered.':'Error: '+e.message;msg.className='auth-msg error';}}
+async function doRegister(){const name=document.getElementById('reg-name').value.trim();const email=document.getElementById('reg-email').value.trim();const pass=document.getElementById('reg-pass').value;const msg=document.getElementById('auth-msg');if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:name});await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});msg.textContent='Account created successfully!';msg.className='auth-msg success';}catch(e){msg.textContent=e.code==='auth/email-already-in-use'?'This email is already registered.':'Error: '+e.message;msg.className='auth-msg error';}}
 async function doLogin(){const email=document.getElementById('login-email').value.trim();const pass=document.getElementById('login-pass').value;const msg=document.getElementById('auth-msg');try{await auth.signInWithEmailAndPassword(email,pass);}catch(e){msg.textContent='Incorrect email or password.';msg.className='auth-msg error';}}
 async function doLogout(){await auth.signOut();}
 
-auth.onAuthStateChanged(async(user)=>{if(user){currentUser=user;const snap=await db.collection('users').doc(user.uid).get();currentUserData=snap.exists?snap.data():{name:user.displayName||'User',verified:false,friends:[],sentRequests:[],receivedRequests:[]};if(currentUser.email === MY_ADMIN_EMAIL) document.getElementById('admin-panel-btn').style.display = 'block';document.getElementById('auth-screen').style.display='none';document.getElementById('app-screen').style.display='block';loadUserUI();loadFeed();loadMessages();cleanupExpiredPosts();}else{currentUser=null;currentUserData=null;document.getElementById('auth-screen').style.display='flex';document.getElementById('app-screen').style.display='none';if(feedUnsub)feedUnsub();}});
+auth.onAuthStateChanged(async(user)=>{if(user){currentUser=user;const snap=await db.collection('users').doc(user.uid).get();currentUserData=snap.exists?snap.data():{name:user.displayName||'User',bio:'',location:'',hometown:'',relationship:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[]};if(!currentUserData.friends)currentUserData.friends=[];if(!currentUserData.sentRequests)currentUserData.sentRequests=[];if(!currentUserData.receivedRequests)currentUserData.receivedRequests=[];document.getElementById('auth-screen').style.display='none';document.getElementById('app-screen').style.display='block';loadUserUI();loadFeed();loadMessages();cleanupExpiredPosts();}else{currentUser=null;currentUserData=null;document.getElementById('auth-screen').style.display='flex';document.getElementById('app-screen').style.display='none';if(feedUnsub)feedUnsub();}});
 
 function loadUserUI(){
     const name=currentUserData.name||currentUser.displayName||'User';
     const av=currentUserData.avatar;
     document.getElementById('composer-avatar').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);
-    document.getElementById('profile-name-display').innerHTML=name + getVerifiedBadge(currentUserData.verified);
+    document.getElementById('profile-name-display').innerHTML=name + getVerifiedBadge(currentUser.email);
     document.getElementById('profile-bio-display').textContent=currentUserData.bio||'No bio yet';
     document.getElementById('profile-avatar-big').innerHTML=av?'<img src="'+av+'">':avatarInitial(name);
+    
+    // Friends Count for Self Profile
     const fCount = currentUserData.friends ? currentUserData.friends.length : 0;
     document.getElementById('profile-friends-count').innerHTML = fCount + ' <span style="color:var(--accent2); font-weight:normal; cursor:pointer; text-decoration:underline;" onclick="openFriendsList()">Friends (View List)</span>';
+
     let detailsHtml = '';
     if(currentUserData.location) detailsHtml += `<div class="detail-item">📍 Lives in <strong>${currentUserData.location}</strong></div>`;
     if(currentUserData.hometown) detailsHtml += `<div class="detail-item">🏡 From <strong>${currentUserData.hometown}</strong></div>`;
@@ -343,7 +362,6 @@ function showPage(page){
     if(page==='messages') loadMessages();
     if(page==='profile'){ loadUserUI(); loadMyPosts(); }
     if(page==='search'){ loadFriendRequests(); }
-    if(page==='admin'){ loadAdminDashboard(); }
 }
 
 function previewImage(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{document.getElementById('compose-img-preview').style.display='block';document.getElementById('compose-preview-img').src=e.target.result;};reader.readAsDataURL(file);}
@@ -358,6 +376,7 @@ async function submitPost(){
         const expireAt=new Date(Date.now()+5*3600000);
         await db.collection('posts').add({
             uid:currentUser.uid,
+            email:currentUser.email,
             name:currentUserData.name||currentUser.displayName,
             avatar:currentUserData.avatar||'',
             text,
@@ -379,33 +398,60 @@ function toBase64(file){return new Promise((resolve)=>{const reader=new FileRead
 
 function loadFeed(){
     const feedList=document.getElementById('feed-list');
+    const loading=document.getElementById('feed-loading');
     feedUnsub=db.collection('posts').orderBy('createdAt','desc').onSnapshot((snap)=>{
+        loading.style.display='none';
         const now=Date.now();
         const posts=snap.docs.filter(d=>{const data=d.data();if(!data.expiresAt)return true;const expMs=data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime();return expMs>now;});
-        if(posts.length===0){feedList.innerHTML='<div class="empty-feed">No posts yet</div>';return;}
+        if(posts.length===0){feedList.innerHTML='<div class="empty-feed"><div class="empty-icon">✦</div><div>No posts yet<br><small>Be the first to post!</small></div></div>';return;}
         
         feedList.innerHTML=posts.map(d=>{
             const p=d.data();
             const av=p.avatar?'<img src="'+p.avatar+'">':avatarInitial(p.name||'?');
-            return `<div class="post-card">
+            const liked=p.likedBy&&p.likedBy.includes(currentUser.uid);
+            const expMs=p.expiresAt?(p.expiresAt.toMillis?p.expiresAt.toMillis():new Date(p.expiresAt).getTime()):null;
+            
+            const commentsList = p.comments || [];
+            const commentsHtml = commentsList.map(c => `<div class="comment-item"><span class="comment-author" style="cursor:pointer;" onclick="viewUserProfile('${c.uid}')">${c.name} ${getVerifiedBadge(c.email)}</span> <span>${c.text}</span></div>`).join('');
+
+            return `
+            <div class="post-card">
               <div class="post-header">
                 <div class="avatar" style="width:36px;height:36px;font-size:14px;cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${av}</div>
-                <div><div class="post-name" style="cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${(p.name||'User')}</div></div>
+                <div>
+                  <div class="post-name" style="cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${(p.name||'User')} ${getVerifiedBadge(p.email)}</div>
+                  ${expMs?`<span class="post-expires">⏱ ${expiresIn(expMs)}</span>`:''}
+                </div>
+                <div class="post-time">${timeAgo(p.createdAt)}</div>
               </div>
               ${p.text?`<div class="post-text">${p.text}</div>`:''}
               ${p.imgUrl?`<img class="post-img" src="${p.imgUrl}">`:''}
+              
               <div class="post-actions">
+                <button class="post-action-btn ${liked?'liked':''}" onclick="toggleLike('${d.id}',${liked})">❤ ${p.likes||0}</button>
                 ${p.uid!==currentUser.uid?`<button class="post-action-btn" onclick="openChatByUid('${p.uid}','${(p.name||'User')}','${(p.avatar||'')}')">💬 Message</button>`:`<button class="post-action-btn" onclick="deletePost('${d.id}')">🗑 Delete</button>`}
+              </div>
+
+              <div class="comments-section">
+                ${commentsHtml ? `<div class="comment-list">${commentsHtml}</div>` : ''}
+                <div class="comment-input-wrap">
+                  <input type="text" id="comment-input-${d.id}" placeholder="Write a comment...">
+                  <button onclick="submitComment('${d.id}')">Send</button>
+                </div>
               </div>
             </div>`;
         }).join('');
     });
 }
 
+// ==========================================
+// SEARCH & FRIEND SYSTEM
+// ==========================================
 async function searchUsers() {
     const q = document.getElementById('search-input').value.trim().toLowerCase();
     const list = document.getElementById('search-results-list');
-    if(!q) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Search users...</div>'; return; }
+    if(!q) { list.innerHTML = '<div style="text-align:center; padding:40px 20px; color:var(--muted); font-size:13px;">Type a name to search users</div>'; return; }
+
     const snap = await db.collection('users').get();
     let html = '';
     snap.forEach(d => {
@@ -414,81 +460,265 @@ async function searchUsers() {
         if(u.name.toLowerCase().includes(q)) {
             let btnHtml = '';
             const friends = currentUserData.friends || [];
-            if(friends.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 12px; font-size:11px;" disabled>Friends</button>';
-            else btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="sendRequest('${d.id}')">Add Friend</button>`;
-            
+            const sent = currentUserData.sentRequests || [];
+            const received = currentUserData.receivedRequests || [];
+
+            if(friends.includes(d.id)) {
+                btnHtml = '<button class="btn-outline" style="padding:6px 12px; font-size:11px;" disabled>Friends</button>';
+            } else if(sent.includes(d.id)) {
+                btnHtml = '<button class="btn-outline" style="padding:6px 12px; font-size:11px;" disabled>Request Sent</button>';
+            } else if(received.includes(d.id)) {
+                btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="acceptRequest('${d.id}')">Accept</button>`;
+            } else {
+                btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="sendRequest('${d.id}')">Add Friend</button>`;
+            }
+
             const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name);
-            html += `<div class="msg-item"><div class="avatar" style="width:40px;height:40px;cursor:pointer;" onclick="viewUserProfile('${d.id}')">${av}</div><div class="msg-info" onclick="viewUserProfile('${d.id}')">${u.name}</div><div>${btnHtml}</div></div>`;
+            html += `<div class="msg-item" style="align-items:center;">
+                <div class="avatar" style="width:40px;height:40px; cursor:pointer;" onclick="viewUserProfile('${d.id}')">${av}</div>
+                <div class="msg-info" style="cursor:pointer;" onclick="viewUserProfile('${d.id}')">
+                    <div class="msg-name">${u.name} ${getVerifiedBadge(u.email)}</div>
+                </div>
+                <div>${btnHtml}</div>
+            </div>`;
         }
     });
-    list.innerHTML = html;
+    list.innerHTML = html || '<div style="text-align:center; padding:20px; color:var(--muted); font-size:13px;">No users found</div>';
 }
 
 async function sendRequest(targetUid) {
     await db.collection('users').doc(currentUser.uid).update({ sentRequests: firebase.firestore.FieldValue.arrayUnion(targetUid) });
     await db.collection('users').doc(targetUid).update({ receivedRequests: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) });
+    if(!currentUserData.sentRequests) currentUserData.sentRequests = [];
+    currentUserData.sentRequests.push(targetUid);
     searchUsers();
-    showToast('Request sent!');
+    showToast('Friend request sent!');
 }
 
 async function acceptRequest(requesterUid) {
     await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) });
     await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) });
+    if(currentUserData.receivedRequests) currentUserData.receivedRequests = currentUserData.receivedRequests.filter(id => id !== requesterUid);
+    if(!currentUserData.friends) currentUserData.friends = [];
+    currentUserData.friends.push(requesterUid);
     loadFriendRequests();
-    showToast('Accepted!');
+    searchUsers();
+    showToast('Friend request accepted!');
+}
+
+async function rejectRequest(requesterUid) {
+    await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid) });
+    await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) });
+    if(currentUserData.receivedRequests) currentUserData.receivedRequests = currentUserData.receivedRequests.filter(id => id !== requesterUid);
+    loadFriendRequests();
+    searchUsers();
 }
 
 function loadFriendRequests() {
     const reqs = currentUserData.receivedRequests || [];
     const list = document.getElementById('friend-requests-list');
-    if(reqs.length === 0) { list.innerHTML = '<div style="padding:10px; color:var(--muted); font-size:12px; text-align:center;">No requests</div>'; return; }
+    if(reqs.length === 0) {
+        list.innerHTML = '<div style="padding:10px 16px; color:var(--muted); font-size:12px; text-align:center;">No pending requests</div>';
+        return;
+    }
     db.collection('users').get().then(snap => {
         let html = '';
         snap.forEach(d => {
             if(reqs.includes(d.id)) {
                 const u = d.data();
-                html += `<div class="msg-item"><div>${u.name}</div><button class="btn-primary" style="padding:4px 8px; font-size:10px; width:auto;" onclick="acceptRequest('${d.id}')">Accept</button></div>`;
+                const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name);
+                html += `<div class="msg-item">
+                    <div class="avatar" style="width:40px;height:40px;">${av}</div>
+                    <div class="msg-info">
+                        <div class="msg-name">${u.name} ${getVerifiedBadge(u.email)}</div>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-primary" style="padding:6px 10px; font-size:11px; width:auto; margin:0;" onclick="acceptRequest('${d.id}')">Accept</button>
+                        <button class="btn-danger-outline" style="padding:6px 10px; font-size:11px; width:auto; margin:0;" onclick="rejectRequest('${d.id}')">Decline</button>
+                    </div>
+                </div>`;
             }
         });
         list.innerHTML = html;
     });
 }
 
-// ADMIN DASHBOARD
-async function loadAdminDashboard() {
-    const list = document.getElementById('admin-user-list');
-    list.innerHTML = 'Loading...';
-    const snap = await db.collection('users').get();
+async function openFriendsList() {
+    document.getElementById('friends-list-modal').classList.add('open');
+    const list = document.getElementById('friends-list-content');
+    const friends = currentUserData.friends || [];
+    if(friends.length === 0) {
+        list.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px;">No friends yet</div>';
+        return;
+    }
+    list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
+    
     let html = '';
-    snap.forEach(d => {
-        const u = d.data();
-        html += `<div class="msg-item">
-            <div>${u.name}</div>
-            <button class="btn-outline" onclick="verifyUser('${d.id}', ${!u.verified})">${u.verified ? 'Unverify' : 'Verify'}</button>
-        </div>`;
-    });
+    for(let i=0; i<friends.length; i++) {
+        const snap = await db.collection('users').doc(friends[i]).get();
+        if(snap.exists) {
+            const u = snap.data();
+            const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name);
+            html += `<div class="msg-item" style="align-items:center;">
+                <div class="avatar" style="width:40px;height:40px; cursor:pointer;" onclick="viewUserProfile('${snap.id}'); document.getElementById('friends-list-modal').classList.remove('open');">${av}</div>
+                <div class="msg-info" style="cursor:pointer;" onclick="viewUserProfile('${snap.id}'); document.getElementById('friends-list-modal').classList.remove('open');">
+                    <div class="msg-name">${u.name} ${getVerifiedBadge(u.email)}</div>
+                </div>
+            </div>`;
+        }
+    }
     list.innerHTML = html;
 }
 
-async function verifyUser(uid, status) {
-    await db.collection('users').doc(uid).update({ verified: status });
-    loadAdminDashboard();
-}
-
+// ==========================================
+// PROFILE SYSTEM
+// ==========================================
 async function viewUserProfile(uid) {
     if(uid === currentUser.uid) { showPage('profile'); return; }
+    
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById('page-other-profile').classList.add('active');
     
+    document.getElementById('other-profile-name').textContent = 'Loading...';
+    document.getElementById('other-profile-bio').textContent = '';
+    document.getElementById('other-profile-details').innerHTML = '';
+    document.getElementById('other-profile-friends-count').innerHTML = '';
+    document.getElementById('other-user-posts-list').innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
+
     const snap = await db.collection('users').doc(uid).get();
     if(snap.exists) {
         const data = snap.data();
-        document.getElementById('other-profile-name').innerHTML = data.name + getVerifiedBadge(data.verified);
-        document.getElementById('other-profile-friends-count').innerHTML = (data.friends ? data.friends.length : 0) + ' Friends';
-        // ... (remaining view logic)
+        const name = data.name || 'User';
+        document.getElementById('other-profile-top-name').textContent = name;
+        document.getElementById('other-profile-name').innerHTML = name + getVerifiedBadge(data.email);
+        document.getElementById('other-profile-avatar').innerHTML = data.avatar ? '<img src="'+data.avatar+'">' : avatarInitial(name);
+        document.getElementById('other-profile-bio').textContent = data.bio || 'No bio yet';
+        
+        const fCount = data.friends ? data.friends.length : 0;
+        document.getElementById('other-profile-friends-count').innerHTML = fCount + ' <span style="color:var(--muted); font-weight:normal;">Friends</span>';
+
+ let detailsHtml = '';
+        if(data.location) detailsHtml += `<div class="detail-item">📍 Lives in <strong>${data.location}</strong></div>`;
+        if(data.hometown) detailsHtml += `<div class="detail-item">🏡 From <strong>${data.hometown}</strong></div>`;
+        if(data.relationship) detailsHtml += `<div class="detail-item">💞 <strong>${data.relationship}</strong></div>`;
+        if(data.gender) detailsHtml += `<div class="detail-item">👤 <strong>${data.gender}</strong></div>`;
+        document.getElementById('other-profile-details').innerHTML = detailsHtml;
+
+        const isFriend = currentUserData.friends && currentUserData.friends.includes(uid);
+        const msgBtn = document.getElementById('other-msg-btn');
+        if(isFriend) {
+            msgBtn.innerHTML = '✓ Friends &nbsp;|&nbsp; 💬 Message';
+        } else {
+            msgBtn.innerHTML = '💬 Send Message';
+        }
+        msgBtn.onclick = () => openChatByUid(uid, name, data.avatar||'');
+    }
+
+    const postsSnap = await db.collection('posts').orderBy('createdAt', 'desc').get();
+    const now = Date.now();
+    const userPosts = postsSnap.docs.filter(d => {
+        const pData = d.data();
+        if(pData.uid !== uid) return false; 
+        if(!pData.expiresAt) return true;
+        const expMs = pData.expiresAt.toMillis ? pData.expiresAt.toMillis() : new Date(pData.expiresAt).getTime();
+        return expMs > now;
+    });
+
+    const list = document.getElementById('other-user-posts-list');
+    if(userPosts.length === 0) {
+        list.innerHTML = '<div class="empty-feed"><div class="empty-icon">📝</div><div>No posts yet</div></div>';
+    } else {
+        list.innerHTML = userPosts.map(d => {
+            const p = d.data();
+            const liked = p.likedBy && p.likedBy.includes(currentUser.uid);
+            return '<div class="post-card"><div class="post-header"><div class="post-name">'+(p.text?p.text.substring(0,40)+(p.text.length>40?'...':''):'Photo post')+'</div><div class="post-time">'+timeAgo(p.createdAt)+'</div></div>'+(p.imgUrl?'<img class="post-img" src="'+p.imgUrl+'" style="max-height:180px;">':'')+'<div class="post-actions"><button class="post-action-btn '+(liked?'liked':'')+'" onclick="toggleLike(\''+d.id+'\','+liked+')">❤ '+(p.likes||0)+'</button></div></div>';
+        }).join('');
     }
 }
 
-// ... (rest of the helper functions: sendMsg, toggleLike, etc.)
+function closeUserProfile() { showPage('feed'); }
+
+async function submitComment(postId) {
+    const input = document.getElementById('comment-input-' + postId);
+    const text = input.value.trim();
+    if(!text) return;
+    try {
+        await db.collection('posts').doc(postId).update({
+            comments: firebase.firestore.FieldValue.arrayUnion({
+                uid: currentUser.uid,
+                email: currentUser.email,
+                name: currentUserData.name || currentUser.displayName,
+                text: text,
+                createdAt: Date.now()
+            })
+        });
+        input.value = '';
+    } catch(e) {
+        showToast("Error adding comment!");
+    }
+}
+
+async function toggleLike(postId,wasLiked){const ref=db.collection('posts').doc(postId);const snap=await ref.get();if(!snap.exists)return;const data=snap.data();let likedBy=data.likedBy||[];let likes=data.likes||0;if(wasLiked){likedBy=likedBy.filter(u=>u!==currentUser.uid);likes=Math.max(0,likes-1);}else{likedBy.push(currentUser.uid);likes++;}await ref.update({likedBy,likes});}
+async function deletePost(postId){if(!confirm('Delete this post?'))return;await db.collection('posts').doc(postId).delete();showToast('Post deleted.');}
+async function cleanupExpiredPosts(){const snap=await db.collection('posts').get();const now=Date.now();snap.forEach(d=>{const data=d.data();if(!data.expiresAt)return;const expMs=data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime();if(expMs<now)d.ref.delete();});}
+setInterval(cleanupExpiredPosts,5*60000);
+
+async function loadMyPosts(){const list=document.getElementById('my-posts-list');list.innerHTML='<div class="loading"><span class="spinner"></span>Loading...</div>';const snap=await db.collection('posts').orderBy('createdAt','desc').get();const now=Date.now();const mine=snap.docs.filter(d=>{if(d.data().uid!==currentUser.uid)return false;const data=d.data();if(!data.expiresAt)return true;const expMs=data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime();return expMs>now;});if(mine.length===0){list.innerHTML='<div class="empty-feed"><div class="empty-icon">📝</div><div>No posts yet</div></div>';return;}list.innerHTML=mine.map(d=>{const p=d.data();return'<div class="post-card"><div class="post-header"><div class="post-name">'+(p.text?p.text.substring(0,40)+(p.text.length>40?'...':''):'Photo post')+'</div><div class="post-time">'+timeAgo(p.createdAt)+'</div></div>'+(p.imgUrl?'<img class="post-img" src="'+p.imgUrl+'" style="max-height:180px;">':'')+'<div class="post-actions"><span style="color:var(--muted);font-size:13px;">❤ '+(p.likes||0)+'</span><button class="post-action-btn" onclick="deletePost(\''+d.id+'\')">🗑 Delete</button></div></div>';}).join('');}
+
+function editProfile(){
+    document.getElementById('edit-name').value=currentUserData.name||'';
+    document.getElementById('edit-bio').value=currentUserData.bio||'';
+    document.getElementById('edit-location').value=currentUserData.location||'';
+    document.getElementById('edit-hometown').value=currentUserData.hometown||'';
+    document.getElementById('edit-relationship').value=currentUserData.relationship||'';
+    document.getElementById('edit-gender').value=currentUserData.gender||'';
+
+    document.getElementById('profile-edit-form').style.display='block';
+    document.getElementById('profile-btns').style.display='none';
+}
+
+function cancelEdit(){document.getElementById('profile-edit-form').style.display='none';document.getElementById('profile-btns').style.display='flex';}
+
+async function saveProfile(){
+    const name=document.getElementById('edit-name').value.trim();
+    const bio=document.getElementById('edit-bio').value.trim();
+    const location=document.getElementById('edit-location').value.trim();
+    const hometown=document.getElementById('edit-hometown').value.trim();
+    const relationship=document.getElementById('edit-relationship').value;
+    const gender=document.getElementById('edit-gender').value;
+
+    if(!name){showToast('Name is required!');return;}
+    await db.collection('users').doc(currentUser.uid).set({
+        name, bio, location, hometown, relationship, gender
+    },{merge:true});
+    
+    currentUserData.name=name;
+    currentUserData.bio=bio;
+    currentUserData.location=location;
+    currentUserData.hometown=hometown;
+    currentUserData.relationship=relationship;
+    currentUserData.gender=gender;
+
+    loadUserUI();
+    cancelEdit();
+    showToast('Profile updated!');
+}
+
+function uploadAvatar(input){const file=input.files[0];if(!file)return;showToast('Uploading...');const reader=new FileReader();reader.onload=async e=>{const base64=e.target.result;await db.collection('users').doc(currentUser.uid).set({avatar:base64},{merge:true});currentUserData.avatar=base64;loadUserUI();showToast('Profile photo updated!');};reader.readAsDataURL(file);}
+function getChatId(uid1,uid2){return[uid1,uid2].sort().join('_');}
+
+async function loadMessages(){const list=document.getElementById('msg-list');list.innerHTML='<div class="loading"><span class="spinner"></span>Loading...</div>';const snap=await db.collection('chats').get();const myChats=snap.docs.filter(d=>d.id.includes(currentUser.uid));if(myChats.length===0){list.innerHTML='<div class="empty-feed"><div class="empty-icon">💬</div><div>No messages yet<br><small>Start a new conversation</small></div></div>';return;}list.innerHTML=myChats.map(d=>{const data=d.data();const otherUid=d.id.replace(currentUser.uid,'').replace('_','');const otherName=(data.names&&data.names[otherUid])?data.names[otherUid]:'User';const otherAvatar=(data.avatars&&data.avatars[otherUid])?data.avatars[otherUid]:'';const av=otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName);return'<div class="msg-item" onclick="openChatById(\''+d.id+'\',\''+otherUid+'\',\''+otherName+'\',\''+otherAvatar+'\')">'+'<div class="avatar" style="width:44px;height:44px;">'+av+'</div>'+'<div class="msg-info"><div class="msg-name">'+otherName+'</div><div class="msg-preview">'+(data.lastMsg||'...')+'</div></div>'+'<div class="msg-time">'+(data.lastAt?timeAgo(data.lastAt):'')+'</div></div>';}).join('');}
+
+function openNewMsg(){document.getElementById('new-msg-modal').classList.add('open');}
+function closeNewMsg(){document.getElementById('new-msg-modal').classList.remove('open');document.getElementById('new-msg-email').value='';}
+async function startNewChat(){const email=document.getElementById('new-msg-email').value.trim();if(!email){showToast('Enter an email!');return;}if(email===currentUser.email){showToast('You cannot message yourself!');return;}const snap=await db.collection('users').where('email','==',email).get();if(snap.empty){showToast('No user found with this email.');return;}const otherDoc=snap.docs[0];const otherData=otherDoc.data();closeNewMsg();openChatById(getChatId(currentUser.uid,otherDoc.id),otherDoc.id,otherData.name,otherData.avatar||'');}
+function openChatByUid(uid,name,avatar){openChatById(getChatId(currentUser.uid,uid),uid,name,avatar);}
+
+function openChatById(chatId,otherUid,otherName,otherAvatar){currentChatId=chatId;currentChatUser={uid:otherUid,name:otherName,avatar:otherAvatar};document.getElementById('chat-name').textContent=otherName;const av=document.getElementById('chat-avatar');av.innerHTML=otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName);document.getElementById('chat-screen').classList.add('open');document.getElementById('chat-messages').innerHTML='<div class="loading"><span class="spinner"></span></div>';if(chatUnsub)chatUnsub();chatUnsub=db.collection('chats').doc(chatId).collection('messages').orderBy('createdAt','asc').onSnapshot(snap=>{const msgs=snap.docs;document.getElementById('chat-messages').innerHTML=msgs.length===0?'<div style="text-align:center;color:var(--muted);padding:40px;font-size:13px;">Send the first message!</div>':msgs.map(d=>{const m=d.data();const mine=m.uid===currentUser.uid;return'<div style="display:flex;flex-direction:column;align-items:'+(mine?'flex-end':'flex-start')+';"><div class="chat-bubble '+(mine?'mine':'theirs')+'">'+m.text+'</div><div style="align-self:'+(mine?'flex-end':'flex-start')+';color:var(--muted);font-size:10px;margin-top:2px;">'+timeAgo(m.createdAt)+'</div></div>';}).join('');const cm=document.getElementById('chat-messages');cm.scrollTop=cm.scrollHeight;});}
+
+function closeChat(){document.getElementById('chat-screen').classList.remove('open');if(chatUnsub)chatUnsub();loadMessages();}
+async function sendMsg(){const input=document.getElementById('chat-input');const text=input.value.trim();if(!text||!currentChatId)return;input.value='';await db.collection('chats').doc(currentChatId).collection('messages').add({uid:currentUser.uid,text,createdAt:firebase.firestore.FieldValue.serverTimestamp()});await db.collection('chats').doc(currentChatId).set({lastMsg:text,lastAt:firebase.firestore.FieldValue.serverTimestamp(),names:{[currentUser.uid]:currentUserData.name||currentUser.displayName,[currentChatUser.uid]:currentChatUser.name},avatars:{[currentUser.uid]:currentUserData.avatar||'',[currentChatUser.uid]:currentChatUser.avatar||''}},{merge:true});}
+document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
 </script>
+</body>
 </html>

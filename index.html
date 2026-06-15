@@ -109,7 +109,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <body>
   <div id="auth-screen">
   <div class="auth-box">
-    <div class="auth-logo">✦ GoChat</div>
+    <div class="auth-logo">✦ GoChat V2</div>
     <div class="auth-sub">Your own social space</div>
     <div class="auth-tabs">
       <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</div>
@@ -136,7 +136,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
     <div class="icon-btn" onclick="toggleSettingsMenu()">⚙️
       <div class="settings-menu" id="settings-menu">
         <div class="setting-item" onclick="toggleDarkMode()">🌓 ডার্ক মোড</div>
-        <!-- নতুন Switch Account বাটন -->
         <div class="setting-item" onclick="openSwitchAccountModal()">🔄 Switch account</div>
         <div class="setting-item" style="color:var(--danger)" onclick="doLogout()">🚪 লগ আউট</div>
       </div>
@@ -219,12 +218,16 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <div id="chat-screen">
   <div class="chat-topbar"><div class="chat-back" onclick="closeChat()">←</div><div class="avatar" id="chat-avatar" style="width:36px;height:36px;font-size:14px;position:relative;">?</div><div class="chat-name" id="chat-name-display" style="flex:1;">Chat</div></div>
   <div class="chat-messages" id="chat-messages"></div>
-  <div class="chat-input-bar"><input type="text" id="chat-input" placeholder="Type a message..."><button class="chat-send-btn" onclick="sendMsg()">➤</button></div>
+  <div class="chat-input-bar">
+    <label for="chat-img-input" style="cursor:pointer; font-size:22px; margin-right:10px; color:var(--muted);">📷</label>
+    <input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="sendChatImage(this)">
+    <input type="text" id="chat-input" placeholder="Type a message...">
+    <button class="chat-send-btn" onclick="sendMsg()">➤</button>
+  </div>
 </div>
 
 <div class="modal-overlay" id="friends-list-modal"><div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;"><button class="modal-close" onclick="document.getElementById('friends-list-modal').classList.remove('open')">✕</button><div class="modal-title">My Friends</div><div id="friends-list-content" style="overflow-y:auto; flex:1; margin-top:10px;"></div></div></div>
 
-<!-- নতুন Switch Account Modal -->
 <div class="modal-overlay" id="switch-account-modal">
   <div class="modal-box" style="padding:0; overflow:hidden;">
     <div style="padding:16px; border-bottom:1px solid var(--border); font-weight:700; text-align:center;">Switch accounts</div>
@@ -249,7 +252,7 @@ firebase.initializeApp({
 
 const auth=firebase.auth(); const db=firebase.firestore();
 let currentUser=null,currentUserData=null,currentChatId=null,currentChatUser=null,feedUnsub=null,chatUnsub=null;
-window.tempLoginPass = null; // একাউন্ট সেভ করার জন্য
+window.tempLoginPass = null; 
 
 if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
 function toggleDarkMode() { document.body.classList.toggle('light-mode'); localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark'); }
@@ -274,23 +277,11 @@ function openSwitchAccountModal() {
     document.getElementById('settings-menu').classList.remove('open'); const list = document.getElementById('saved-accounts-list');
     let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]');
     if(accounts.length === 0) { list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted); font-size:13px;">No saved accounts</div>'; }
-    else {
-        list.innerHTML = accounts.map(a => {
-            const av = a.avatar ? `<img src="${a.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(a.name);
-            const isActive = currentUser && currentUser.email === a.email;
-            return `<div class="msg-item" onclick="doSwitchAccount('${a.email}', '${a.pass}')" style="background:${isActive ? 'var(--surface)' : 'transparent'};">
-                <div class="avatar">${av}</div><div class="msg-info" style="font-weight:700;">${a.name} ${isActive ? '<span style="color:var(--success); font-size:11px; font-weight:normal; display:block;">● Logged In</span>' : ''}</div>
-            </div>`;
-        }).join('');
-    }
+    else { list.innerHTML = accounts.map(a => { const av = a.avatar ? `<img src="${a.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(a.name); const isActive = currentUser && currentUser.email === a.email; return `<div class="msg-item" onclick="doSwitchAccount('${a.email}', '${a.pass}')" style="background:${isActive ? 'var(--surface)' : 'transparent'};"><div class="avatar">${av}</div><div class="msg-info" style="font-weight:700;">${a.name} ${isActive ? '<span style="color:var(--success); font-size:11px; font-weight:normal; display:block;">● Logged In</span>' : ''}</div></div>`; }).join(''); }
     document.getElementById('switch-account-modal').classList.add('open');
 }
 function closeSwitchAccountModal() { document.getElementById('switch-account-modal').classList.remove('open'); }
-async function doSwitchAccount(email, pass) {
-    if(currentUser && currentUser.email === email) { closeSwitchAccountModal(); return; }
-    showToast('Switching account...'); closeSwitchAccountModal();
-    try { window.tempLoginPass = pass; await auth.signOut(); await auth.signInWithEmailAndPassword(email, pass); } catch(e) { showToast('Session expired. Please login again.'); loginAnotherAccount(); }
-}
+async function doSwitchAccount(email, pass) { if(currentUser && currentUser.email === email) { closeSwitchAccountModal(); return; } showToast('Switching account...'); closeSwitchAccountModal(); try { window.tempLoginPass = pass; await auth.signOut(); await auth.signInWithEmailAndPassword(email, pass); } catch(e) { showToast('Session expired. Please login again.'); loginAnotherAccount(); } }
 function loginAnotherAccount() { closeSwitchAccountModal(); doLogout(); }
 
 // --- Auth Functions ---
@@ -305,17 +296,12 @@ async function doLogout(){ setOnlineStatus(false); await auth.signOut(); }
 
 auth.onAuthStateChanged(async(user)=>{
     if(user){
-        currentUser=user;setOnlineStatus(true);
-        const snap=await db.collection('users').doc(user.uid).get();
+        currentUser=user;setOnlineStatus(true); const snap=await db.collection('users').doc(user.uid).get();
         currentUserData=snap.exists?snap.data():{name:user.displayName||'User',email:user.email,friends:[],sentRequests:[],receivedRequests:[],location:'',hometown:'',gender:'',relationship:'',partnerName:''};
         if(window.tempLoginPass) { saveAccountToLocal(user.email, window.tempLoginPass, currentUserData.name, currentUserData.avatar||''); window.tempLoginPass = null; }
         document.getElementById('auth-screen').style.display='none'; document.getElementById('app-screen').style.display='block';
         loadUserUI();loadFeed();loadMessages();cleanupExpiredPosts();
-    }else{
-        currentUser=null;currentUserData=null;
-        document.getElementById('auth-screen').style.display='flex'; document.getElementById('app-screen').style.display='none';
-        if(feedUnsub)feedUnsub();
-    }
+    }else{ currentUser=null;currentUserData=null; document.getElementById('auth-screen').style.display='flex'; document.getElementById('app-screen').style.display='none'; if(feedUnsub)feedUnsub(); }
 });
   function showPage(page){
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -372,10 +358,7 @@ async function saveProfileChanges() {
     const name = document.getElementById('edit-name').value.trim(); const bio = document.getElementById('edit-bio').value.trim(); const gender = document.getElementById('edit-gender').value; const hometown = document.getElementById('edit-hometown').value.trim(); const location = document.getElementById('edit-location').value.trim(); const relationship = document.getElementById('edit-relationship').value; const partnerName = document.getElementById('edit-partner').value.trim();
     if(!name) { showToast('Name is required!'); return; } if(hasEmoji(name)) { showToast('No Emojis allowed in Name!'); return; }
     try { showToast('Saving...'); await db.collection('users').doc(currentUser.uid).set({ name, bio, gender, hometown, location, relationship, partnerName }, { merge: true }); currentUserData.name = name; currentUserData.bio = bio; currentUserData.gender = gender; currentUserData.hometown = hometown; currentUserData.location = location; currentUserData.relationship = relationship; currentUserData.partnerName = partnerName; 
-    
-    // লোকাল স্টোরেজে থাকা নামটাও আপডেট করা হচ্ছে
     let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); const idx = accounts.findIndex(a => a.email === currentUser.email); if(idx > -1) { accounts[idx].name = name; localStorage.setItem('savedAccounts', JSON.stringify(accounts)); }
-    
     loadUserUI(); closeProfileEdit(); showToast('Profile Updated! 🎉'); } catch(e) { showToast('Error saving data.'); }
 }
 
@@ -407,10 +390,7 @@ async function deletePost(postId){if(!confirm('Delete post?'))return;await db.co
 async function cleanupExpiredPosts(){const snap=await db.collection('posts').get();const now=Date.now();snap.forEach(d=>{const exp=d.data().expiresAt; if(exp && (exp.toMillis?exp.toMillis():new Date(exp).getTime())<now) d.ref.delete();});} setInterval(cleanupExpiredPosts,5*60000);
 
 async function loadMyPosts(){const list=document.getElementById('my-posts-list');list.innerHTML='<div class="loading">Loading...</div>';const snap=await db.collection('posts').orderBy('createdAt','desc').get();const now=Date.now();const mine=snap.docs.filter(d=>{if(d.data().uid!==currentUser.uid)return false;const data=d.data();if(!data.expiresAt)return true;const expMs=data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime();return expMs>now;});if(mine.length===0){list.innerHTML='<div class="empty-feed">No posts yet</div>';return;}list.innerHTML=mine.map(d=>{const p=d.data();return'<div class="post-card"><div class="post-header"><div class="post-name">'+(p.title?p.title:(p.text?p.text.substring(0,40):'Photo post'))+'</div><div class="post-time">'+timeAgo(p.createdAt)+'</div></div>'+(p.imgUrl?'<img class="post-img" src="'+p.imgUrl+'" style="max-height:180px;">':'')+'<div class="post-actions"><button class="post-action-btn" onclick="deletePost(\''+d.id+'\')">🗑 Delete</button></div></div>';}).join('');}
-function uploadAvatar(input){const file=input.files[0];if(!file)return;showToast('Uploading...');const reader=new FileReader();reader.onload=async e=>{const base64=e.target.result;await db.collection('users').doc(currentUser.uid).set({avatar:base64},{merge:true}); currentUserData.avatar=base64;
-    // লোকাল স্টোরেজে ছবি আপডেট
-    let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); const idx = accounts.findIndex(a => a.email === currentUser.email); if(idx > -1) { accounts[idx].avatar = base64; localStorage.setItem('savedAccounts', JSON.stringify(accounts)); }
-loadUserUI();showToast('Profile photo updated!');};reader.readAsDataURL(file);}
+function uploadAvatar(input){const file=input.files[0];if(!file)return;showToast('Uploading...');const reader=new FileReader();reader.onload=async e=>{const base64=e.target.result;await db.collection('users').doc(currentUser.uid).set({avatar:base64},{merge:true}); currentUserData.avatar=base64; let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); const idx = accounts.findIndex(a => a.email === currentUser.email); if(idx > -1) { accounts[idx].avatar = base64; localStorage.setItem('savedAccounts', JSON.stringify(accounts)); } loadUserUI();showToast('Profile photo updated!');};reader.readAsDataURL(file);}
 
 async function loadMessages(){ const list=document.getElementById('msg-list');list.innerHTML='<div class="loading">Loading...</div>'; const snap=await db.collection('chats').get();const myChats=snap.docs.filter(d=>d.id.includes(currentUser.uid)); if(myChats.length===0){list.innerHTML='<div class="empty-feed">No messages yet</div>';return;} let html = ''; for(let d of myChats) { const data=d.data(); const otherUid=d.id.replace(currentUser.uid,'').replace('_',''); const otherName=(data.names&&data.names[otherUid])?data.names[otherUid]:'User'; const otherAvatar=(data.avatars&&data.avatars[otherUid])?data.avatars[otherUid]:''; const userSnap = await db.collection('users').doc(otherUid).get(); const isOnline = userSnap.exists && userSnap.data().online; const email = userSnap.exists ? userSnap.data().email : ''; const av=otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName); const dot = isOnline ? '<div class="online-dot"></div>' : ''; html += '<div class="msg-item" onclick="openChatById(\''+d.id+'\',\''+otherUid+'\',\''+otherName+'\',\''+otherAvatar+'\','+isOnline+',\''+email+'\')">'+'<div class="avatar" style="width:44px;height:44px;position:relative;">'+av+dot+'</div>'+'<div class="msg-info"><div class="msg-name">'+otherName+' '+getVerifiedBadge(email)+'</div><div class="msg-preview">'+(data.lastMsg||'...')+'</div></div>'+'<div class="msg-time">'+(data.lastAt?timeAgo(data.lastAt):'')+'</div></div>'; } list.innerHTML = html; }
 
@@ -422,11 +402,39 @@ function openChatById(chatId,otherUid,otherName,otherAvatar,isOnline=false,email
     document.getElementById('chat-name-display').innerHTML=`<div style="font-size:16px;">${otherName} ${vBadge}</div>${isOnline?'<div style="font-size:11px;color:var(--success);font-weight:normal;">Active Now</div>':''}`;
     const av=document.getElementById('chat-avatar'); const dot = isOnline ? '<div class="online-dot" style="bottom:-2px;right:-2px;"></div>' : ''; av.innerHTML = (otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName)) + dot;
     document.getElementById('chat-screen').classList.add('open'); document.getElementById('chat-messages').innerHTML='<div class="loading">Loading...</div>'; if(chatUnsub)chatUnsub();
-    chatUnsub=db.collection('chats').doc(chatId).collection('messages').orderBy('createdAt','asc').onSnapshot(snap=>{ const msgs=snap.docs; let unreadDocs = []; let html = msgs.length === 0 ? '<div style="text-align:center;color:var(--muted);padding:40px;font-size:13px;">Send the first message!</div>' : msgs.map(d=>{ const m=d.data(); const mine=m.uid===currentUser.uid; if(!mine && m.read===false) unreadDocs.push(d.ref); let seenStatus = ''; if(mine) { seenStatus = m.read ? '<span style="color:#0084ff;font-size:12px;font-weight:bold;">✓✓</span>' : '<span style="color:var(--muted);font-size:12px;font-weight:bold;">✓</span>'; } const unsendBtn = mine ? `<button class="unsend-btn" onclick="unsendMessage('${d.id}')">🗑 Unsend</button>` : ''; return '<div style="display:flex;flex-direction:column;align-items:'+(mine?'flex-end':'flex-start')+';"><div class="chat-bubble '+(mine?'mine':'theirs')+'">'+m.text+'</div><div style="align-self:'+(mine?'flex-end':'flex-start')+';color:var(--muted);font-size:10px;margin-top:2px;display:flex;gap:4px;align-items:center;">'+timeAgo(m.createdAt)+' '+seenStatus+unsendBtn+'</div></div>'; }).join(''); document.getElementById('chat-messages').innerHTML = html; const cm=document.getElementById('chat-messages');cm.scrollTop=cm.scrollHeight; if(unreadDocs.length > 0) { unreadDocs.forEach(ref => ref.update({read: true})); } });
+    chatUnsub=db.collection('chats').doc(chatId).collection('messages').orderBy('createdAt','asc').onSnapshot(snap=>{ 
+        const msgs=snap.docs; let unreadDocs = []; 
+        let html = msgs.length === 0 ? '<div style="text-align:center;color:var(--muted);padding:40px;font-size:13px;">Send the first message!</div>' : msgs.map(d=>{ 
+            const m=d.data(); const mine=m.uid===currentUser.uid; if(!mine && m.read===false) unreadDocs.push(d.ref); 
+            let seenStatus = ''; if(mine) { seenStatus = m.read ? '<span style="color:#0084ff;font-size:12px;font-weight:bold;">✓✓</span>' : '<span style="color:var(--muted);font-size:12px;font-weight:bold;">✓</span>'; } 
+            const unsendBtn = mine ? `<button class="unsend-btn" onclick="unsendMessage('${d.id}')">🗑 Unsend</button>` : ''; 
+            const displayContent = m.imgUrl ? `<img src="${m.imgUrl}" style="max-width:200px; border-radius:8px; display:block;">` : m.text;
+            const bubbleStyle = m.imgUrl ? 'padding:4px; background:var(--surface);' : '';
+            return `<div style="display:flex;flex-direction:column;align-items:${mine?'flex-end':'flex-start'};"><div class="chat-bubble ${mine?'mine':'theirs'}" style="${bubbleStyle}">${displayContent}</div><div style="align-self:${mine?'flex-end':'flex-start'};color:var(--muted);font-size:10px;margin-top:2px;display:flex;gap:4px;align-items:center;">${timeAgo(m.createdAt)} ${seenStatus}${unsendBtn}</div></div>`; 
+        }).join(''); 
+        document.getElementById('chat-messages').innerHTML = html; const cm=document.getElementById('chat-messages');cm.scrollTop=cm.scrollHeight; 
+        if(unreadDocs.length > 0) { unreadDocs.forEach(ref => ref.update({read: true})); } 
+    });
 }
 function closeChat(){document.getElementById('chat-screen').classList.remove('open');if(chatUnsub)chatUnsub();loadMessages();}
 async function sendMsg(){ const input=document.getElementById('chat-input');const text=input.value.trim(); if(!text||!currentChatId)return; input.value=''; await db.collection('chats').doc(currentChatId).collection('messages').add({uid:currentUser.uid,text,read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); await db.collection('chats').doc(currentChatId).set({lastMsg:text,lastAt:firebase.firestore.FieldValue.serverTimestamp(),names:{[currentUser.uid]:currentUserData.name||currentUser.displayName,[currentChatUser.uid]:currentChatUser.name},avatars:{[currentUser.uid]:currentUserData.avatar||'',[currentChatUser.uid]:currentChatUser.avatar||''}},{merge:true}); }
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
+
+// --- Cloudinary Image Upload Logic ---
+async function sendChatImage(input) {
+    const file = input.files[0]; if (!file || !currentChatId) return;
+    showToast('Sending photo...');
+    const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'ml_default');
+    try {
+        const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+        if(data.secure_url) {
+            await db.collection('chats').doc(currentChatId).collection('messages').add({ uid: currentUser.uid, text: '📷 Photo', imgUrl: data.secure_url, read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            await db.collection('chats').doc(currentChatId).set({ lastMsg: '📷 Photo', lastAt: firebase.firestore.FieldValue.serverTimestamp(), names: {[currentUser.uid]: currentUserData.name, [currentChatUser.uid]: currentChatUser.name}, avatars: {[currentUser.uid]: currentUserData.avatar||'', [currentChatUser.uid]: currentChatUser.avatar||''} }, {merge: true});
+        }
+    } catch (e) { showToast('Failed to send photo.'); }
+    input.value = ''; 
+}
 </script>
 </body>
 </html>

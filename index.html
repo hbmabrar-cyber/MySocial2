@@ -422,18 +422,42 @@ document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key===
 
 // --- Cloudinary Image Upload Logic ---
 async function sendChatImage(input) {
-    const file = input.files[0]; if (!file || !currentChatId) return;
+    const file = input.files[0]; 
+    if (!file || !currentChatId) return;
     showToast('Sending photo...');
-    const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'ml_default');
+    
+    const formData = new FormData(); 
+    formData.append('file', file); 
+    // এখানে ml_default এর বদলে আপনার নতুন প্রিসেট gochat দেওয়া হলো
+    formData.append('upload_preset', 'gochat'); 
+    
     try {
-        const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData });
+        const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { 
+            method: 'POST', body: formData 
+        });
         const data = await res.json();
+        
         if(data.secure_url) {
-            await db.collection('chats').doc(currentChatId).collection('messages').add({ uid: currentUser.uid, text: '📷 Photo', imgUrl: data.secure_url, read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-            await db.collection('chats').doc(currentChatId).set({ lastMsg: '📷 Photo', lastAt: firebase.firestore.FieldValue.serverTimestamp(), names: {[currentUser.uid]: currentUserData.name, [currentChatUser.uid]: currentChatUser.name}, avatars: {[currentUser.uid]: currentUserData.avatar||'', [currentChatUser.uid]: currentChatUser.avatar||''} }, {merge: true});
+            await db.collection('chats').doc(currentChatId).collection('messages').add({ 
+                uid: currentUser.uid, text: '📷 Photo', imgUrl: data.secure_url, read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+            });
+            await db.collection('chats').doc(currentChatId).set({ 
+                lastMsg: '📷 Photo', lastAt: firebase.firestore.FieldValue.serverTimestamp(), 
+                names: {[currentUser.uid]: currentUserData.name, [currentChatUser.uid]: currentChatUser.name}, 
+                avatars: {[currentUser.uid]: currentUserData.avatar||'', [currentChatUser.uid]: currentChatUser.avatar||''} 
+            }, {merge: true});
+            
+            showToast('Photo sent! ✅');
+        } else {
+            console.error("Cloudinary Error:", data);
+            showToast('Error: ' + (data.error ? data.error.message : 'Upload failed'));
         }
-    } catch (e) { showToast('Failed to send photo.'); }
+    } catch (e) { 
+        showToast('Network error! Check connection.'); 
+    }
     input.value = ''; 
+}
+  
 }
 </script>
 </body>

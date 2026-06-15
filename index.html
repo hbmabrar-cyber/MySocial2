@@ -60,7 +60,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .comment-list{max-height:300px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:10px;}
 .comment-item{background:var(--bg);padding:10px;border-radius:10px;font-size:12px;display:flex;flex-direction:column;}
 .comment-author{font-weight:700;color:var(--accent2);margin-right:5px;}
-.reply-btn{background:none;border:none;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;margin-top:4px;text-align:left;}
+  .reply-btn{background:none;border:none;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;margin-top:4px;text-align:left;}
 .reply-list{margin-left:12px;border-left:2px solid var(--border);padding-left:10px;margin-top:6px;display:flex;flex-direction:column;gap:6px;}
 .reply-input-wrap{display:none;gap:6px;margin-top:8px;}
 .reply-input-wrap.open{display:flex;}
@@ -118,7 +118,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 </style>
 </head>
 <body>
-  <div id="auth-screen">
+
+<div id="auth-screen">
   <div class="auth-box">
     <div class="auth-logo">✦ GoChat</div>
     <div class="auth-sub">Connect and share your moments</div>
@@ -140,7 +141,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
     <div id="auth-msg" class="auth-msg"></div>
   </div>
 </div>
-
 <div id="app-screen">
   <div class="topbar">
     <div class="topbar-logo">✦ GoChat</div>
@@ -182,7 +182,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
     <div class="section-title">Friend Requests</div><div id="friend-requests-list"></div>
     <div class="section-title">Search Results</div><div id="search-results-list"><div class="empty-feed">Type a name to search users</div></div>
   </div>
-    <div class="page" id="page-notifications">
+
+  <div class="page" id="page-notifications">
     <div class="section-title">Notifications</div>
     <div id="notifications-list"><div class="empty-feed">No notifications yet</div></div>
   </div>
@@ -267,7 +268,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   </div>
 </div>
 <div id="toast"></div>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
@@ -294,45 +295,18 @@ function getVerifiedBadge(email) { return email === MY_SPECIAL_EMAIL ? '<span cl
 function setOnlineStatus(status) { if(currentUser) db.collection('users').doc(currentUser.uid).update({ online: status, lastActive: Date.now() }); }
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') setOnlineStatus(true); else setOnlineStatus(false); });
 
-function saveAccountToLocal(email, pass, name, avatar) {
-    let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]');
-    const index = accounts.findIndex(a => a.email === email);
-    if(index > -1) { accounts[index] = {email, pass, name, avatar}; } else { accounts.push({email, pass, name, avatar}); }
-    localStorage.setItem('savedAccounts', JSON.stringify(accounts));
-}
-function openSwitchAccountModal() {
-    document.getElementById('settings-menu').classList.remove('open'); const list = document.getElementById('saved-accounts-list');
-    let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]');
-    if(accounts.length === 0) { list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted); font-size:13px;">No saved accounts</div>'; }
-    else { list.innerHTML = accounts.map(a => { const av = a.avatar ? `<img src="${a.avatar}">` : avatarInitial(a.name); const isActive = currentUser && currentUser.email === a.email; return `<div class="msg-item" onclick="doSwitchAccount('${a.email}', '${a.pass}')" style="background:${isActive ? 'var(--surface)' : 'transparent'};"><div class="avatar">${av}</div><div class="msg-info" style="font-weight:700;">${a.name} ${isActive ? '<span style="color:var(--success); font-size:11px; font-weight:normal; display:block;">● Logged In</span>' : ''}</div></div>`; }).join(''); }
-    document.getElementById('switch-account-modal').classList.add('open');
-}
+function saveAccountToLocal(email, pass, name, avatar) { let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); const index = accounts.findIndex(a => a.email === email); if(index > -1) { accounts[index] = {email, pass, name, avatar}; } else { accounts.push({email, pass, name, avatar}); } localStorage.setItem('savedAccounts', JSON.stringify(accounts)); }
+function openSwitchAccountModal() { document.getElementById('settings-menu').classList.remove('open'); const list = document.getElementById('saved-accounts-list'); let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); if(accounts.length === 0) { list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted); font-size:13px;">No saved accounts</div>'; } else { list.innerHTML = accounts.map(a => { const av = a.avatar ? `<img src="${a.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(a.name); const isActive = currentUser && currentUser.email === a.email; return `<div class="msg-item" onclick="doSwitchAccount('${a.email}', '${a.pass}')" style="background:${isActive ? 'var(--surface)' : 'transparent'};"><div class="avatar">${av}</div><div class="msg-info" style="font-weight:700;">${a.name} ${isActive ? '<span style="color:var(--success); font-size:11px; font-weight:normal; display:block;">● Logged In</span>' : ''}</div></div>`; }).join(''); } document.getElementById('switch-account-modal').classList.add('open'); }
 function closeSwitchAccountModal() { document.getElementById('switch-account-modal').classList.remove('open'); }
-
-async function doSwitchAccount(email, pass) { 
-    if(currentUser && currentUser.email === email) { closeSwitchAccountModal(); return; } 
-    showToast('Switching account...'); closeSwitchAccountModal(); 
-    try { window.tempLoginPass = pass; if(notifUnsub) notifUnsub(); await auth.signOut(); await auth.signInWithEmailAndPassword(email, pass); } 
-    catch(e) { showToast('Session expired. Please login again.'); loginAnotherAccount(); } 
-}
+async function doSwitchAccount(email, pass) { if(currentUser && currentUser.email === email) { closeSwitchAccountModal(); return; } showToast('Switching account...'); closeSwitchAccountModal(); try { window.tempLoginPass = pass; if(notifUnsub) notifUnsub(); await auth.signOut(); await auth.signInWithEmailAndPassword(email, pass); } catch(e) { showToast('Session expired. Please login again.'); loginAnotherAccount(); } }
 function loginAnotherAccount() { closeSwitchAccountModal(); doLogout(); }
-async function doLogout(){ 
-    try{ setOnlineStatus(false); } catch(e){} 
-    try{ await auth.signOut(); } catch(e){} 
-    window.location.reload(); 
-}
+async function doLogout(){ try{ setOnlineStatus(false); } catch(e){} try{ await auth.signOut(); } catch(e){} window.location.reload(); }
 
-async function doRegister(){
-    const name=document.getElementById('reg-name').value.trim(); const email=document.getElementById('reg-email').value.trim(); const pass=document.getElementById('reg-pass').value; const msg=document.getElementById('auth-msg');
-    if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}
-    if(hasEmoji(name)){msg.textContent='নামে কোনো ইমোজি ব্যবহার করা যাবে না!';msg.className='auth-msg error';return;}
-    try{ window.tempLoginPass = pass; const cred=await auth.createUserWithEmailAndPassword(email,pass); await cred.user.updateProfile({displayName:name}); await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',partnerName:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],online:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); msg.textContent='Account created successfully!';msg.className='auth-msg success'; }catch(e){msg.textContent='Error: '+e.message;msg.className='auth-msg error';}
-}
+async function doRegister(){ const name=document.getElementById('reg-name').value.trim(); const email=document.getElementById('reg-email').value.trim(); const pass=document.getElementById('reg-pass').value; const msg=document.getElementById('auth-msg'); if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;} if(hasEmoji(name)){msg.textContent='নামে কোনো ইমোজি ব্যবহার করা যাবে না!';msg.className='auth-msg error';return;} try{ window.tempLoginPass = pass; const cred=await auth.createUserWithEmailAndPassword(email,pass); await cred.user.updateProfile({displayName:name}); await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',partnerName:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],online:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); msg.textContent='Account created successfully!';msg.className='auth-msg success'; }catch(e){msg.textContent='Error: '+e.message;msg.className='auth-msg error';} }
 async function doLogin(){ const email=document.getElementById('login-email').value.trim(); const pass=document.getElementById('login-pass').value; const msg=document.getElementById('auth-msg'); try{ window.tempLoginPass = pass; await auth.signInWithEmailAndPassword(email,pass); }catch(e){msg.textContent='Incorrect email or password.';msg.className='auth-msg error';} }
 function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('auth-msg').className='auth-msg';}
 function previewImage(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{document.getElementById('compose-img-preview').style.display='block';document.getElementById('compose-preview-img').src=e.target.result;};reader.readAsDataURL(file);}
-</script>
-<script>
+
 auth.onAuthStateChanged(async(user)=>{
     if(user){
         currentUser=user;setOnlineStatus(true); const snap=await db.collection('users').doc(user.uid).get();
@@ -341,34 +315,26 @@ auth.onAuthStateChanged(async(user)=>{
         document.getElementById('auth-screen').style.display='none'; document.getElementById('app-screen').style.display='block';
         loadUserUI();loadFeed();loadMessages();cleanupExpiredPosts();
         
-        // --- নোটিফিকেশন সিস্টেম (জাভাস্ক্রিপ্ট সর্টিং) ---
-        notifUnsub = db.collection('notifications')
-            .where('toUid', '==', user.uid)
-            .onSnapshot(nSnap => {
-                let notifs = nSnap.docs.map(nd => ({ id: nd.id, ...nd.data() }));
-                
-                // ক্লায়েন্ট-সাইড সর্টিং (ফায়ারবেস ইনডেক্স ছাড়াই কাজ করবে)
-                notifs.sort((a,b) => {
-                   let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : Date.now();
-                   let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : Date.now();
-                   return tb - ta;
-                });
-                
-                let unreadNotif = notifs.filter(nd => nd.read === false).length;
-                let nBadge = document.getElementById('notif-badge');
-                if(unreadNotif > 0) { nBadge.textContent = unreadNotif; nBadge.style.display = 'flex'; } else { nBadge.style.display = 'none'; }
-                
-                const nList = document.getElementById('notifications-list');
-                if(notifs.length === 0) { nList.innerHTML = '<div class="empty-feed">No notifications yet</div>'; return; }
-                nList.innerHTML = notifs.map(data => {
-                    let icon = data.type === 'like' ? 'favorite' : 'chat_bubble';
-                    let iconColor = data.type === 'like' ? 'var(--danger)' : 'var(--accent)';
-                    return `<div class="notif-item ${data.read?'':'unread'}" onclick="markNotifAsRead('${data.id}')">
-                        <div class="notif-icon-wrap" style="background:${iconColor}22; color:${iconColor};"><span class="material-symbols-outlined">${icon}</span></div>
-                        <div class="notif-text"><strong>${data.fromName}</strong> ${data.type==='like'?'liked':'commented on'} your post "${data.postTitle || 'Photo Post'}" <div style="font-size:10px; color:var(--muted); margin-top:2px;">${timeAgo(data.createdAt)}</div></div>
-                    </div>`;
-                }).join('');
+        // --- নোটিফিকেশন সিস্টেম (জাভাস্ক্রিপ্ট সর্টিং - ফায়ারবেস ইনডেক্স প্রয়োজন নেই) ---
+        notifUnsub = db.collection('notifications').where('toUid', '==', user.uid).onSnapshot(nSnap => {
+            let notifs = nSnap.docs.map(nd => ({ id: nd.id, ...nd.data() }));
+            notifs.sort((a,b) => {
+               let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : Date.now();
+               let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : Date.now();
+               return tb - ta;
             });
+            
+            let unreadNotif = notifs.filter(nd => nd.read === false).length;
+            let nBadge = document.getElementById('notif-badge');
+            if(unreadNotif > 0) { nBadge.textContent = unreadNotif; nBadge.style.display = 'flex'; } else { nBadge.style.display = 'none'; }
+            
+            const nList = document.getElementById('notifications-list');
+            if(notifs.length === 0) { nList.innerHTML = '<div class="empty-feed">No notifications yet</div>'; return; }
+            nList.innerHTML = notifs.map(data => {
+                let icon = data.type === 'like' ? 'favorite' : 'chat_bubble'; let iconColor = data.type === 'like' ? 'var(--danger)' : 'var(--accent)';
+                return `<div class="notif-item ${data.read?'':'unread'}" onclick="markNotifAsRead('${data.id}')"><div class="notif-icon-wrap" style="background:${iconColor}22; color:${iconColor};"><span class="material-symbols-outlined">${icon}</span></div><div class="notif-text"><strong>${data.fromName}</strong> ${data.type==='like'?'liked':'commented on'} your post "${data.postTitle || 'Photo Post'}" <div style="font-size:10px; color:var(--muted); margin-top:2px;">${timeAgo(data.createdAt)}</div></div></div>`;
+            }).join('');
+        });
 
         // --- রিয়েল-টাইম আনরিড মেসেজ ব্যাজ কাউন্টার ---
         db.collection('chats').onSnapshot(cSnap => {
@@ -393,21 +359,18 @@ function showPage(page){
     if(page==='notifications') { db.collection('notifications').where('toUid', '==', currentUser.uid).get().then(qs => { qs.forEach(doc => doc.ref.update({read: true})); }); }
 }
 async function markNotifAsRead(id) { await db.collection('notifications').doc(id).update({read: true}); showPage('feed'); }
-</script>
-<script>
-// --- মেগা ফিক্স: ফিড পোস্ট এখন সরাসরি ক্লাউডিনারিতে আপলোড হবে ---
+  // --- মেগা ফিক্স: ফিড পোস্ট এখন সরাসরি ক্লাউডিনারিতে আপলোড হবে ---
 async function submitPost() {
     const title = document.getElementById('post-title').value.trim();
     const imgFile = document.getElementById('post-img-input').files[0];
     if (!title && !imgFile) { showToast('Write something or add photo!'); return; }
     
-    showToast('Uploading post...');
     let imgUrl = '';
-    
     if (imgFile) {
+        showToast('Uploading post...');
         const formData = new FormData();
         formData.append('file', imgFile);
-        formData.append('upload_preset', 'gochat'); // ক্লাউডিনারি প্রিসেট
+        formData.append('upload_preset', 'gochat');
         try {
             const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData });
             const data = await res.json();
@@ -446,11 +409,10 @@ async function submitReply(postId, commentId) { const input = document.getElemen
 
 async function searchUsers() { const q = document.getElementById('search-input').value.trim().toLowerCase();const list = document.getElementById('search-results-list'); if(!q) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Search users...</div>'; return; } const snap = await db.collection('users').get();let html = ''; snap.forEach(d => { if(d.id === currentUser.uid) return; const u = d.data(); if(u.name.toLowerCase().includes(q)) { let btnHtml = '';const friends = currentUserData.friends || [];const sent = currentUserData.sentRequests || [];const received = currentUserData.receivedRequests || []; if(friends.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 12px; font-size:11px;" disabled>Friends</button>'; else if(sent.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 12px; font-size:11px;" disabled>Sent</button>'; else if(received.includes(d.id)) btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="acceptRequest('${d.id}')">Accept</button>`; else btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="sendRequest('${d.id}')">Add</button>`; const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name); const dot = u.online ? '<div class="online-dot"></div>' : ''; html += `<div class="msg-item"><div class="avatar" style="width:40px;height:40px;cursor:pointer;position:relative;" onclick="viewUserProfile('${d.id}')">${av}${dot}</div><div class="msg-info" onclick="viewUserProfile('${d.id}')">${u.name} ${getVerifiedBadge(u.email)}</div><div>${btnHtml}</div></div>`; } }); list.innerHTML = html || '<div style="text-align:center; padding:20px;">No users found.</div>'; }
 async function sendRequest(targetUid) { await db.collection('users').doc(currentUser.uid).update({ sentRequests: firebase.firestore.FieldValue.arrayUnion(targetUid) }); await db.collection('users').doc(targetUid).update({ receivedRequests: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); if(!currentUserData.sentRequests) currentUserData.sentRequests=[]; currentUserData.sentRequests.push(targetUid); searchUsers();showToast('Friend request sent!'); }
-async function acceptRequest(requesterUid) { await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); if(currentUserData.receivedRequests) currentUserData.receivedRequests = currentUserData.receivedRequests.filter(id=>id!==requesterUid); if(!currentUserData.friends) currentUserData.friends=[]; currentUserData.friends.push(requesterUid); loadFriendRequests();searchUsers();showToast('Connected as friends!'); }
+async function acceptRequest(requesterUid) { await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); if(currentUserData.receivedRequests) currentUserData.receivedRequests = currentUserData.receivedRequests.filter(id=>id!==requesterUid); if(!currentUserData.friends) currentUserData.friends=[]; currentUserData.friends.push(requesterUid); loadFriendRequests();searchUsers();showToast('Connected as friends!'); }
 function loadFriendRequests() { const reqs = currentUserData.receivedRequests || [];const list = document.getElementById('friend-requests-list'); if(reqs.length === 0) { list.innerHTML = '<div style="padding:10px; color:var(--muted); font-size:12px; text-align:center;">No requests</div>'; return; } db.collection('users').get().then(snap => { let html = '';snap.forEach(d => { if(reqs.includes(d.id)) { const u = d.data(); html += `<div class="msg-item"><div>${u.name}</div><button class="btn-primary" style="padding:4px 8px; font-size:10px; width:auto;" onclick="acceptRequest('${d.id}')">Accept</button></div>`; } }); list.innerHTML = html; }); }
 async function openFriendsList() { document.getElementById('friends-list-modal').classList.add('open');const list = document.getElementById('friends-list-content');const friends = currentUserData.friends || []; if(friends.length === 0) { list.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px;">No friends yet</div>'; return; } list.innerHTML = '<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>';let html = ''; for(let i=0; i<friends.length; i++) { const snap = await db.collection('users').doc(friends[i]).get(); if(snap.exists) { const u = snap.data(); const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name); const dot = u.online ? '<div class="online-dot"></div>' : ''; html += `<div class="msg-item" onclick="viewUserProfile('${snap.id}')"><div class="avatar" style="width:36px;height:36px;position:relative;">${av}${dot}</div><div>${u.name} ${getVerifiedBadge(u.email)}</div></div>`; } } list.innerHTML = html; }
-      </script>
-      function togglePartnerField() { const rel = document.getElementById('edit-relationship').value; document.getElementById('partner-field-wrap').style.display = (rel === 'In a relationship' || rel === 'Married') ? 'block' : 'none'; }
+  function togglePartnerField() { const rel = document.getElementById('edit-relationship').value; document.getElementById('partner-field-wrap').style.display = (rel === 'In a relationship' || rel === 'Married') ? 'block' : 'none'; }
 function openProfileEdit() { document.getElementById('profile-display-section').style.display = 'none'; document.getElementById('profile-edit-section').style.display = 'block'; document.getElementById('edit-name').value = currentUserData.name || ''; document.getElementById('edit-bio').value = currentUserData.bio || ''; document.getElementById('edit-gender').value = currentUserData.gender || ''; document.getElementById('edit-hometown').value = currentUserData.hometown || ''; document.getElementById('edit-location').value = currentUserData.location || ''; document.getElementById('edit-relationship').value = currentUserData.relationship || ''; document.getElementById('edit-partner').value = currentUserData.partnerName || ''; togglePartnerField(); }
 function closeProfileEdit() { document.getElementById('profile-display-section').style.display = 'block'; document.getElementById('profile-edit-section').style.display = 'none'; }
 async function saveProfileChanges() { const name = document.getElementById('edit-name').value.trim(); const bio = document.getElementById('edit-bio').value.trim(); const gender = document.getElementById('edit-gender').value; const hometown = document.getElementById('edit-hometown').value.trim(); const location = document.getElementById('edit-location').value.trim(); const relationship = document.getElementById('edit-relationship').value; const partnerName = document.getElementById('edit-partner').value.trim(); if(!name) { showToast('Name is required!'); return; } if(hasEmoji(name)) { showToast('No Emojis allowed in Name!'); return; } try { showToast('Saving...'); await db.collection('users').doc(currentUser.uid).set({ name, bio, gender, hometown, location, relationship, partnerName }, { merge: true }); currentUserData.name = name; currentUserData.bio = bio; currentUserData.gender = gender; currentUserData.hometown = hometown; currentUserData.location = location; currentUserData.relationship = relationship; currentUserData.partnerName = partnerName; let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); const idx = accounts.findIndex(a => a.email === currentUser.email); if(idx > -1) { accounts[idx].name = name; localStorage.setItem('savedAccounts', JSON.stringify(accounts)); } loadUserUI(); closeProfileEdit(); showToast('Profile Updated! 🎉'); } catch(e) { showToast('Error saving data.'); } }

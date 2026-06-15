@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GoChat V2</title>
-<!-- Google Material Symbols (Outline Icons) -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -272,7 +271,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-// আপনার ভেরিফাইড ইমেইলটি এখানে দিন
+// আপনার নিজস্ব স্পেশাল জিমেইল আইডিটি এখানে বসান
 const MY_SPECIAL_EMAIL = "hmdabrar70@gmail.com"; 
 
 firebase.initializeApp({
@@ -295,7 +294,7 @@ function getVerifiedBadge(email) { return email === MY_SPECIAL_EMAIL ? '<span cl
 function setOnlineStatus(status) { if(currentUser) db.collection('users').doc(currentUser.uid).update({ online: status, lastActive: Date.now() }); }
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') setOnlineStatus(true); else setOnlineStatus(false); });
 
-// --- Logout & Switch Account Logic (FIXED) ---
+// --- Switch Account & Clear Sessions Logic ---
 function saveAccountToLocal(email, pass, name, avatar) {
     let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]');
     const index = accounts.findIndex(a => a.email === email);
@@ -323,8 +322,18 @@ async function doLogout(){
     try{ await auth.signOut(); } catch(e){} 
     window.location.reload(); 
 }
-</script>
-<script>
+
+async function doRegister(){
+    const name=document.getElementById('reg-name').value.trim(); const email=document.getElementById('reg-email').value.trim(); const pass=document.getElementById('reg-pass').value; const msg=document.getElementById('auth-msg');
+    if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}
+    if(hasEmoji(name)){msg.textContent='নামে কোনো ইমোজি ব্যবহার করা যাবে না!';msg.className='auth-msg error';return;}
+    try{ window.tempLoginPass = pass; const cred=await auth.createUserWithEmailAndPassword(email,pass); await cred.user.updateProfile({displayName:name}); await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',partnerName:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],online:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); msg.textContent='Account created successfully!';msg.className='auth-msg success'; }catch(e){msg.textContent='Error: '+e.message;msg.className='auth-msg error';}
+}
+async function doLogin(){ const email=document.getElementById('login-email').value.trim(); const pass=document.getElementById('login-pass').value; const msg=document.getElementById('auth-msg'); try{ window.tempLoginPass = pass; await auth.signInWithEmailAndPassword(email,pass); }catch(e){msg.textContent='Incorrect email or password.';msg.className='auth-msg error';} }
+function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('auth-msg').className='auth-msg';}
+function previewImage(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{document.getElementById('compose-img-preview').style.display='block';document.getElementById('compose-preview-img').src=e.target.result;};reader.readAsDataURL(file);}
+  </script>
+  <script>
 auth.onAuthStateChanged(async(user)=>{
     if(user){
         currentUser=user;setOnlineStatus(true); const snap=await db.collection('users').doc(user.uid).get();
@@ -333,31 +342,29 @@ auth.onAuthStateChanged(async(user)=>{
         document.getElementById('auth-screen').style.display='none'; document.getElementById('app-screen').style.display='block';
         loadUserUI();loadFeed();loadMessages();cleanupExpiredPosts();
         
-        // ১. নোটিফিকেশন সিস্টেম ফিক্স (No Firebase Index Required)
-        notifUnsub = db.collection('notifications').where('toUid', '==', user.uid).onSnapshot(nSnap => {
-            let notifs = nSnap.docs.map(nd => ({ id: nd.id, ...nd.data() }));
-            notifs.sort((a,b) => {
-               let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : Date.now();
-               let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : Date.now();
-               return tb - ta;
+        // --- ফায়ারবেস অফিশিয়াল কম্পোজিট ইনডেক্স নোটিফিকেশন সিস্টেম ---
+        notifUnsub = db.collection('notifications')
+            .where('toUid', '==', user.uid)
+            .orderBy('createdAt', 'desc')
+            .onSnapshot(nSnap => {
+                let unreadNotif = nSnap.docs.filter(nd => nd.data().read === false).length;
+                let nBadge = document.getElementById('notif-badge');
+                if(unreadNotif > 0) { nBadge.textContent = unreadNotif; nBadge.style.display = 'flex'; } else { nBadge.style.display = 'none'; }
+                
+                const nList = document.getElementById('notifications-list');
+                if(nSnap.docs.length === 0) { nList.innerHTML = '<div class="empty-feed">No notifications yet</div>'; return; }
+                nList.innerHTML = nSnap.docs.map(nd => {
+                    const data = nd.data();
+                    let icon = data.type === 'like' ? 'favorite' : 'chat_bubble';
+                    let iconColor = data.type === 'like' ? 'var(--danger)' : 'var(--accent)';
+                    return `<div class="notif-item ${data.read?'':'unread'}" onclick="markNotifAsRead('${nd.id}')">
+                        <div class="notif-icon-wrap" style="background:${iconColor}22; color:${iconColor};"><span class="material-symbols-outlined">${icon}</span></div>
+                        <div class="notif-text"><strong>${data.fromName}</strong> ${data.type==='like'?'liked':'commented on'} your post "${data.postTitle || 'Photo Post'}" <div style="font-size:10px; color:var(--muted); margin-top:2px;">${timeAgo(data.createdAt)}</div></div>
+                    </div>`;
+                }).join('');
             });
-            let unreadNotif = notifs.filter(nd => nd.read === false).length;
-            let nBadge = document.getElementById('notif-badge');
-            if(unreadNotif > 0) { nBadge.textContent = unreadNotif; nBadge.style.display = 'flex'; } else { nBadge.style.display = 'none'; }
-            
-            const nList = document.getElementById('notifications-list');
-            if(notifs.length === 0) { nList.innerHTML = '<div class="empty-feed">No notifications yet</div>'; return; }
-            nList.innerHTML = notifs.map(data => {
-                let icon = data.type === 'like' ? 'favorite' : 'chat_bubble';
-                let iconColor = data.type === 'like' ? 'var(--danger)' : 'var(--accent)';
-                return `<div class="notif-item ${data.read?'':'unread'}" onclick="markNotifAsRead('${data.id}')">
-                    <div class="notif-icon-wrap" style="background:${iconColor}22; color:${iconColor};"><span class="material-symbols-outlined">${icon}</span></div>
-                    <div class="notif-text"><strong>${data.fromName}</strong> ${data.type==='like'?'liked':'commented on'} your post "${data.postTitle || 'Photo Post'}" <div style="font-size:10px; color:var(--muted); margin-top:2px;">${timeAgo(data.createdAt)}</div></div>
-                </div>`;
-            }).join('');
-        });
 
-        // ২. রিয়েল-টাইম আনরিড মেসেজ ব্যাজ
+        // --- রিয়েল-টাইম আনরিড মেসেজ ব্যাজ কাউন্টার ---
         db.collection('chats').onSnapshot(cSnap => {
             let myChats = cSnap.docs.filter(cd => cd.id.includes(user.uid));
             myChats.forEach(cd => {
@@ -381,16 +388,6 @@ function showPage(page){
 }
 async function markNotifAsRead(id) { await db.collection('notifications').doc(id).update({read: true}); showPage('feed'); }
 
-async function doRegister(){
-    const name=document.getElementById('reg-name').value.trim(); const email=document.getElementById('reg-email').value.trim(); const pass=document.getElementById('reg-pass').value; const msg=document.getElementById('auth-msg');
-    if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;}
-    if(hasEmoji(name)){msg.textContent='নামে কোনো ইমোজি ব্যবহার করা যাবে না!';msg.className='auth-msg error';return;}
-    try{ window.tempLoginPass = pass; const cred=await auth.createUserWithEmailAndPassword(email,pass); await cred.user.updateProfile({displayName:name}); await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',partnerName:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],online:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); msg.textContent='Account created successfully!';msg.className='auth-msg success'; }catch(e){msg.textContent='Error: '+e.message;msg.className='auth-msg error';}
-}
-async function doLogin(){ const email=document.getElementById('login-email').value.trim(); const pass=document.getElementById('login-pass').value; const msg=document.getElementById('auth-msg'); try{ window.tempLoginPass = pass; await auth.signInWithEmailAndPassword(email,pass); }catch(e){msg.textContent='Incorrect email or password.';msg.className='auth-msg error';} }
-function previewImage(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{document.getElementById('compose-img-preview').style.display='block';document.getElementById('compose-preview-img').src=e.target.result;};reader.readAsDataURL(file);}
-</script>
-<script>
 async function submitPost(){
     const title=document.getElementById('post-title').value.trim(); const imgFile=document.getElementById('post-img-input').files[0];
     if(!title && !imgFile){showToast('Write something or add photo!');return;}
@@ -398,7 +395,8 @@ async function submitPost(){
     try{ const expireAt=new Date(Date.now()+5*3600000); await db.collection('posts').add({uid:currentUser.uid,name:currentUserData.name||currentUser.displayName,email:currentUserData.email||'',avatar:currentUserData.avatar||'',title:title,text:'',imgUrl:imgUrl,likes:0,likedBy:[],comments:[],createdAt:firebase.firestore.FieldValue.serverTimestamp(),expiresAt:expireAt}); document.getElementById('post-title').value='';document.getElementById('post-img-input').value='';document.getElementById('compose-img-preview').style.display='none';showToast('Posted! ✦'); }catch(e){showToast('Error uploading post.');}
 }
 function toBase64(file){return new Promise((resolve)=>{const reader=new FileReader();reader.onload=e=>resolve(e.target.result);reader.readAsDataURL(file);});}
-
+  </script>
+  <script>
 function loadFeed(){
     const feedList=document.getElementById('feed-list');
     feedUnsub=db.collection('posts').orderBy('createdAt','desc').onSnapshot((snap)=>{
@@ -409,42 +407,19 @@ function loadFeed(){
             const p=d.data();const av=p.avatar?'<img src="'+p.avatar+'">':avatarInitial(p.name||'?'); const vBadge = getVerifiedBadge(p.email);
             const commentsHtml = (p.comments || []).map(c => { const repliesHtml = (c.replies || []).map(r => `<div class="reply-item"><span class="comment-author">${r.name}</span> <span>${r.text}</span></div>`).join(''); return `<div class="comment-item"><div><span class="comment-author" style="cursor:pointer;" onclick="viewUserProfile('${c.uid}')">${c.name}</span> <span>${c.text}</span></div><button class="reply-btn" onclick="toggleReplyBox('${d.id}', '${c.id}')">↳ Reply</button>${repliesHtml ? `<div class="reply-list">${repliesHtml}</div>` : ''}<div class="reply-input-wrap" id="reply-box-${d.id}-${c.id}"><input type="text" id="reply-input-${d.id}-${c.id}" placeholder="Write a reply..."><button onclick="submitReply('${d.id}', '${c.id}')">Send</button></div></div>`; }).join('');
             const isLiked = p.likedBy && p.likedBy.includes(currentUser.uid); const likeColor = isLiked ? '#ff4f4f' : 'var(--text)'; const fillProp = isLiked ? '1' : '0';
-
             return `<div class="post-card"><div class="post-header"><div class="avatar" style="width:36px;height:36px;cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${av}</div><div><div class="post-name" style="cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${p.name||'User'} ${vBadge}</div></div></div>${p.title?`<div style="font-weight:800; font-size:15px; margin-bottom:6px; color:var(--text);">${p.title}</div>`:''}${p.imgUrl?`<img class="post-img" src="${p.imgUrl}">`:''}<div class="post-actions"><button class="post-action-btn like-btn" style="color:${likeColor};" onclick="toggleLike('${d.id}')"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' ${fillProp};">favorite</span><span style="font-size:16px; font-weight:600;">${p.likes||0}</span></button>${p.uid!==currentUser.uid?`<button class="post-action-btn" style="color:var(--muted);" onclick="openChatByUid('${p.uid}','${p.name||'User'}','${p.avatar||''}')"><span class="material-symbols-outlined">chat_bubble</span> Message</button>`:`<button class="post-action-btn" style="color:var(--muted);" onclick="deletePost('${d.id}')"><span class="material-symbols-outlined">delete</span> Delete</button>`}</div><div class="comments-section">${commentsHtml ? `<div class="comment-list">${commentsHtml}</div>` : ''}<div class="comment-input-wrap"><input type="text" id="comment-input-${d.id}" placeholder="Write a comment..."><button onclick="submitComment('${d.id}')">Send</button></div></div></div>`;
         }).join('');
     });
 }
 
-async function toggleLike(postId) {
-    const postRef = db.collection('posts').doc(postId); const doc = await postRef.get();
-    if(doc.exists) {
-        const p = doc.data(); let likedBy = p.likedBy || []; let likes = p.likes || 0;
-        if(likedBy.includes(currentUser.uid)) { likedBy = likedBy.filter(id => id !== currentUser.uid); likes = Math.max(0, likes - 1); } 
-        else { likedBy.push(currentUser.uid); likes++; if(p.uid !== currentUser.uid) { await db.collection('notifications').add({ toUid: p.uid, fromUid: currentUser.uid, fromName: currentUserData.name, type: 'like', postId: postId, postTitle: p.title || 'Photo', read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); } }
-        await postRef.update({ likes, likedBy });
-    }
-}
-
-// কমেন্ট সেন্ড করার ফিক্সড লজিক
-async function submitComment(postId) {
-    const input = document.getElementById('comment-input-' + postId); const text = input.value.trim(); if(!text) return;
-    try {
-        const postRef = db.collection('posts').doc(postId); const doc = await postRef.get();
-        if(doc.exists) {
-            const p = doc.data();
-            await postRef.update({ comments: firebase.firestore.FieldValue.arrayUnion({ id: 'c_'+Date.now(), uid: currentUser.uid, name: currentUserData.name || currentUser.displayName, text: text, createdAt: Date.now(), replies: [] }) });
-            if(p.uid !== currentUser.uid) { await db.collection('notifications').add({ toUid: p.uid, fromUid: currentUser.uid, fromName: currentUserData.name, type: 'comment', postId: postId, postTitle: p.title || 'Photo', read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); }
-        }
-        input.value = '';
-    } catch(e) { showToast("Error adding comment!"); }
-}
-
+async function toggleLike(postId) { const postRef = db.collection('posts').doc(postId); const doc = await postRef.get(); if(doc.exists) { const p = doc.data(); let likedBy = p.likedBy || []; let likes = p.likes || 0; if(likedBy.includes(currentUser.uid)) { likedBy = likedBy.filter(id => id !== currentUser.uid); likes = Math.max(0, likes - 1); } else { likedBy.push(currentUser.uid); likes++; if(p.uid !== currentUser.uid) { await db.collection('notifications').add({ toUid: p.uid, fromUid: currentUser.uid, fromName: currentUserData.name, type: 'like', postId: postId, postTitle: p.title || 'Photo', read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); } } await postRef.update({ likes, likedBy }); } }
+async function submitComment(postId) { const input = document.getElementById('comment-input-' + postId); const text = input.value.trim(); if(!text) return; try { const postRef = db.collection('posts').doc(postId); const doc = await postRef.get(); if(doc.exists) { const p = doc.data(); await postRef.update({ comments: firebase.firestore.FieldValue.arrayUnion({ id: 'c_'+Date.now(), uid: currentUser.uid, name: currentUserData.name || currentUser.displayName, text: text, createdAt: Date.now(), replies: [] }) }); if(p.uid !== currentUser.uid) { await db.collection('notifications').add({ toUid: p.uid, fromUid: currentUser.uid, fromName: currentUserData.name, type: 'comment', postId: postId, postTitle: p.title || 'Photo', read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); } } input.value = ''; } catch(e) { showToast("Error adding comment!"); } }
 function toggleReplyBox(postId, commentId) { document.getElementById(`reply-box-${postId}-${commentId}`).classList.toggle('open'); }
 async function submitReply(postId, commentId) { const input = document.getElementById(`reply-input-${postId}-${commentId}`); const text = input.value.trim(); if(!text) return; try { const postRef = db.collection('posts').doc(postId); const doc = await postRef.get(); if(doc.exists) { const data = doc.data(); const comments = data.comments || []; const cIndex = comments.findIndex(c => c.id === commentId); if(cIndex > -1) { if(!comments[cIndex].replies) comments[cIndex].replies = []; comments[cIndex].replies.push({ uid: currentUser.uid, name: currentUserData.name || currentUser.displayName, text: text, createdAt: Date.now() }); await postRef.update({ comments: comments }); } } input.value = ''; toggleReplyBox(postId, commentId); } catch(e) { showToast("Error adding reply!"); } }
 
 async function searchUsers() { const q = document.getElementById('search-input').value.trim().toLowerCase();const list = document.getElementById('search-results-list'); if(!q) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Search users...</div>'; return; } const snap = await db.collection('users').get();let html = ''; snap.forEach(d => { if(d.id === currentUser.uid) return; const u = d.data(); if(u.name.toLowerCase().includes(q)) { let btnHtml = '';const friends = currentUserData.friends || [];const sent = currentUserData.sentRequests || [];const received = currentUserData.receivedRequests || []; if(friends.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 12px; font-size:11px;" disabled>Friends</button>'; else if(sent.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 12px; font-size:11px;" disabled>Sent</button>'; else if(received.includes(d.id)) btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="acceptRequest('${d.id}')">Accept</button>`; else btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="sendRequest('${d.id}')">Add</button>`; const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name); const dot = u.online ? '<div class="online-dot"></div>' : ''; html += `<div class="msg-item"><div class="avatar" style="width:40px;height:40px;cursor:pointer;position:relative;" onclick="viewUserProfile('${d.id}')">${av}${dot}</div><div class="msg-info" onclick="viewUserProfile('${d.id}')">${u.name} ${getVerifiedBadge(u.email)}</div><div>${btnHtml}</div></div>`; } }); list.innerHTML = html || '<div style="text-align:center; padding:20px;">No users found.</div>'; }
 async function sendRequest(targetUid) { await db.collection('users').doc(currentUser.uid).update({ sentRequests: firebase.firestore.FieldValue.arrayUnion(targetUid) }); await db.collection('users').doc(targetUid).update({ receivedRequests: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); if(!currentUserData.sentRequests) currentUserData.sentRequests=[]; currentUserData.sentRequests.push(targetUid); searchUsers();showToast('Friend request sent!'); }
-async function acceptRequest(requesterUid) { await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); if(currentUserData.receivedRequests) currentUserData.receivedRequests = currentUserData.receivedRequests.filter(id=>id!==requesterUid); if(!currentUserData.friends) currentUserData.friends=[]; currentUserData.friends.push(requesterUid); loadFriendRequests();searchUsers();showToast('Connected as friends!'); }
+async function acceptRequest(requesterUid) { await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); if(currentUserData.receivedRequests) currentUserData.receivedRequests = currentUserData.receivedRequests.filter(id=>id!==requesterUid); if(!currentUserData.friends) currentUserData.friends=[]; currentUserData.friends.push(requesterUid); loadFriendRequests();searchUsers();showToast('Connected as friends!'); }
 function loadFriendRequests() { const reqs = currentUserData.receivedRequests || [];const list = document.getElementById('friend-requests-list'); if(reqs.length === 0) { list.innerHTML = '<div style="padding:10px; color:var(--muted); font-size:12px; text-align:center;">No requests</div>'; return; } db.collection('users').get().then(snap => { let html = '';snap.forEach(d => { if(reqs.includes(d.id)) { const u = d.data(); html += `<div class="msg-item"><div>${u.name}</div><button class="btn-primary" style="padding:4px 8px; font-size:10px; width:auto;" onclick="acceptRequest('${d.id}')">Accept</button></div>`; } }); list.innerHTML = html; }); }
 async function openFriendsList() { document.getElementById('friends-list-modal').classList.add('open');const list = document.getElementById('friends-list-content');const friends = currentUserData.friends || []; if(friends.length === 0) { list.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px;">No friends yet</div>'; return; } list.innerHTML = '<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>';let html = ''; for(let i=0; i<friends.length; i++) { const snap = await db.collection('users').doc(friends[i]).get(); if(snap.exists) { const u = snap.data(); const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name); const dot = u.online ? '<div class="online-dot"></div>' : ''; html += `<div class="msg-item" onclick="viewUserProfile('${snap.id}')"><div class="avatar" style="width:36px;height:36px;position:relative;">${av}${dot}</div><div>${u.name} ${getVerifiedBadge(u.email)}</div></div>`; } } list.innerHTML = html; }
 
@@ -454,7 +429,50 @@ function closeProfileEdit() { document.getElementById('profile-display-section')
 async function saveProfileChanges() { const name = document.getElementById('edit-name').value.trim(); const bio = document.getElementById('edit-bio').value.trim(); const gender = document.getElementById('edit-gender').value; const hometown = document.getElementById('edit-hometown').value.trim(); const location = document.getElementById('edit-location').value.trim(); const relationship = document.getElementById('edit-relationship').value; const partnerName = document.getElementById('edit-partner').value.trim(); if(!name) { showToast('Name is required!'); return; } if(hasEmoji(name)) { showToast('No Emojis allowed in Name!'); return; } try { showToast('Saving...'); await db.collection('users').doc(currentUser.uid).set({ name, bio, gender, hometown, location, relationship, partnerName }, { merge: true }); currentUserData.name = name; currentUserData.bio = bio; currentUserData.gender = gender; currentUserData.hometown = hometown; currentUserData.location = location; currentUserData.relationship = relationship; currentUserData.partnerName = partnerName; let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); const idx = accounts.findIndex(a => a.email === currentUser.email); if(idx > -1) { accounts[idx].name = name; localStorage.setItem('savedAccounts', JSON.stringify(accounts)); } loadUserUI(); closeProfileEdit(); showToast('Profile Updated! 🎉'); } catch(e) { showToast('Error saving data.'); } }
 function loadUserUI(){ const name=currentUserData.name||currentUser.displayName||'User'; const av=currentUserData.avatar; document.getElementById('composer-avatar').innerHTML=av?'<img src="'+av+'">':avatarInitial(name); document.getElementById('profile-name-display').innerHTML=name + getVerifiedBadge(currentUserData.email); document.getElementById('profile-my-status').innerHTML='<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:8px;">● Active Now</div>'; document.getElementById('profile-bio-display').textContent=currentUserData.bio||''; document.getElementById('profile-avatar-big').innerHTML=av?'<img src="'+av+'">':avatarInitial(name); const fCount = currentUserData.friends ? currentUserData.friends.length : 0; document.getElementById('profile-friends-count').innerHTML = fCount + ' <span style="color:var(--accent2); font-weight:normal; cursor:pointer; text-decoration:underline;" onclick="openFriendsList()">Friends</span>'; let dHtml = ''; if(currentUserData.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">person</span> <strong>${currentUserData.gender}</strong></div>`; if(currentUserData.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">location_on</span> Lives in <strong>${currentUserData.location}</strong></div>`; if(currentUserData.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">home</span> From <strong>${currentUserData.hometown}</strong></div>`; if(currentUserData.relationship) { if((currentUserData.relationship === 'In a relationship' || currentUserData.relationship === 'Married') && currentUserData.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${currentUserData.relationship}</strong> with <strong>${currentUserData.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${currentUserData.relationship}</strong></div>`; } } document.getElementById('profile-details-display').innerHTML = dHtml; }
 function uploadAvatar(input){ const file=input.files[0];if(!file)return; showToast('Uploading profile photo...'); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }).then(res => res.json()).then(async data => { if(data.secure_url) { await db.collection('users').doc(currentUser.uid).set({avatar: data.secure_url},{merge:true}); currentUserData.avatar=data.secure_url; let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); const idx = accounts.findIndex(a => a.email === currentUser.email); if(idx > -1) { accounts[idx].avatar = data.secure_url; localStorage.setItem('savedAccounts', JSON.stringify(accounts)); } loadUserUI(); showToast('Profile photo updated! ✅'); } else { showToast('Upload failed.'); } }).catch(e => showToast('Network error.')); }
-async function viewUserProfile(uid) { if(uid === currentUser.uid) { showPage('profile'); return; } document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-other-profile').classList.add('active'); const snap = await db.collection('users').doc(uid).get(); if(snap.exists) { const data = snap.data(); const name = data.name || 'User'; document.getElementById('other-profile-name').innerHTML = name + getVerifiedBadge(data.email); const isOnline = data.online; document.getElementById('other-profile-status').innerHTML = isOnline ? '<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:8px;">● Active Now</div>' : '<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">Offline</div>'; document.getElementById('other-profile-bio').innerHTML = data.bio || ''; document.getElementById('other-profile-friends-count').innerHTML = (data.friends ? data.friends.length : 0) + ' Friends'; let dHtml = ''; if(data.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">person</span> <strong>${data.gender}</strong></div>`; if(data.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">location_on</span> Lives in <strong>${data.location}</strong></div>`; if(data.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">home</span> From <strong>${data.hometown}</strong></div>`; if(data.relationship) { if((data.relationship === 'In a relationship' || data.relationship === 'Married') && data.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${data.relationship}</strong> with <strong>${data.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${data.relationship}</strong></div>`; } } document.getElementById('other-profile-details').innerHTML = dHtml; const isFriend = currentUserData.friends && currentUserData.friends.includes(uid); if(isFriend) { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Message'; document.getElementById('other-unfriend-btn').style.display = 'inline-block'; document.getElementById('other-unfriend-btn').onclick = () => unfriendUser(uid); } else { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Send Message'; document.getElementById('other-unfriend-btn').style.display = 'none'; } document.getElementById('other-msg-btn').onclick = () => openChatByUid(uid, name, data.avatar||'', isOnline, data.email); } }
+
+// --- অন্য ইউজারের প্রোফাইল পিকচার এবং পোস্ট লোডিং ফিক্স (FIXED) ---
+async function viewUserProfile(uid) { 
+    if(uid === currentUser.uid) { showPage('profile'); return; } 
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-other-profile').classList.add('active'); 
+    const snap = await db.collection('users').doc(uid).get(); 
+    if(snap.exists) { 
+        const data = snap.data(); const name = data.name || 'User'; document.getElementById('other-profile-name').innerHTML = name + getVerifiedBadge(data.email); 
+        
+        // অন্যদের প্রোফাইল ছবি ফিক্স
+        const otherAv = data.avatar ? `<img src="${data.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(name);
+        document.getElementById('other-profile-avatar').innerHTML = otherAv;
+        
+        const isOnline = data.online; document.getElementById('other-profile-status').innerHTML = isOnline ? '<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:8px;">● Active Now</div>' : '<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">Offline</div>'; document.getElementById('other-profile-bio').innerHTML = data.bio || ''; document.getElementById('other-profile-friends-count').innerHTML = (data.friends ? data.friends.length : 0) + ' Friends'; let dHtml = ''; if(data.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">person</span> <strong>${data.gender}</strong></div>`; if(data.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">location_on</span> Lives in <strong>${data.location}</strong></div>`; if(data.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">home</span> From <strong>${data.hometown}</strong></div>`; if(data.relationship) { if((data.relationship === 'In a relationship' || data.relationship === 'Married') && data.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${data.relationship}</strong> with <strong>${data.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${data.relationship}</strong></div>`; } } document.getElementById('other-profile-details').innerHTML = dHtml; const isFriend = currentUserData.friends && currentUserData.friends.includes(uid); if(isFriend) { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Message'; document.getElementById('other-unfriend-btn').style.display = 'inline-block'; document.getElementById('other-unfriend-btn').onclick = () => unfriendUser(uid); } else { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Send Message'; document.getElementById('other-unfriend-btn').style.display = 'none'; } document.getElementById('other-msg-btn').onclick = () => openChatByUid(uid, name, data.avatar||'', isOnline, data.email); 
+        
+        // নির্দিষ্ট এই ইউজারের পোস্টগুলো লোড করার ট্রিগার
+        loadOtherUserPosts(uid);
+    } 
+}
+
+async function loadOtherUserPosts(uid) {
+    const list = document.getElementById('other-user-posts-list');
+    list.innerHTML = '<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>';
+    const snap = await db.collection('posts').where('uid', '==', uid).get();
+    let posts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const now = Date.now();
+    posts = posts.filter(p => { if(!p.expiresAt) return true; const expMs = p.expiresAt.toMillis ? p.expiresAt.toMillis() : new Date(p.expiresAt).getTime(); return expMs > now; });
+    posts.sort((a,b) => {
+        let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : 0;
+        let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : 0;
+        return tb - ta;
+    });
+    if(posts.length === 0) { list.innerHTML = '<div class="empty-feed">No posts yet</div>'; return; }
+    list.innerHTML = posts.map(p => {
+        return `<div class="post-card">
+            <div class="post-header">
+                <div class="post-name">${p.title ? p.title : 'Photo post'}</div>
+                <div class="post-time">${timeAgo(p.createdAt)}</div>
+            </div>
+            ${p.imgUrl ? `<img class="post-img" src="${p.imgUrl}" style="max-height:180px;">` : ''}
+        </div>`;
+    }).join('');
+}
+
 async function unfriendUser(uid) { if(!confirm('Unfriend?')) return; await db.collection('users').doc(currentUser.uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(uid) }); await db.collection('users').doc(uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) }); if(currentUserData.friends) currentUserData.friends = currentUserData.friends.filter(id => id !== uid); showToast('Unfriended!'); viewUserProfile(uid); }
 async function deletePost(postId){if(!confirm('Delete post?'))return;await db.collection('posts').doc(postId).delete();showToast('Deleted.');}
 async function cleanupExpiredPosts(){const snap=await db.collection('posts').get();const now=Date.now();snap.forEach(d=>{const exp=d.data().expiresAt; if(exp && (exp.toMillis?exp.toMillis():new Date(exp).getTime())<now) d.ref.delete();});} setInterval(cleanupExpiredPosts,5*60000);
@@ -463,7 +481,6 @@ async function loadMessages(){ const list=document.getElementById('msg-list');li
 function openChatByUid(uid,name,avatar,isOnline=false,email=''){openChatById([currentUser.uid,uid].sort().join('_'),uid,name,avatar,isOnline,email);}
 async function unsendMessage(msgId) { if(!confirm('Remove message?')) return; await db.collection('chats').doc(currentChatId).collection('messages').doc(msgId).delete(); }
 function openChatById(chatId,otherUid,otherName,otherAvatar,isOnline=false,email=''){ currentChatId=chatId;currentChatUser={uid:otherUid,name:otherName,avatar:otherAvatar}; const vBadge = getVerifiedBadge(email); document.getElementById('chat-name-display').innerHTML=`<div style="font-size:16px;">${otherName} ${vBadge}</div>${isOnline?'<div style="font-size:11px;color:var(--success);font-weight:normal;">Active Now</div>':''}`; const av=document.getElementById('chat-avatar'); const dot = isOnline ? '<div class="online-dot" style="bottom:-2px;right:-2px;"></div>' : ''; av.innerHTML = (otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName)) + dot; document.getElementById('chat-screen').classList.add('open'); document.getElementById('chat-messages').innerHTML='<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; if(chatUnsub)chatUnsub(); chatUnsub=db.collection('chats').doc(chatId).collection('messages').orderBy('createdAt','asc').onSnapshot(snap=>{ const msgs=snap.docs; let unreadDocs = []; let html = msgs.length === 0 ? '<div style="text-align:center;color:var(--muted);padding:40px;font-size:13px;">Send the first message!</div>' : msgs.map(d=>{ const m=d.data(); const mine=m.uid===currentUser.uid; if(!mine && m.read===false) unreadDocs.push(d.ref); let seenStatus = ''; if(mine) { seenStatus = m.read ? '<span style="color:#0084ff;font-size:14px;font-weight:bold;">✓✓</span>' : '<span style="color:var(--muted);font-size:14px;font-weight:bold;">✓</span>'; } const unsendBtn = mine ? `<button class="unsend-btn" onclick="unsendMessage('${d.id}')"><span class="material-symbols-outlined" style="font-size:14px;">delete</span> Unsend</button>` : ''; const displayContent = m.imgUrl ? `<img src="${m.imgUrl}" style="max-width:200px; border-radius:8px; display:block;">` : m.text; const bubbleStyle = m.imgUrl ? 'padding:4px; background:var(--surface);' : ''; return `<div style="display:flex;flex-direction:column;align-items:${mine?'flex-end':'flex-start'};"><div class="chat-bubble ${mine?'mine':'theirs'}" style="${bubbleStyle}">${displayContent}</div><div style="align-self:${mine?'flex-end':'flex-start'};color:var(--muted);font-size:10px;margin-top:2px;display:flex;gap:4px;align-items:center;">${timeAgo(m.createdAt)} ${seenStatus}${unsendBtn}</div></div>`; }).join(''); document.getElementById('chat-messages').innerHTML = html; const cm=document.getElementById('chat-messages');cm.scrollTop=cm.scrollHeight; if(unreadDocs.length > 0) { unreadDocs.forEach(ref => ref.update({read: true})); } }); }
-function closeChat(){document.getElementById('chat-screen').classList.remove('open');if(chatUnsub)chatUnsub();loadMessages();}
 async function sendMsg(){ const input=document.getElementById('chat-input');const text=input.value.trim(); if(!text||!currentChatId)return; input.value=''; await db.collection('chats').doc(currentChatId).collection('messages').add({uid:currentUser.uid,text,read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); await db.collection('chats').doc(currentChatId).set({lastMsg:text,lastAt:firebase.firestore.FieldValue.serverTimestamp(),names:{[currentUser.uid]:currentUserData.name||currentUser.displayName,[currentChatUser.uid]:currentChatUser.name},avatars:{[currentUser.uid]:currentUserData.avatar||'',[currentChatUser.uid]:currentChatUser.avatar||''}},{merge:true}); }
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
 async function sendChatImage(input) { const file = input.files[0]; if (!file || !currentChatId) return; showToast('Uploading photo...'); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); try { const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }); const data = await res.json(); if(data.secure_url) { await db.collection('chats').doc(currentChatId).collection('messages').add({ uid: currentUser.uid, text: '📷 Photo', imgUrl: data.secure_url, read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); await db.collection('chats').doc(currentChatId).set({ lastMsg: '📷 Photo', lastAt: firebase.firestore.FieldValue.serverTimestamp(), names: {[currentUser.uid]: currentUserData.name, [currentChatUser.uid]: currentChatUser.name}, avatars: {[currentUser.uid]: currentUserData.avatar||'', [currentChatUser.uid]: currentChatUser.avatar||''} }, {merge: true}); showToast('Photo sent! ✅'); } else { console.error("Cloudinary Error:", data); showToast('Upload failed'); } } catch (e) { showToast('Network error!'); } input.value = ''; }

@@ -492,40 +492,70 @@ async function sendChatImage(input) { const file = input.files[0]; if (!file || 
   // ==========================================
 // Multi-Language System (Dictionary & Logic)
 // ==========================================
+// ==========================================
+// Multi-Language System (Dictionary & Logic)
+// ==========================================
 const appTranslations = {
-    en: { post: "Post Title / Text...", comment: "Write a comment...", },
-    bn: { post: "পোস্টের বিস্তারিত লিখুন...", comment: "কমেন্ট লিখুন...", },
-    hi: { post: "पोस्ट का विवरण लिखें...", comment: "एक टिप्पणी लिखें...", },
-    ur: { post: "پوسٹ کی تفصیلات لکھیں...", comment: "ایک تبصرہ لکھیں...", },
-    ar: { post: "اكتب تفاصيل المنشور...", comment: "اكتب تعليقًا...", }
+    en: { post: "Post Title / Text...", comment: "Write a comment...", dark: "Dark mode", switch: "Switch account", logout: "Log out", notif: "NOTIFICATIONS", search: "Search by name..." },
+    bn: { post: "পোস্টের বিস্তারিত লিখুন...", comment: "কমেন্ট লিখুন...", dark: "ডার্ক মোড", switch: "অ্যাকাউন্ট পরিবর্তন", logout: "লগ আউট", notif: "নোটিফিকেশনস", search: "নাম দিয়ে খুঁজুন..." },
+    hi: { post: "पोस्ट का विवरण लिखें...", comment: "एक टिप्पणी लिखें...", dark: "डार्क मोड", switch: "खाता बदलें", logout: "लॉग आउट", notif: "सूचनाएं", search: "नाम से खोजें..." },
+    ur: { post: "پوسٹ کی تفصیلات لکھیں...", comment: "ایک تبصرہ لکھیں...", dark: "ڈارک موڈ", switch: "اکاؤنٹ تبدیل کریں", logout: "لاگ آؤٹ", notif: "اطلاعات", search: "نام سے تلاش کریں..." },
+    ar: { post: "اكتب تفاصيل المنشور...", comment: "اكتب تعليقًا...", dark: "الوضع المظلم", switch: "تبديل الحساب", logout: "تسجيل خروج", notif: "إشعارات", search: "البحث بالاسم..." }
 };
 
 function changeLanguage() {
     const lang = document.getElementById('app-language').value;
-    localStorage.setItem('goChatLang', lang); // ব্রাউজারে সেভ করে রাখা
+    localStorage.setItem('goChatLang', lang);
     applyLanguage(lang);
 }
 
 function applyLanguage(lang) {
-    // ১. উর্দু এবং আরবির জন্য ডান দিক থেকে বাম দিকে (RTL) করা
+    // ১. দিক পরিবর্তন (RTL / LTR)
     if(lang === 'ur' || lang === 'ar') {
         document.body.style.direction = "rtl";
     } else {
         document.body.style.direction = "ltr";
     }
 
-    // ২. সিলেক্ট করা ভাষা অনুযায়ী ইনপুট বক্সের লেখাগুলো পরিবর্তন করা
+    // ২. মেনুর লেখাগুলো পরিবর্তন
+    const t = appTranslations[lang];
+    
+    // ইনপুট বক্স
     const postInput = document.getElementById('post-title');
-    if(postInput) postInput.placeholder = appTranslations[lang].post;
+    if(postInput) postInput.placeholder = t.post;
+    
+    const searchInput = document.getElementById('search-input');
+    if(searchInput) searchInput.placeholder = t.search;
 
-    // ড্রপডাউনে সঠিক ভাষাটি সিলেক্ট করে রাখা
+    // সেটিংস মেনু (আপনার HTML-এ এই লেখাগুলো যে লাইনে আছে, সেগুলোকে আইডি দিয়ে ধরতে হবে)
+    // এর জন্য আমরা HTML-এর ভেতরে সরাসরি পরিবর্তন না করে, জাভাস্ক্রিপ্ট দিয়েই টেক্সট বদলে দিচ্ছি।
+    const settingsItems = document.querySelectorAll('.setting-item');
+    if(settingsItems.length >= 4) {
+        // Dark mode (১ম আইটেম)
+        settingsItems[0].childNodes[1].nodeValue = " " + t.dark;
+        // Switch account (৩য় আইটেম)
+        settingsItems[2].childNodes[1].nodeValue = " " + t.switch;
+        // Log out (৪র্থ আইটেম)
+        settingsItems[3].childNodes[1].nodeValue = " " + t.logout;
+    }
+
+    // নোটিফিকেশন টাইটেল
+    const sectionTitles = document.querySelectorAll('.section-title');
+    if(sectionTitles.length > 0) {
+        sectionTitles.forEach(title => {
+            if(title.textContent.trim().toUpperCase() === "NOTIFICATIONS" || title.textContent.trim() === "নোটিফিকেশনস" || title.textContent.trim() === "सूचनाएं" || title.textContent.trim() === "اطلاعات" || title.textContent.trim() === "إشعارات") {
+                title.textContent = t.notif;
+            }
+        });
+    }
+
+    // ড্রপডাউনে ভাষা সিলেক্ট করা রাখা
     const langSelect = document.getElementById('app-language');
     if(langSelect) langSelect.value = lang;
 }
 
-// অ্যাপ ওপেন হওয়ার সাথে সাথে সেভ করা ভাষা চালু করা
 window.addEventListener('load', () => {
-    const savedLang = localStorage.getItem('goChatLang') || 'en'; // ডিফল্ট ইংরেজি
+    const savedLang = localStorage.getItem('goChatLang') || 'en';
     applyLanguage(savedLang);
 });
 </script>

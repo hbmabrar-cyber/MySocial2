@@ -484,35 +484,67 @@ async function sendMsg(){ const input=document.getElementById('chat-input');cons
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
 async function sendChatImage(input) { const file = input.files[0]; if (!file || !currentChatId) return; showToast('Uploading photo...'); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); try { const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }); const data = await res.json(); if(data.secure_url) { await db.collection('chats').doc(currentChatId).collection('messages').add({ uid: currentUser.uid, text: '📷 Photo', imgUrl: data.secure_url, read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); await db.collection('chats').doc(currentChatId).set({ lastMsg: '📷 Photo', lastAt: firebase.firestore.FieldValue.serverTimestamp(), names: {[currentUser.uid]: currentUserData.name, [currentChatUser.uid]: currentChatUser.name}, avatars: {[currentUser.uid]: currentUserData.avatar||'', [currentChatUser.uid]: currentChatUser.avatar||''} }, {merge: true}); showToast('Photo sent! ✅'); } else { console.error("Cloudinary Error:", data); showToast('Upload failed'); } } catch (e) { showToast('Network error!'); } input.value = ''; }  
   // ==========================================
-// Post Share System (Web Share API)
+// Custom Share Menu System (Updated with Messenger & GoChat)
 // ==========================================
-async function sharePost(postId) {
-    // আপনার অ্যাপের বর্তমান লিংক
-    const appUrl = window.location.href.split('?')[0]; 
-    const shareUrl = appUrl; // ভবিষ্যতে ডাইরেক্ট লিংক করতে চাইলে এখানে ?post=postId যুক্ত করা যাবে
+let currentShareUrl = '';
 
-    const shareData = {
-        title: 'GoChat',
-        text: 'আমার GoChat-এর এই দারুণ পোস্টটি দেখুন! ✨\n',
-        url: shareUrl
-    };
+// ডায়নামিক শেয়ার মেনু তৈরি
+const shareModalDiv = document.createElement('div');
+shareModalDiv.id = 'custom-share-modal';
+shareModalDiv.style.cssText = 'display:none; justify-content:center; align-items:center; z-index:9999; background:rgba(0,0,0,0.6); position:fixed; top:0; left:0; right:0; bottom:0; padding:20px;';
+shareModalDiv.innerHTML = `
+    <div style="background:var(--surface); padding:25px; border-radius:15px; width:100%; max-width:340px; text-align:center; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+        <h3 style="margin-top:0; margin-bottom:20px; color:var(--text); font-family:inherit; font-size: 18px;">কোথায় শেয়ার করবেন?</h3>
+        <div style="display:flex; justify-content:space-around; align-items:center; margin-bottom:25px; flex-wrap:wrap; gap:10px;">
+            <button onclick="shareToApp('facebook')" style="background:#1877F2; color:#fff; border:none; border-radius:50%; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">FB</button>
+            <button onclick="shareToApp('messenger')" style="background:#00B2FF; color:#fff; border:none; border-radius:50%; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:11px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">MSG</button>
+            <button onclick="shareToApp('whatsapp')" style="background:#25D366; color:#fff; border:none; border-radius:50%; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">WA</button>
+            <button onclick="shareToApp('gochat')" style="background:var(--accent); color:#fff; border:none; border-radius:50%; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:10px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">GoChat</button>
+            <button onclick="shareToApp('copy')" style="background:#6c757d; color:#fff; border:none; border-radius:50%; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">Copy</button>
+        </div>
+        <button onclick="closeShareMenu()" style="background:var(--danger); color:#fff; border:none; padding:10px 30px; border-radius:25px; cursor:pointer; font-size:14px; font-weight:bold;">বাতিল করুন</button>
+    </div>
+`;
+document.body.appendChild(shareModalDiv);
 
-    // মোবাইল ব্রাউজার হলে ডিফল্ট শেয়ার মেনু ওপেন হবে
-    if (navigator.share) {
-        try {
-            await navigator.share(shareData);
-        } catch (error) {
-            console.log('শেয়ার করা বাতিল হয়েছে', error);
+function sharePost(postId) {
+    currentShareUrl = window.location.href.split('?')[0]; 
+    document.getElementById('custom-share-modal').style.display = 'flex';
+}
+
+function closeShareMenu() {
+    document.getElementById('custom-share-modal').style.display = 'none';
+}
+
+function shareToApp(platform) {
+    const text = "আমার GoChat-এর এই দারুণ পোস্টটি দেখুন! ✨";
+    const url = encodeURIComponent(currentShareUrl);
+    const textEncoded = encodeURIComponent(text);
+
+    if(platform === 'facebook') {
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    } else if(platform === 'messenger') {
+        // মোবাইলে মেসেঞ্জার অ্যাপ ওপেন করার লিংক
+        window.open(`fb-messenger://share/?link=${url}`, '_blank');
+    } else if(platform === 'whatsapp') {
+        window.open(`https://api.whatsapp.com/send?text=${textEncoded} ${url}`, '_blank');
+    } else if(platform === 'gochat') {
+        // GoChat মেসেজে শেয়ার করার জন্য কপি লজিক
+        navigator.clipboard.writeText(currentShareUrl);
+        if(typeof showToast === 'function') {
+            showToast('লিংক কপি হয়েছে! চ্যাটে গিয়ে পেস্ট করুন।'); 
+        } else {
+            alert('লিংক কপি হয়েছে! চ্যাটে গিয়ে পেস্ট করুন।');
         }
-    } else {
-        // পিসি বা সাপোর্ট না করা ব্রাউজার হলে শুধু লিংক কপি হবে
-        navigator.clipboard.writeText(shareUrl);
+    } else if(platform === 'copy') {
+        navigator.clipboard.writeText(currentShareUrl);
         if(typeof showToast === 'function') {
             showToast('লিংক কপি করা হয়েছে!'); 
         } else {
             alert('লিংক কপি করা হয়েছে!');
         }
     }
+    closeShareMenu();
 }
 </script>
 </body>

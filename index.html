@@ -489,15 +489,16 @@ async function sendChatImage(input) { const file = input.files[0]; if (!file || 
 
 </script>
   <script>
-// আইকন এবং লোগোকে অনুবাদের হাত থেকে বাঁচানোর শিল্ড
+// আইকন, লোগো এবং ইউজারের পোস্ট/মেসেজকে অনুবাদের হাত থেকে বাঁচানোর শিল্ড
 const protectIcons = new MutationObserver(() => {
-    document.querySelectorAll('.material-symbols-outlined, .topbar-logo').forEach(el => {
+    document.querySelectorAll('.material-symbols-outlined, .topbar-logo, .auth-logo, .post-name, .post-text, .chat-bubble, .comment-item, .profile-name, .chat-name').forEach(el => {
         el.setAttribute('translate', 'no');
         el.classList.add('notranslate');
     });
 });
 protectIcons.observe(document.body, { childList: true, subtree: true });
   </script>
+  
   
   <script type="text/javascript">
 function googleTranslateElementInit() {

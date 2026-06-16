@@ -181,7 +181,7 @@ body {
       </div>
       <div id="compose-img-preview" style="padding-left:52px; margin-top:10px; display:none;"><img id="compose-preview-img" src="" style="max-width:200px; max-height:150px; border-radius:10px;"></div>
     </div>
-    <div class="timer-info"><span class="material-symbols-outlined" style="font-size:16px;">timer</span> Posts will be deleted after 5 hours</div>
+    
     <div id="feed-loading" class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>
     <div id="feed-list"></div>
   </div>
@@ -464,7 +464,8 @@ async function loadOtherUserPosts(uid) {
         return `<div class="post-card">
             <div class="post-header">
                 <div class="post-name">${p.title ? p.title : 'Photo post'}</div>
-                <div class="post-time">${timeAgo(p.createdAt)}</div>
+                <div class="post-time">${getRelativeTime(p.createdAt)}</div>
+  
             </div>
             ${p.imgUrl ? `<img class="post-img" src="${p.imgUrl}" style="max-height:180px;">` : ''}
         </div>`;
@@ -545,6 +546,26 @@ function shareToApp(platform) {
         }
     }
     closeShareMenu();
+}
+  // ==========================================
+// Advanced Time-Ago System
+// ==========================================
+function getRelativeTime(timestamp) {
+    if (!timestamp) return "এইমাত্র";
+    const now = new Date();
+    const past = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const diffInSeconds = Math.floor((now - past) / 1000);
+
+    if (diffInSeconds < 60) return "এইমাত্র";
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return diffInMinutes + " মিনিট আগে";
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return diffInHours + " ঘণ্টা আগে";
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 30) return diffInDays + " দিন আগে";
+    const diffInMonths = Math.floor(diffInDays / 30);
+    if (diffInMonths < 12) return diffInMonths + " মাস আগে";
+    return Math.floor(diffInMonths / 12) + " বছর আগে";
 }
 </script>
 </body>

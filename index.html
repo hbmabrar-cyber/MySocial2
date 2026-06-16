@@ -115,6 +115,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .notif-icon-wrap{width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;}
 .notif-text{font-size:13px; line-height:1.4;}
 .notif-text strong{color:var(--text); font-weight:700;}
+  /* Smoothness & 90Hz Optimization */
+body {
+    touch-action: manipulation;
+}
+.nav-item, .post-card, .chat-bubble {
+    will-change: transform;
+}
+  
 </style>
 </head>
 <body>

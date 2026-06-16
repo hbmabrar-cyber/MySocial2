@@ -302,7 +302,46 @@ const auth=firebase.auth(); const db=firebase.firestore();
 let currentUser=null,currentUserData=null,currentChatId=null,currentChatUser=null,feedUnsub=null,chatUnsub=null,notifUnsub=null;
 window.tempLoginPass = null; 
 let chatCounters = {}; 
+// ==========================================
+// Multi-Language System (Dictionary & Logic)
+// ==========================================
+const appTranslations = {
+    en: { post: "Post Title / Text...", comment: "Write a comment...", },
+    bn: { post: "পোস্টের বিস্তারিত লিখুন...", comment: "কমেন্ট লিখুন...", },
+    hi: { post: "पोस्ट का विवरण लिखें...", comment: "एक टिप्पणी लिखें...", },
+    ur: { post: "پوسٹ کی تفصیلات لکھیں...", comment: "ایک تبصرہ لکھیں...", },
+    ar: { post: "اكتب تفاصيل المنشور...", comment: "اكتب تعليقًا...", }
+};
 
+function changeLanguage() {
+    const lang = document.getElementById('app-language').value;
+    localStorage.setItem('goChatLang', lang); // ব্রাউজারে সেভ করে রাখা
+    applyLanguage(lang);
+}
+
+function applyLanguage(lang) {
+    // ১. উর্দু এবং আরবির জন্য ডান দিক থেকে বাম দিকে (RTL) করা
+    if(lang === 'ur' || lang === 'ar') {
+        document.body.style.direction = "rtl";
+    } else {
+        document.body.style.direction = "ltr";
+    }
+
+    // ২. সিলেক্ট করা ভাষা অনুযায়ী ইনপুট বক্সের লেখাগুলো পরিবর্তন করা
+    const postInput = document.getElementById('post-title');
+    if(postInput) postInput.placeholder = appTranslations[lang].post;
+
+    // ড্রপডাউনে সঠিক ভাষাটি সিলেক্ট করে রাখা
+    const langSelect = document.getElementById('app-language');
+    if(langSelect) langSelect.value = lang;
+}
+
+// অ্যাপ ওপেন হওয়ার সাথে সাথে সেভ করা ভাষা চালু করা
+window.addEventListener('load', () => {
+    const savedLang = localStorage.getItem('goChatLang') || 'en'; // ডিফল্ট ইংরেজি
+    applyLanguage(savedLang);
+});
+  
 if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
 function toggleDarkMode() { document.body.classList.toggle('light-mode'); localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark'); }
 function toggleSettingsMenu() { document.getElementById('settings-menu').classList.toggle('open'); }

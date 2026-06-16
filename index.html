@@ -122,6 +122,8 @@ body {
 .nav-item, .post-card, .chat-bubble {
     will-change: transform;
 }
+  body { top: 0 !important; }
+.skiptranslate iframe { display: none !important; }
   
 </style>
 </head>
@@ -156,16 +158,11 @@ body {
       <span class="material-symbols-outlined">settings</span>
       <div class="settings-menu" id="settings-menu">
         <div class="setting-item" onclick="toggleDarkMode()"><span class="material-symbols-outlined">dark_mode</span> Dark mode</div>
-        <div class="setting-item" onclick="event.stopPropagation()">
+        <div class="setting-item">
     <span class="material-symbols-outlined">language</span>
-    <select id="app-language" onchange="changeLanguage()" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()" style="background:transparent; color:var(--text); border:none; outline:none; font-size:16px; width:100%; cursor:pointer; margin-left:10px; font-family: inherit; appearance: auto;">
-        <option value="en" style="color:#000;">English</option>
-        <option value="bn" style="color:#000;">বাংলা</option>
-        <option value="hi" style="color:#000;">हिंदी</option>
-        <option value="ur" style="color:#000;">اردو</option>
-        <option value="ar" style="color:#000;">العربية</option>
-    </select>
+    <div id="google_translate_element" style="margin-left:10px; overflow:hidden;"></div>
         </div>
+        
         
       
         <div class="setting-item" onclick="openSwitchAccountModal()"><span class="material-symbols-outlined">swap_horiz</span> Switch account</div>
@@ -489,72 +486,17 @@ function closeChat(){document.getElementById('chat-screen').classList.remove('op
 async function sendMsg(){ const input=document.getElementById('chat-input');const text=input.value.trim(); if(!text||!currentChatId)return; input.value=''; await db.collection('chats').doc(currentChatId).collection('messages').add({uid:currentUser.uid,text,read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); await db.collection('chats').doc(currentChatId).set({lastMsg:text,lastAt:firebase.firestore.FieldValue.serverTimestamp(),names:{[currentUser.uid]:currentUserData.name||currentUser.displayName,[currentChatUser.uid]:currentChatUser.name},avatars:{[currentUser.uid]:currentUserData.avatar||'',[currentChatUser.uid]:currentChatUser.avatar||''}},{merge:true}); }
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
 async function sendChatImage(input) { const file = input.files[0]; if (!file || !currentChatId) return; showToast('Uploading photo...'); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); try { const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }); const data = await res.json(); if(data.secure_url) { await db.collection('chats').doc(currentChatId).collection('messages').add({ uid: currentUser.uid, text: '📷 Photo', imgUrl: data.secure_url, read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); await db.collection('chats').doc(currentChatId).set({ lastMsg: '📷 Photo', lastAt: firebase.firestore.FieldValue.serverTimestamp(), names: {[currentUser.uid]: currentUserData.name, [currentChatUser.uid]: currentChatUser.name}, avatars: {[currentUser.uid]: currentUserData.avatar||'', [currentChatUser.uid]: currentChatUser.avatar||''} }, {merge: true}); showToast('Photo sent! ✅'); } else { console.error("Cloudinary Error:", data); showToast('Upload failed'); } } catch (e) { showToast('Network error!'); } input.value = ''; }
-// ==========================================
-// Multi-Language System (Dictionary & Logic)
-// ==========================================
-const appTranslations = {
-    en: { post: "Post Title / Text...", comment: "Write a comment...", dark: "Dark mode", switch: "Switch account", logout: "Log out", notif: "NOTIFICATIONS", search: "Search by name..." },
-    bn: { post: "পোস্টের বিস্তারিত লিখুন...", comment: "কমেন্ট লিখুন...", dark: "ডার্ক মোড", switch: "অ্যাকাউন্ট পরিবর্তন", logout: "লগ আউট", notif: "নোটিফিকেশনস", search: "নাম দিয়ে খুঁজুন..." },
-    hi: { post: "पोस्ट का विवरण लिखें...", comment: "एक टिप्पणी लिखें...", dark: "डार्क मोड", switch: "खाता बदलें", logout: "लॉग आउट", notif: "सूचनाएं", search: "नाम से खोजें..." },
-    ur: { post: "پوسٹ کی تفصیلات لکھیں...", comment: "ایک تبصرہ لکھیں...", dark: "ڈارک موڈ", switch: "اکاؤنٹ تبدیل کریں", logout: "لاگ آؤٹ", notif: "اطلاعات", search: "نام سے تلاش کریں..." },
-    ar: { post: "اكتب تفاصيل المنشور...", comment: "اكتب تعليقًا...", dark: "الوضع المظلم", switch: "تبديل الحساب", logout: "تسجيل خروج", notif: "إشعارات", search: "البحث بالاسم..." }
-};
 
-function changeLanguage() {
-    const lang = document.getElementById('app-language').value;
-    localStorage.setItem('goChatLang', lang);
-    applyLanguage(lang);
-}
-
-function applyLanguage(lang) {
-    // ১. দিক পরিবর্তন (RTL / LTR)
-    if(lang === 'ur' || lang === 'ar') {
-        document.body.style.direction = "rtl";
-    } else {
-        document.body.style.direction = "ltr";
-    }
-
-    // ২. মেনুর লেখাগুলো পরিবর্তন
-    const t = appTranslations[lang];
-    
-    // ইনপুট বক্স
-    const postInput = document.getElementById('post-title');
-    if(postInput) postInput.placeholder = t.post;
-    
-    const searchInput = document.getElementById('search-input');
-    if(searchInput) searchInput.placeholder = t.search;
-
-    // সেটিংস মেনু (আপনার HTML-এ এই লেখাগুলো যে লাইনে আছে, সেগুলোকে আইডি দিয়ে ধরতে হবে)
-    // এর জন্য আমরা HTML-এর ভেতরে সরাসরি পরিবর্তন না করে, জাভাস্ক্রিপ্ট দিয়েই টেক্সট বদলে দিচ্ছি।
-    const settingsItems = document.querySelectorAll('.setting-item');
-    if(settingsItems.length >= 4) {
-        // Dark mode (১ম আইটেম)
-        settingsItems[0].childNodes[1].nodeValue = " " + t.dark;
-        // Switch account (৩য় আইটেম)
-        settingsItems[2].childNodes[1].nodeValue = " " + t.switch;
-        // Log out (৪র্থ আইটেম)
-        settingsItems[3].childNodes[1].nodeValue = " " + t.logout;
-    }
-
-    // নোটিফিকেশন টাইটেল
-    const sectionTitles = document.querySelectorAll('.section-title');
-    if(sectionTitles.length > 0) {
-        sectionTitles.forEach(title => {
-            if(title.textContent.trim().toUpperCase() === "NOTIFICATIONS" || title.textContent.trim() === "নোটিফিকেশনস" || title.textContent.trim() === "सूचनाएं" || title.textContent.trim() === "اطلاعات" || title.textContent.trim() === "إشعارات") {
-                title.textContent = t.notif;
-            }
-        });
-    }
-
-    // ড্রপডাউনে ভাষা সিলেক্ট করা রাখা
-    const langSelect = document.getElementById('app-language');
-    if(langSelect) langSelect.value = lang;
-}
-
-window.addEventListener('load', () => {
-    const savedLang = localStorage.getItem('goChatLang') || 'en';
-    applyLanguage(savedLang);
-});
 </script>
+  <script type="text/javascript">
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'en', 
+        includedLanguages: 'bn,en,hi,ur,ar', 
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+    }, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>

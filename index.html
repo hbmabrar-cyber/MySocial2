@@ -494,7 +494,7 @@ shareModalDiv.id = 'custom-share-modal';
 shareModalDiv.style.cssText = 'display:none; justify-content:center; align-items:center; z-index:9999; background:rgba(0,0,0,0.6); position:fixed; top:0; left:0; right:0; bottom:0; padding:20px;';
 shareModalDiv.innerHTML = `
     <div style="background:var(--surface); padding:25px; border-radius:15px; width:100%; max-width:340px; text-align:center; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
-        <h3 style="margin-top:0; margin-bottom:20px; color:var(--text); font-family:inherit; font-size: 18px;">কোথায় শেয়ার করবেন?</h3>
+        <h3 style="margin-top:0; margin-bottom:20px; color:var(--text); font-family:inherit; font-size: 18px;">Choose the platform!</h3>
         <div style="display:flex; justify-content:space-around; align-items:center; margin-bottom:25px; flex-wrap:wrap; gap:10px;">
             <button onclick="shareToApp('facebook')" style="background:#1877F2; color:#fff; border:none; border-radius:50%; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">FB</button>
             <button onclick="shareToApp('messenger')" style="background:#00B2FF; color:#fff; border:none; border-radius:50%; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:11px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">MSG</button>
@@ -502,7 +502,7 @@ shareModalDiv.innerHTML = `
             <button onclick="shareToApp('gochat')" style="background:var(--accent); color:#fff; border:none; border-radius:50%; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:10px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">GoChat</button>
             <button onclick="shareToApp('copy')" style="background:#6c757d; color:#fff; border:none; border-radius:50%; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">Copy</button>
         </div>
-        <button onclick="closeShareMenu()" style="background:var(--danger); color:#fff; border:none; padding:10px 30px; border-radius:25px; cursor:pointer; font-size:14px; font-weight:bold;">বাতিল করুন</button>
+        <button onclick="closeShareMenu()" style="background:var(--danger); color:#fff; border:none; padding:10px 30px; border-radius:25px; cursor:pointer; font-size:14px; font-weight:bold;">Cancel</button>
     </div>
 `;
 document.body.appendChild(shareModalDiv);
@@ -517,7 +517,7 @@ function closeShareMenu() {
 }
 
 function shareToApp(platform) {
-    const text = "আমার GoChat-এর এই দারুণ পোস্টটি দেখুন! ✨";
+    const text = "GoChat-see-this-post! ✨";
     const url = encodeURIComponent(currentShareUrl);
     const textEncoded = encodeURIComponent(text);
 
@@ -532,16 +532,16 @@ function shareToApp(platform) {
         // GoChat মেসেজে শেয়ার করার জন্য কপি লজিক
         navigator.clipboard.writeText(currentShareUrl);
         if(typeof showToast === 'function') {
-            showToast('লিংক কপি হয়েছে! চ্যাটে গিয়ে পেস্ট করুন।'); 
+            showToast('Link copied! Share your friends.'); 
         } else {
-            alert('লিংক কপি হয়েছে! চ্যাটে গিয়ে পেস্ট করুন।');
+            alert('Link copied! Share your friends।');
         }
     } else if(platform === 'copy') {
         navigator.clipboard.writeText(currentShareUrl);
         if(typeof showToast === 'function') {
-            showToast('লিংক কপি করা হয়েছে!'); 
+            showToast('Link copied!'); 
         } else {
-            alert('লিংক কপি করা হয়েছে!');
+            alert('Link copied!');
         }
     }
     closeShareMenu();

@@ -651,6 +651,7 @@ async function loadMessages(){ const list=document.getElementById('msg-list');li
 
 function openChatByUid(uid,name,avatar,isOnline=false,email=''){openChatById([currentUser.uid,uid].sort().join('_'),uid,name,avatar,isOnline,email);}
 async function unsendMessage(msgId) { if(!confirm('Remove message?')) return; await db.collection('chats').doc(currentChatId).collection('messages').doc(msgId).delete(); }
+        let amIBlockedByCurrent = false;
 
 function updateChatBlockUI() {
     let blocked = currentUserData.blockedUsers || [];
@@ -660,13 +661,18 @@ function updateChatBlockUI() {
     if(isBlocked) {
         document.getElementById('chat-input-area').style.display = 'none';
         document.getElementById('chat-blocked-area').style.display = 'block';
+        document.getElementById('chat-blocked-area').innerHTML = 'You blocked this user. <span style="color:var(--accent); cursor:pointer; margin-left:5px;" onclick="toggleBlockUser()">Unblock</span>';
+    } else if (amIBlockedByCurrent) {
+        document.getElementById('chat-input-area').style.display = 'none';
+        document.getElementById('chat-blocked-area').style.display = 'block';
+        document.getElementById('chat-blocked-area').innerHTML = 'You cannot reply to this conversation.';
     } else {
         document.getElementById('chat-input-area').style.display = 'flex';
         document.getElementById('chat-blocked-area').style.display = 'none';
     }
 }
 
-function openChatById(chatId,otherUid,otherName,otherAvatar,isOnline=false,email=''){ 
+async function openChatById(chatId,otherUid,otherName,otherAvatar,isOnline=false,email=''){ 
     currentChatId=chatId;currentChatUser={uid:otherUid,name:otherName,avatar:otherAvatar}; 
     const vBadge = getVerifiedBadge(email); 
     document.getElementById('chat-name-display').innerHTML=`<div style="font-size:16px;">${otherName} ${vBadge}</div>${isOnline?'<div style="font-size:11px;color:var(--success);font-weight:normal;">Active Now</div>':''}`; 
@@ -676,6 +682,9 @@ function openChatById(chatId,otherUid,otherName,otherAvatar,isOnline=false,email
     let muted = currentUserData.mutedChats || [];
     document.getElementById('mute-text').textContent = muted.includes(chatId) ? 'Unmute' : 'Mute';
     
+    const snap = await db.collection('users').doc(otherUid).get();
+    amIBlockedByCurrent = snap.exists ? (snap.data().blockedUsers || []).includes(currentUser.uid) : false;
+
     updateChatBlockUI(); 
     
     document.getElementById('chat-screen').classList.add('open'); 
@@ -724,6 +733,11 @@ async function sendMsg(){
     let blocked = currentUserData.blockedUsers || [];
     if(blocked.includes(currentChatUser.uid)) { showToast("You can't send messages to blocked users."); return; }
     
+    const snap = await db.collection('users').doc(currentChatUser.uid).get();
+    if(snap.exists && (snap.data().blockedUsers || []).includes(currentUser.uid)) {
+        amIBlockedByCurrent = true; updateChatBlockUI(); showToast("Message failed."); return;
+    }
+
     const input=document.getElementById('chat-input');const text=input.value.trim(); if(!text||!currentChatId)return; input.value=''; 
     await db.collection('chats').doc(currentChatId).collection('messages').add({uid:currentUser.uid,text,read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); 
     await db.collection('chats').doc(currentChatId).set({lastMsg:text,lastAt:firebase.firestore.FieldValue.serverTimestamp(),names:{[currentUser.uid]:currentUserData.name||currentUser.displayName,[currentChatUser.uid]:currentChatUser.name},avatars:{[currentUser.uid]:currentUserData.avatar||'',[currentChatUser.uid]:currentChatUser.avatar||''}},{merge:true}); 
@@ -733,6 +747,11 @@ async function sendChatImage(input) {
     let blocked = currentUserData.blockedUsers || [];
     if(blocked.includes(currentChatUser.uid)) { showToast("You can't send photos to blocked users."); return; }
     
+    const snap = await db.collection('users').doc(currentChatUser.uid).get();
+    if(snap.exists && (snap.data().blockedUsers || []).includes(currentUser.uid)) {
+        amIBlockedByCurrent = true; updateChatBlockUI(); showToast("Message failed."); return;
+    }
+
     const file = input.files[0]; if (!file || !currentChatId) return; showToast('Uploading photo...'); 
     const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); 
     try { const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }); const data = await res.json(); if(data.secure_url) { await db.collection('chats').doc(currentChatId).collection('messages').add({ uid: currentUser.uid, text: '📷 Photo', imgUrl: data.secure_url, read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); await db.collection('chats').doc(currentChatId).set({ lastMsg: '📷 Photo', lastAt: firebase.firestore.FieldValue.serverTimestamp(), names: {[currentUser.uid]: currentUserData.name, [currentChatUser.uid]: currentChatUser.name}, avatars: {[currentUser.uid]: currentUserData.avatar||'', [currentChatUser.uid]: currentChatUser.avatar||''} }, {merge: true}); showToast('Photo sent! ✅'); } else { console.error("Cloudinary Error:", data); showToast('Upload failed'); } } catch (e) { showToast('Network error!'); } input.value = ''; 

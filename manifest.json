@@ -1,19 +1,19 @@
 {
-  "name": "GoChat",
+  "name": "GoChat V2",
   "short_name": "GoChat",
-  "description": "Your own social space",
-  "start_url": "/",
+  "description": "Connect and share your moments",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#0f0f13",
   "theme_color": "#6c63ff",
   "icons": [
     {
-      "src": "https://via.placeholder.com/192x192/6c63ff/ffffff?text=GC",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://via.placeholder.com/512x512/6c63ff/ffffff?text=GC",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

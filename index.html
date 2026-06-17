@@ -195,7 +195,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
     </div>
   </div>
 
-  <div class="page" id="page-messages"><div class="section-title">Messages</div><div id="msg-list"></div></div>
     <div class="page" id="page-profile">
     <div class="profile-header">
       <div class="icon-btn" onclick="toggleSettingsMenu()" style="position:absolute; top:16px; right:16px; background:var(--surface);">
@@ -296,16 +295,20 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       <div id="chat-dropdown" class="chat-dropdown">
         <div class="chat-dropdown-item" onclick="toggleMuteChat()"><span class="material-symbols-outlined" style="font-size:18px;">notifications_off</span> <span id="mute-text">Mute</span></div>
         <div class="chat-dropdown-item" style="color:var(--danger)" onclick="deleteCurrentChat()"><span class="material-symbols-outlined" style="font-size:18px;">delete</span> Delete Chat</div>
-        <div class="chat-dropdown-item" style="color:var(--danger)" onclick="blockCurrentChatUser()"><span class="material-symbols-outlined" style="font-size:18px;">block</span> Block</div>
+        <div class="chat-dropdown-item" style="color:var(--danger)" onclick="toggleBlockUser()"><span class="material-symbols-outlined" style="font-size:18px;">block</span> <span id="block-text">Block</span></div>
       </div>
     </div>
   </div>
   <div class="chat-messages" id="chat-messages"></div>
-  <div class="chat-input-bar">
+  
+  <div class="chat-input-bar" id="chat-input-area">
     <label for="chat-img-input" style="cursor:pointer; color:var(--muted); display:flex; align-items:center;"><span class="material-symbols-outlined" style="font-size:28px;">photo_camera</span></label>
     <input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="sendChatImage(this)">
     <input type="text" id="chat-input" placeholder="Type a message...">
     <button class="chat-send-btn" onclick="sendMsg()"><span class="material-symbols-outlined" style="font-size:20px;">send</span></button>
+  </div>
+  <div id="chat-blocked-area" style="display:none; padding:16px; background:var(--surface); text-align:center; border-top:1px solid var(--border); color:var(--muted); font-size:13px; font-weight:600;">
+     You blocked this user. <span style="color:var(--accent); cursor:pointer; margin-left:5px;" onclick="toggleBlockUser()">Unblock</span>
   </div>
 </div>
 
@@ -325,6 +328,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   </div>
 </div>
 <div id="toast"></div>
+          
         <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -557,7 +561,7 @@ async function submitComment(postId) {
 }
 function toggleReplyBox(postId, commentId) { document.getElementById(`reply-box-${postId}-${commentId}`).classList.toggle('open'); }
 async function submitReply(postId, commentId) { const input = document.getElementById(`reply-input-${postId}-${commentId}`); const text = input.value.trim(); if(!text) return; try { const postRef = db.collection('posts').doc(postId); const doc = await postRef.get(); if(doc.exists) { const data = doc.data(); const comments = data.comments || []; const cIndex = comments.findIndex(c => c.id === commentId); if(cIndex > -1) { if(!comments[cIndex].replies) comments[cIndex].replies = []; comments[cIndex].replies.push({ uid: currentUser.uid, name: currentUserData.name || currentUser.displayName, text: text, createdAt: Date.now() }); await postRef.update({ comments: comments }); } } input.value = ''; toggleReplyBox(postId, commentId); } catch(e) { showToast("Error adding reply!"); } }
-    async function searchUsers() { const q = document.getElementById('search-input').value.trim().toLowerCase();const list = document.getElementById('search-results-list'); if(!q) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Search users...</div>'; return; } const snap = await db.collection('users').get();let html = ''; snap.forEach(d => { if(d.id === currentUser.uid) return; const u = d.data(); if(u.name.toLowerCase().includes(q)) { let btnHtml = '';const friends = currentUserData.friends || [];const sent = currentUserData.sentRequests || [];const received = currentUserData.receivedRequests || []; if(friends.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 12px; font-size:11px;" disabled>Friends</button>'; else if(sent.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 12px; font-size:11px;" disabled>Sent</button>'; else if(received.includes(d.id)) btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="acceptRequest('${d.id}')">Accept</button>`; else btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="sendRequest('${d.id}')">Add</button>`; const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name); const dot = u.online ? '<div class="online-dot"></div>' : ''; html += `<div class="msg-item"><div class="avatar" style="width:40px;height:40px;cursor:pointer;position:relative;" onclick="viewUserProfile('${d.id}')">${av}${dot}</div><div class="msg-info" onclick="viewUserProfile('${d.id}')">${u.name} ${getVerifiedBadge(u.email)}</div><div>${btnHtml}</div></div>`; } }); list.innerHTML = html || '<div style="text-align:center; padding:20px;">No users found.</div>'; }
+  async function searchUsers() { const q = document.getElementById('search-input').value.trim().toLowerCase();const list = document.getElementById('search-results-list'); if(!q) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Search users...</div>'; return; } const snap = await db.collection('users').get();let html = ''; snap.forEach(d => { if(d.id === currentUser.uid) return; const u = d.data(); if(u.name.toLowerCase().includes(q)) { let btnHtml = '';const friends = currentUserData.friends || [];const sent = currentUserData.sentRequests || [];const received = currentUserData.receivedRequests || []; if(friends.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 12px; font-size:11px;" disabled>Friends</button>'; else if(sent.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 12px; font-size:11px;" disabled>Sent</button>'; else if(received.includes(d.id)) btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="acceptRequest('${d.id}')">Accept</button>`; else btnHtml = `<button class="btn-primary" style="padding:6px 12px; font-size:11px; width:auto; margin:0;" onclick="sendRequest('${d.id}')">Add</button>`; const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name); const dot = u.online ? '<div class="online-dot"></div>' : ''; html += `<div class="msg-item"><div class="avatar" style="width:40px;height:40px;cursor:pointer;position:relative;" onclick="viewUserProfile('${d.id}')">${av}${dot}</div><div class="msg-info" onclick="viewUserProfile('${d.id}')">${u.name} ${getVerifiedBadge(u.email)}</div><div>${btnHtml}</div></div>`; } }); list.innerHTML = html || '<div style="text-align:center; padding:20px;">No users found.</div>'; }
 async function sendRequest(targetUid) { await db.collection('users').doc(currentUser.uid).update({ sentRequests: firebase.firestore.FieldValue.arrayUnion(targetUid) }); await db.collection('users').doc(targetUid).update({ receivedRequests: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); if(!currentUserData.sentRequests) currentUserData.sentRequests=[]; currentUserData.sentRequests.push(targetUid); searchUsers();showToast('Friend request sent!'); }
 async function acceptRequest(requesterUid) { await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); if(currentUserData.receivedRequests) currentUserData.receivedRequests = currentUserData.receivedRequests.filter(id=>id!==requesterUid); if(!currentUserData.friends) currentUserData.friends=[]; currentUserData.friends.push(requesterUid); loadFriendRequests();searchUsers();showToast('Connected as friends!'); }
 function loadFriendRequests() { const reqs = currentUserData.receivedRequests || [];const list = document.getElementById('friend-requests-list'); if(reqs.length === 0) { list.innerHTML = '<div style="padding:10px; color:var(--muted); font-size:12px; text-align:center;">No requests</div>'; return; } db.collection('users').get().then(snap => { let html = '';snap.forEach(d => { if(reqs.includes(d.id)) { const u = d.data(); html += `<div class="msg-item"><div>${u.name}</div><button class="btn-primary" style="padding:4px 8px; font-size:10px; width:auto;" onclick="acceptRequest('${d.id}')">Accept</button></div>`; } }); list.innerHTML = html; }); }
@@ -645,8 +649,23 @@ async function loadMyPosts(){
 
 async function loadMessages(){ const list=document.getElementById('msg-list');list.innerHTML='<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; const snap=await db.collection('chats').get();const myChats=snap.docs.filter(d=>d.id.includes(currentUser.uid)); if(myChats.length===0){list.innerHTML='<div class="empty-feed">No messages yet</div>';return;} let html = ''; for(let d of myChats) { const data=d.data(); const otherUid=d.id.replace(currentUser.uid,'').replace('_',''); const otherName=(data.names&&data.names[otherUid])?data.names[otherUid]:'User'; const otherAvatar=(data.avatars&&data.avatars[otherUid])?data.avatars[otherUid]:''; const userSnap = await db.collection('users').doc(otherUid).get(); const isOnline = userSnap.exists && userSnap.data().online; const email = userSnap.exists ? userSnap.data().email : ''; const av=otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName); const dot = isOnline ? '<div class="online-dot"></div>' : ''; html += '<div class="msg-item" onclick="openChatById(\''+d.id+'\',\''+otherUid+'\',\''+otherName+'\',\''+otherAvatar+'\','+isOnline+',\''+email+'\')">'+'<div class="avatar" style="width:44px;height:44px;position:relative;">'+av+dot+'</div>'+'<div class="msg-info"><div class="msg-name">'+otherName+' '+getVerifiedBadge(email)+'</div><div class="msg-preview">'+(data.lastMsg||'...')+'</div></div>'+'<div class="msg-time">'+(data.lastAt?timeAgo(data.lastAt):'')+'</div></div>'; } list.innerHTML = html; }
 
-function openChatByUid(uid,name,avatar,isOnline=false,email=''){openChatById([currentUser.uid,uid].sort().join('_'),uid,name,avatar,isOnline,email);}
+  function openChatByUid(uid,name,avatar,isOnline=false,email=''){openChatById([currentUser.uid,uid].sort().join('_'),uid,name,avatar,isOnline,email);}
 async function unsendMessage(msgId) { if(!confirm('Remove message?')) return; await db.collection('chats').doc(currentChatId).collection('messages').doc(msgId).delete(); }
+
+function updateChatBlockUI() {
+    let blocked = currentUserData.blockedUsers || [];
+    let isBlocked = blocked.includes(currentChatUser.uid);
+    document.getElementById('block-text').textContent = isBlocked ? 'Unblock' : 'Block';
+    
+    if(isBlocked) {
+        document.getElementById('chat-input-area').style.display = 'none';
+        document.getElementById('chat-blocked-area').style.display = 'block';
+    } else {
+        document.getElementById('chat-input-area').style.display = 'flex';
+        document.getElementById('chat-blocked-area').style.display = 'none';
+    }
+}
+
 function openChatById(chatId,otherUid,otherName,otherAvatar,isOnline=false,email=''){ 
     currentChatId=chatId;currentChatUser={uid:otherUid,name:otherName,avatar:otherAvatar}; 
     const vBadge = getVerifiedBadge(email); 
@@ -656,6 +675,8 @@ function openChatById(chatId,otherUid,otherName,otherAvatar,isOnline=false,email
     
     let muted = currentUserData.mutedChats || [];
     document.getElementById('mute-text').textContent = muted.includes(chatId) ? 'Unmute' : 'Mute';
+    
+    updateChatBlockUI(); // ব্লক চেক করে UI চেঞ্জ করবে
     
     document.getElementById('chat-screen').classList.add('open'); 
     document.getElementById('chat-messages').innerHTML='<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; 
@@ -679,18 +700,43 @@ async function deleteCurrentChat() {
     await db.collection('chats').doc(currentChatId).delete();
     showToast('Chat Deleted'); closeChat();
 }
-async function blockCurrentChatUser() {
-    if(!confirm('Block this user?')) return;
+async function toggleBlockUser() {
     document.getElementById('chat-dropdown').classList.remove('open');
-    await db.collection('users').doc(currentUser.uid).update({ blockedUsers: firebase.firestore.FieldValue.arrayUnion(currentChatUser.uid) });
-    if(!currentUserData.blockedUsers) currentUserData.blockedUsers = [];
-    currentUserData.blockedUsers.push(currentChatUser.uid);
-    showToast('User Blocked'); closeChat();
+    let blocked = currentUserData.blockedUsers || [];
+    let isBlocked = blocked.includes(currentChatUser.uid);
+    
+    if(isBlocked) {
+        if(!confirm('Unblock this user?')) return;
+        blocked = blocked.filter(id => id !== currentChatUser.uid);
+        showToast('User Unblocked');
+    } else {
+        if(!confirm('Block this user?')) return;
+        blocked.push(currentChatUser.uid);
+        showToast('User Blocked');
+    }
+    
+    currentUserData.blockedUsers = blocked;
+    await db.collection('users').doc(currentUser.uid).update({ blockedUsers: blocked });
+    updateChatBlockUI(); // UI আপডেট করবে
 }
 
-async function sendMsg(){ const input=document.getElementById('chat-input');const text=input.value.trim(); if(!text||!currentChatId)return; input.value=''; await db.collection('chats').doc(currentChatId).collection('messages').add({uid:currentUser.uid,text,read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); await db.collection('chats').doc(currentChatId).set({lastMsg:text,lastAt:firebase.firestore.FieldValue.serverTimestamp(),names:{[currentUser.uid]:currentUserData.name||currentUser.displayName,[currentChatUser.uid]:currentChatUser.name},avatars:{[currentUser.uid]:currentUserData.avatar||'',[currentChatUser.uid]:currentChatUser.avatar||''}},{merge:true}); }
+async function sendMsg(){ 
+    let blocked = currentUserData.blockedUsers || [];
+    if(blocked.includes(currentChatUser.uid)) { showToast("You can't send messages to blocked users."); return; }
+    
+    const input=document.getElementById('chat-input');const text=input.value.trim(); if(!text||!currentChatId)return; input.value=''; 
+    await db.collection('chats').doc(currentChatId).collection('messages').add({uid:currentUser.uid,text,read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); 
+    await db.collection('chats').doc(currentChatId).set({lastMsg:text,lastAt:firebase.firestore.FieldValue.serverTimestamp(),names:{[currentUser.uid]:currentUserData.name||currentUser.displayName,[currentChatUser.uid]:currentChatUser.name},avatars:{[currentUser.uid]:currentUserData.avatar||'',[currentChatUser.uid]:currentChatUser.avatar||''}},{merge:true}); 
+}
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
-async function sendChatImage(input) { const file = input.files[0]; if (!file || !currentChatId) return; showToast('Uploading photo...'); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); try { const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }); const data = await res.json(); if(data.secure_url) { await db.collection('chats').doc(currentChatId).collection('messages').add({ uid: currentUser.uid, text: '📷 Photo', imgUrl: data.secure_url, read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); await db.collection('chats').doc(currentChatId).set({ lastMsg: '📷 Photo', lastAt: firebase.firestore.FieldValue.serverTimestamp(), names: {[currentUser.uid]: currentUserData.name, [currentChatUser.uid]: currentChatUser.name}, avatars: {[currentUser.uid]: currentUserData.avatar||'', [currentChatUser.uid]: currentChatUser.avatar||''} }, {merge: true}); showToast('Photo sent! ✅'); } else { console.error("Cloudinary Error:", data); showToast('Upload failed'); } } catch (e) { showToast('Network error!'); } input.value = ''; }  
+async function sendChatImage(input) { 
+    let blocked = currentUserData.blockedUsers || [];
+    if(blocked.includes(currentChatUser.uid)) { showToast("You can't send photos to blocked users."); return; }
+    
+    const file = input.files[0]; if (!file || !currentChatId) return; showToast('Uploading photo...'); 
+    const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); 
+    try { const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }); const data = await res.json(); if(data.secure_url) { await db.collection('chats').doc(currentChatId).collection('messages').add({ uid: currentUser.uid, text: '📷 Photo', imgUrl: data.secure_url, read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); await db.collection('chats').doc(currentChatId).set({ lastMsg: '📷 Photo', lastAt: firebase.firestore.FieldValue.serverTimestamp(), names: {[currentUser.uid]: currentUserData.name, [currentChatUser.uid]: currentChatUser.name}, avatars: {[currentUser.uid]: currentUserData.avatar||'', [currentChatUser.uid]: currentChatUser.avatar||''} }, {merge: true}); showToast('Photo sent! ✅'); } else { console.error("Cloudinary Error:", data); showToast('Upload failed'); } } catch (e) { showToast('Network error!'); } input.value = ''; 
+}  
 
 let currentShareUrl = '';
 const shareModalDiv = document.createElement('div');
@@ -726,9 +772,8 @@ function shareToApp(platform) {
     else if(platform === 'gochat') { navigator.clipboard.writeText(currentShareUrl); if(typeof showToast === 'function') { showToast('Link copied! Share your friends.'); } else { alert('Link copied! Share your friends।'); } } 
     else if(platform === 'copy') { navigator.clipboard.writeText(currentShareUrl); if(typeof showToast === 'function') { showToast('Link copied!'); } else { alert('Link copied!'); } }
     closeShareMenu();
-}
-
-function getRelativeTime(timestamp) {
+      }
+  function getRelativeTime(timestamp) {
     if (!timestamp) return "এইমাত্র";
     const now = new Date();
     const past = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -800,4 +845,5 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 </body>
-</html>
+</html>    
+

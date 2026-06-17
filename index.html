@@ -582,16 +582,16 @@ function updateNotifCount() {
 
 async function deleteSelectedNotifs() {
     const selected = Array.from(document.querySelectorAll('.notif-checkbox:checked')).map(cb => cb.value);
-    if(selected.length === 0) { showToast('কোনো নোটিফিকেশন সিলেক্ট করা হয়নি!'); return; }
-    if(!confirm(`আপনি কি ${selected.length} টি নোটিফিকেশন মুছে ফেলতে চান?`)) return;
+    if(selected.length === 0) { showToast('No notifications selected!'); return; }
+    if(!confirm(`What are you ${selected.length} Want to delete notifications?`)) return;
     
     showToast('Deleting...');
     try {
         await Promise.all(selected.map(id => db.collection('notifications').doc(id).delete()));
-        showToast('সাফল্যজনকভাবে ডিলিট হয়েছে! ✅');
+        showToast('Delete Successful! ✅');
         toggleNotifEditMode(); // Edit mode থেকে বের হওয়া
     } catch(e) {
-        showToast('ডিলিট করতে সমস্যা হয়েছে!');
+        showToast('There was a problem deleting.!');
     }
 }
 </script>

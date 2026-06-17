@@ -9,18 +9,19 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{--bg:#0f0f13;--surface:#1a1a24;--card:#22222f;--border:#2e2e3f;--accent:#6c63ff;--accent2:#a78bfa;--text:#e8e8f0;--muted:#8888aa;--danger:#ff4f4f;--success:#4fbe79;}
 body.light-mode{--bg:#ffffff;--surface:#f0f2f5;--card:#ffffff;--border:#cccccc;--accent:#5b52e0;--accent2:#7c3aed;--text:#000000;--muted:#666666;}
-body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh;}
+/* অটো-রিফ্রেশ বন্ধ করার কোড নিচে যোগ করা হলো */
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh; overscroll-behavior-y: none; touch-action: manipulation;}
 #auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0f13 0%,#1a1228 100%);}
 .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 32px;width:92%;max-width:380px;}
 .auth-logo{font-size:28px;font-weight:800;color:var(--accent2);text-align:center;margin-bottom:6px;}
 .auth-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:28px;}
-.auth-tabs{display:flex;background:var(--bg);border-radius:10px;padding:4px;margin-bottom:24px;}
-.auth-tab{flex:1;padding:9px;text-align:center;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);}
+.auth-tabs{display:flex;background:var(--bg);border-radius:30px;padding:4px;margin-bottom:24px;}
+.auth-tab{flex:1;padding:10px;text-align:center;border-radius:25px;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);}
 .auth-tab.active{background:var(--accent);color:#fff;}
 .input-group{margin-bottom:14px;}
 .input-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;}
-.input-group input, .input-group select{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;}
-.btn-primary{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px; display:flex; align-items:center; justify-content:center; gap:8px;}
+.input-group input, .input-group select{width:100%;padding:14px 18px;background:var(--bg);border:1px solid var(--border);border-radius:30px;color:var(--text);font-size:14px;outline:none;}
+.btn-primary{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:30px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px; display:flex; align-items:center; justify-content:center; gap:8px;}
 .auth-msg{text-align:center;font-size:13px;margin-top:14px;padding:10px;border-radius:8px;display:none;}
 .auth-msg.error{background:#ff4f4f22;color:var(--danger);display:block;}
 .auth-msg.success{background:#4fbe7922;color:var(--success);display:block;}
@@ -33,7 +34,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .settings-menu.open{display:block;}
 .setting-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;font-weight:600; display:flex; align-items:center; gap:10px;}
 .bottom-nav{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);width:92%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:35px;display:flex;z-index:100; justify-content:space-around; padding:10px 0;box-shadow:0 8px 20px rgba(0,0,0,0.15);}
-.nav-item{flex:1;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted); transition:0.3s; position:relative;}
+.nav-item{flex:1;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted); transition:0.3s; position:relative; will-change: transform;}
 .nav-item .material-symbols-outlined{font-size:28px;}
 .nav-item.active{color:var(--accent);}
 .nav-item.active .material-symbols-outlined{font-variation-settings: 'FILL' 1;}
@@ -44,10 +45,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .composer-top{display:flex;gap:12px;align-items:flex-start;}
 .avatar{width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;overflow:hidden;position:relative;}
 .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-.compose-btn{padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer; display:flex; align-items:center; gap:6px;}
-.img-btn{padding:8px 12px;background:var(--card);color:var(--accent2);border:1px solid var(--border);border-radius:20px;font-size:13px;cursor:pointer; display:flex; align-items:center; gap:6px;}
+.compose-btn{padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer; display:flex; align-items:center; gap:6px;}
+.img-btn{padding:8px 12px;background:var(--card);color:var(--accent2);border:1px solid var(--border);border-radius:30px;font-size:13px;cursor:pointer; display:flex; align-items:center; gap:6px;}
 .timer-info{font-size:11px;color:var(--muted);padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--border);text-align:center; display:flex; justify-content:center; align-items:center; gap:6px;}
-.post-card{background:var(--surface);border-bottom:1px solid var(--border);padding:16px;}
+.post-card{background:var(--surface);border-bottom:1px solid var(--border);padding:16px; will-change: transform;}
 .post-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .post-name{font-weight:700;font-size:14px;display:flex;align-items:center;gap:4px;}
 .post-time{font-size:11px;color:var(--muted);margin-left:auto;}
@@ -65,11 +66,11 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .reply-list{margin-left:12px;border-left:2px solid var(--border);padding-left:10px;margin-top:6px;display:flex;flex-direction:column;gap:6px;}
 .reply-input-wrap{display:none;gap:6px;margin-top:8px;}
 .reply-input-wrap.open{display:flex;}
-.reply-input-wrap input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:15px;padding:6px 12px;font-size:11px;color:var(--text);outline:none;}
-.reply-input-wrap button{background:var(--accent);color:#fff;border:none;border-radius:15px;padding:0 12px;font-size:11px;cursor:pointer;font-weight:600;}
+.reply-input-wrap input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:30px;padding:8px 14px;font-size:11px;color:var(--text);outline:none;}
+.reply-input-wrap button{background:var(--accent);color:#fff;border:none;border-radius:30px;padding:0 14px;font-size:11px;cursor:pointer;font-weight:600;}
 .comment-input-wrap{display:flex;gap:8px;}
-.comment-input-wrap input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;}
-.comment-input-wrap button{background:var(--accent);color:#fff;border:none;border-radius:20px;padding:0 16px;font-size:13px;cursor:pointer;font-weight:600;}
+.comment-input-wrap input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:30px;padding:12px 16px;color:var(--text);font-size:13px;outline:none;}
+.comment-input-wrap button{background:var(--accent);color:#fff;border:none;border-radius:30px;padding:0 18px;font-size:13px;cursor:pointer;font-weight:600;}
 .empty-feed{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;}
 .profile-header{background:var(--surface);padding:24px 16px;border-bottom:1px solid var(--border);text-align:center;}
 .profile-avatar-wrap{position:relative;display:inline-block;margin-bottom:12px;}
@@ -81,7 +82,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .profile-stats{font-size:15px;font-weight:800;color:var(--text);margin-bottom:12px;}
 .profile-personal-details{font-size:12px;color:var(--muted);margin-bottom:16px;display:flex;flex-direction:column;gap:4px;align-items:center;}
 .detail-item{display:flex;gap:6px;align-items:center;}
-.btn-outline{padding:8px 20px;background:transparent;color:var(--accent2);border:1px solid var(--accent);border-radius:20px;font-size:13px;font-weight:600;cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;}
+.btn-outline{padding:10px 20px;background:transparent;color:var(--accent2);border:1px solid var(--accent);border-radius:30px;font-size:13px;font-weight:600;cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;}
 .msg-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer; position:relative;}
 .msg-info{flex:1;}
 .msg-name{font-weight:700;font-size:14px;margin-bottom:2px;display:flex;align-items:center;gap:4px;}
@@ -92,12 +93,12 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .chat-topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:12px;}
 .chat-back{font-size:24px;cursor:pointer;color:var(--accent2);display:flex;}
 .chat-name{font-weight:700;font-size:16px;flex:1;}
-.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
-.chat-bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px; overscroll-behavior-y: contain;}
+.chat-bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5; will-change: transform;}
 .chat-bubble.mine{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
 .chat-bubble.theirs{background:var(--card);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px;}
 .chat-input-bar{background:var(--surface);border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;align-items:center;}
-.chat-input-bar input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:10px 16px;color:var(--text);font-size:14px;outline:none;}
+.chat-input-bar input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:30px;padding:10px 16px;color:var(--text);font-size:14px;outline:none;}
 .chat-send-btn{width:40px;height:40px;background:var(--accent);border:none;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .modal-overlay{display:none;position:fixed;inset:0;background:#0008;z-index:300;align-items:flex-end;justify-content:center;}
 .modal-overlay.open{display:flex;}
@@ -106,7 +107,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .modal-close{float:right;background:none;border:none;color:var(--muted);cursor:pointer;display:flex;}
 .section-title{padding:14px 16px 6px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
 .loading{text-align:center;padding:30px;color:var(--muted);font-size:13px; display:flex; justify-content:center; align-items:center; gap:8px;}
-#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid var(--border);box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:10px 20px;border-radius:30px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid var(--border);box-shadow:0 4px 12px rgba(0,0,0,0.2);}
 #toast.show{opacity:1;}
 .verified-icon{color:#1DA1F2; font-size:16px; font-variation-settings: 'FILL' 1;}
 .online-dot{width:12px;height:12px;background:var(--success);border-radius:50%;display:inline-block;border:2px solid var(--surface);position:absolute;bottom:0;right:0;}
@@ -117,8 +118,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .notif-text{font-size:13px; line-height:1.4;}
 .notif-text strong{color:var(--text); font-weight:700;}
 .notif-checkbox{display:none; margin-right:10px; width:18px; height:18px; accent-color:var(--accent); cursor:pointer;}
-body { touch-action: manipulation; }
-.nav-item, .post-card, .chat-bubble { will-change: transform; }
 </style>
 </head>
 <body>
@@ -180,7 +179,7 @@ body { touch-action: manipulation; }
   <div class="page" id="page-search">
     <div class="chat-topbar" style="position:sticky;top:0;z-index:100;gap:10px;">
       <span class="material-symbols-outlined" style="color:var(--muted);">search</span>
-      <input type="text" id="search-input" placeholder="Search by name..." oninput="searchUsers()" style="flex:1; padding:10px 16px; border-radius:20px; border:none; background:var(--bg); color:var(--text); outline:none;">
+      <input type="text" id="search-input" placeholder="Search by name..." oninput="searchUsers()" style="flex:1; padding:12px 18px; border-radius:30px; border:none; background:var(--bg); color:var(--text); outline:none;">
     </div>
     <div class="section-title">Friend Requests</div><div id="friend-requests-list"></div>
     <div class="section-title">Search Results</div><div id="search-results-list"><div class="empty-feed">Type a name to search users</div></div>
@@ -192,9 +191,9 @@ body { touch-action: manipulation; }
       <button id="notif-edit-btn" onclick="toggleNotifEditMode()" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:13px;cursor:pointer;">Edit</button>
     </div>
     <div id="notifications-list" style="padding-bottom:50px;"><div class="empty-feed">No notifications yet</div></div>
-    <div id="notif-action-bar" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%); width:92%; max-width:440px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:10px 16px; z-index:101; justify-content:space-between; align-items:center; box-shadow:0 5px 15px rgba(0,0,0,0.2);">
+    <div id="notif-action-bar" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%); width:92%; max-width:440px; background:var(--surface); border:1px solid var(--border); border-radius:30px; padding:10px 16px; z-index:101; justify-content:space-between; align-items:center; box-shadow:0 5px 15px rgba(0,0,0,0.2);">
        <div style="font-size:13px; font-weight:700;"><span id="notif-select-count">0</span> Selected</div>
-       <button onclick="deleteSelectedNotifs()" style="background:var(--danger); color:white; border:none; padding:8px 20px; border-radius:20px; font-size:13px; font-weight:700; cursor:pointer;">Delete</button>
+       <button onclick="deleteSelectedNotifs()" style="background:var(--danger); color:white; border:none; padding:8px 20px; border-radius:30px; font-size:13px; font-weight:700; cursor:pointer;">Delete</button>
     </div>
   </div>
 
@@ -206,7 +205,7 @@ body { touch-action: manipulation; }
           <div class="profile-name" id="profile-name-display">Loading...</div><div id="profile-my-status"></div>
           <div class="profile-bio" id="profile-bio-display"></div><div class="profile-stats" id="profile-friends-count"></div>
           <div class="profile-personal-details" id="profile-details-display"></div>
-          <button class="btn-outline" onclick="openProfileEdit()" style="margin-top:10px; padding:6px 16px; font-size:12px;"><span class="material-symbols-outlined" style="font-size:16px;">edit</span> Edit Profile</button>
+          <button class="btn-outline" onclick="openProfileEdit()" style="margin-top:10px; padding:8px 20px; font-size:12px;"><span class="material-symbols-outlined" style="font-size:16px;">edit</span> Edit Profile</button>
       </div>
       <div id="profile-edit-section" style="display:none; text-align:left; background:var(--bg); padding:16px; border-radius:12px; margin-top:15px; border:1px solid var(--border);">
          <div style="font-weight:700; margin-bottom:12px; text-align:center; font-size:14px; color:var(--text);">Edit Profile Information</div>
@@ -230,8 +229,8 @@ body { touch-action: manipulation; }
       <div class="profile-name" id="other-profile-name">Loading...</div><div id="other-profile-status"></div>
       <div class="profile-bio" id="other-profile-bio"></div><div class="profile-stats" id="other-profile-friends-count"></div><div class="profile-personal-details" id="other-profile-details"></div>
       <div class="profile-btns" style="margin-top:10px; display:flex; gap:10px; justify-content:center;">
-        <button class="btn-primary" id="other-msg-btn" style="width:auto;padding:8px 24px;border-radius:20px;font-size:13px;"><span class="material-symbols-outlined" style="font-size:18px;">chat</span> Message</button>
-        <button class="btn-outline" id="other-unfriend-btn" style="width:auto;padding:8px 20px;border-radius:20px;font-size:13px;border-color:var(--danger);color:var(--danger);display:none;"><span class="material-symbols-outlined" style="font-size:18px;">person_remove</span> Unfriend</button>
+        <button class="btn-primary" id="other-msg-btn" style="width:auto;padding:10px 24px;border-radius:30px;font-size:13px;"><span class="material-symbols-outlined" style="font-size:18px;">chat</span> Message</button>
+        <button class="btn-outline" id="other-unfriend-btn" style="width:auto;padding:10px 20px;border-radius:30px;font-size:13px;border-color:var(--danger);color:var(--danger);display:none;"><span class="material-symbols-outlined" style="font-size:18px;">person_remove</span> Unfriend</button>
       </div>
     </div>
     <div class="section-title" style="margin-top:10px;">Recent Posts</div><div id="other-user-posts-list"></div>
@@ -310,11 +309,11 @@ async function doSwitchAccount(email, pass) { if(currentUser && currentUser.emai
 function loginAnotherAccount() { closeSwitchAccountModal(); doLogout(); }
 async function doLogout(){ try{ setOnlineStatus(false); } catch(e){} try{ await auth.signOut(); } catch(e){} window.location.reload(); }
 
-async function doRegister(){ const name=document.getElementById('reg-name').value.trim(); const email=document.getElementById('reg-email').value.trim(); const pass=document.getElementById('reg-pass').value; const msg=document.getElementById('auth-msg'); if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;} if(hasEmoji(name)){msg.textContent='নামে কোনো ইমোজি ব্যবহার করা যাবে বাণিজ্যিক!';msg.className='auth-msg error';return;} try{ window.tempLoginPass = pass; const cred=await auth.createUserWithEmailAndPassword(email,pass); await cred.user.updateProfile({displayName:name}); await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',partnerName:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],online:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); msg.textContent='Account created successfully!';msg.className='auth-msg success'; }catch(e){msg.textContent='Error: '+e.message;msg.className='auth-msg error';} }
+async function doRegister(){ const name=document.getElementById('reg-name').value.trim(); const email=document.getElementById('reg-email').value.trim(); const pass=document.getElementById('reg-pass').value; const msg=document.getElementById('auth-msg'); if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;} if(hasEmoji(name)){msg.textContent='নামে কোনো ইমোজি ব্যবহার করা যাবে না!';msg.className='auth-msg error';return;} try{ window.tempLoginPass = pass; const cred=await auth.createUserWithEmailAndPassword(email,pass); await cred.user.updateProfile({displayName:name}); await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',partnerName:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],online:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); msg.textContent='Account created successfully!';msg.className='auth-msg success'; }catch(e){msg.textContent='Error: '+e.message;msg.className='auth-msg error';} }
 async function doLogin(){ const email=document.getElementById('login-email').value.trim(); const pass=document.getElementById('login-pass').value; const msg=document.getElementById('auth-msg'); try{ window.tempLoginPass = pass; await auth.signInWithEmailAndPassword(email,pass); }catch(e){msg.textContent='Incorrect email or password.';msg.className='auth-msg error';} }
 function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('auth-msg').className='auth-msg';}
 function previewImage(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{document.getElementById('compose-img-preview').style.display='block';document.getElementById('compose-preview-img').src=e.target.result;};reader.readAsDataURL(file);}
-    auth.onAuthStateChanged(async(user)=>{
+            auth.onAuthStateChanged(async(user)=>{
     if(user){
         currentUser=user;setOnlineStatus(true); const snap=await db.collection('users').doc(user.uid).get();
         currentUserData=snap.exists?snap.data():{name:user.displayName||'User',email:user.email,friends:[],sentRequests:[],receivedRequests:[],location:'',hometown:'',gender:'',relationship:'',partnerName:''};
@@ -582,16 +581,16 @@ function updateNotifCount() {
 
 async function deleteSelectedNotifs() {
     const selected = Array.from(document.querySelectorAll('.notif-checkbox:checked')).map(cb => cb.value);
-    if(selected.length === 0) { showToast('No notifications selected!'); return; }
-    if(!confirm(`What are you ${selected.length} Want to delete notifications?`)) return;
+    if(selected.length === 0) { showToast('কোনো নোটিফিকেশন সিলেক্ট করা হয়নি!'); return; }
+    if(!confirm(`আপনি কি ${selected.length} টি নোটিফিকেশন মুছে ফেলতে চান?`)) return;
     
     showToast('Deleting...');
     try {
         await Promise.all(selected.map(id => db.collection('notifications').doc(id).delete()));
-        showToast('Delete Successful! ✅');
+        showToast('সাফল্যজনকভাবে ডিলিট হয়েছে! ✅');
         toggleNotifEditMode(); // Edit mode থেকে বের হওয়া
     } catch(e) {
-        showToast('There was a problem deleting.!');
+        showToast('ডিলিট করতে সমস্যা হয়েছে!');
     }
 }
 </script>

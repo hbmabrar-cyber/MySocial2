@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GoChat V2</title>
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#6c63ff">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -315,7 +313,7 @@ async function doRegister(){ const name=document.getElementById('reg-name').valu
 async function doLogin(){ const email=document.getElementById('login-email').value.trim(); const pass=document.getElementById('login-pass').value; const msg=document.getElementById('auth-msg'); try{ window.tempLoginPass = pass; await auth.signInWithEmailAndPassword(email,pass); }catch(e){msg.textContent='Incorrect email or password.';msg.className='auth-msg error';} }
 function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('auth-msg').className='auth-msg';}
 function previewImage(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{document.getElementById('compose-img-preview').style.display='block';document.getElementById('compose-preview-img').src=e.target.result;};reader.readAsDataURL(file);}
-            auth.onAuthStateChanged(async(user)=>{
+    auth.onAuthStateChanged(async(user)=>{
     if(user){
         currentUser=user;setOnlineStatus(true); const snap=await db.collection('users').doc(user.uid).get();
         currentUserData=snap.exists?snap.data():{name:user.displayName||'User',email:user.email,friends:[],sentRequests:[],receivedRequests:[],location:'',hometown:'',gender:'',relationship:'',partnerName:''};
@@ -594,14 +592,6 @@ async function deleteSelectedNotifs() {
     } catch(e) {
         showToast('ডিলিট করতে সমস্যা হয়েছে!');
     }
-}
-  // Service Worker Registration for PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').then(reg => {
-      console.log('Service Worker registered!');
-    }).catch(err => console.log('Service Worker failed', err));
-  });
 }
 </script>
 </body>

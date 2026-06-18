@@ -215,14 +215,15 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 
   <div class="page" id="page-profile">
     <div class="profile-header">
-      <div class="icon-btn" onclick="toggleSettingsMenu()" style="position:absolute; top:16px; right:16px; background:var(--surface); padding:8px;">
+         <div class="icon-btn" onclick="toggleSettingsMenu()" style="position:absolute; top:16px; right:16px; background:var(--surface); padding:8px;">
         <span class="material-symbols-outlined">settings</span>
         <div class="settings-menu" id="settings-menu" style="text-align:left;">
-          <div class="setting-item" onclick="toggleDarkMode()"><span class="material-symbols-outlined">dark_mode</span> Dark mode</div>
-          <div class="setting-item" onclick="openSettingsPrivacy()"><span class="material-symbols-outlined">shield_person</span> Settings & privacy</div>
-          <div class="setting-item" style="color:var(--danger)" onclick="doLogout()"><span class="material-symbols-outlined">logout</span> Log out</div>
+          <div class="setting-item" onclick="event.stopPropagation(); toggleDarkMode(); toggleSettingsMenu();"><span class="material-symbols-outlined">dark_mode</span> Dark mode</div>
+          <div class="setting-item" onclick="event.stopPropagation(); openSettingsPrivacy();"><span class="material-symbols-outlined">shield_person</span> Settings & privacy</div>
+          <div class="setting-item" style="color:var(--danger)" onclick="event.stopPropagation(); doLogout();"><span class="material-symbols-outlined">logout</span> Log out</div>
         </div>
       </div>
+      
       
       <div class="profile-main-row">
          <div class="profile-avatar-wrap">

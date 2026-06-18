@@ -4,10 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GoChat V2</title>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script type="text/javascript">
-   (function(){ emailjs.init("FsEYhWsWV7ZPnifmL"); })();
-</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" />
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -15,28 +11,26 @@
 body.light-mode{--bg:#ffffff;--surface:#f0f2f5;--card:#ffffff;--border:#cccccc;--accent:#5b52e0;--accent2:#7c3aed;--text:#000000;--muted:#666666;}
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh; overscroll-behavior-y: none; touch-action: manipulation;}
 .material-symbols-outlined { display: inline-block; white-space: nowrap; overflow: hidden; max-width: 1em; word-wrap: normal; direction: ltr; -webkit-font-smoothing: antialiased; }
+
+/* New Clean Auth Screen */
 #auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0f13 0%,#1a1228 100%);}
-.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px 32px;width:92%;max-width:380px;}
-.auth-logo{font-size:28px;font-weight:800;color:var(--accent2);text-align:center;margin-bottom:6px;}
-.auth-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:28px;}
-.auth-tabs{display:flex;background:var(--bg);border-radius:30px;padding:4px;margin-bottom:24px;}
-.auth-tab{flex:1;padding:10px;text-align:center;border-radius:25px;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);}
-.auth-tab.active{background:var(--accent);color:#fff;}
-.input-group{margin-bottom:14px;}
-.input-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;}
-.input-group input, .input-group select{width:100%;padding:14px 18px;background:var(--bg);border:1px solid var(--border);border-radius:30px;color:var(--text);font-size:14px;outline:none;}
-.btn-primary{width:100%;padding:12px 20px;background:var(--accent);color:#fff;border:none;border-radius:30px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px; display:flex; align-items:center; justify-content:center; gap:8px; transition: 0.2s;}
-.btn-primary:active{transform: scale(0.97);}
-.auth-msg{text-align:center;font-size:13px;margin-top:14px;padding:10px;border-radius:30px;display:none;}
+.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px 32px;width:92%;max-width:380px; text-align:center;}
+.auth-logo{font-size:32px;font-weight:900;color:var(--accent2);margin-bottom:8px; letter-spacing:1px;}
+.auth-sub{color:var(--muted);font-size:14px;margin-bottom:40px;}
+.google-btn{background:#fff; color:#444; border:1px solid var(--border); padding:14px 20px; font-size:15px; border-radius:30px; display:flex; align-items:center; justify-content:center; gap:12px; width:100%; box-shadow:0 4px 15px rgba(0,0,0,0.1); cursor:pointer; font-weight:700; transition:0.2s;}
+.google-btn:active{transform:scale(0.97);}
+.google-btn img{width:24px; height:24px;}
+.auth-msg{font-size:13px;margin-top:20px;padding:10px;border-radius:30px;display:none; font-weight:600;}
 .auth-msg.error{background:#ff4f4f22;color:var(--danger);display:block;}
 .auth-msg.success{background:#4fbe7922;color:var(--success);display:block;}
+
 #app-screen{display:none;max-width:480px;margin:0 auto;padding-bottom:95px;}
 .topbar{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
 .topbar-logo{font-size:20px;font-weight:800;color:var(--accent2); cursor:pointer; transition: 0.2s; user-select: none;}
 .topbar-logo:active{transform: scale(0.95);}
 .icon-btn{padding:8px 16px;border-radius:30px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);position:relative; transition:0.2s; font-size:13px; font-weight:600;}
 .icon-btn:hover{background:var(--border);}
-.settings-menu{display:none;position:absolute;top:50px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px;z-index:1000;width:200px;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+.settings-menu{display:none;position:absolute;top:50px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px;z-index:1000;width:180px;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
 .settings-menu.open{display:block;}
 .setting-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;font-weight:600; display:flex; align-items:center; gap:10px; border-radius:30px;}
 .bottom-nav{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);width:92%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:35px;display:flex;z-index:100; justify-content:space-around; padding:10px 0;box-shadow:0 8px 20px rgba(0,0,0,0.15);}
@@ -144,24 +138,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   <div class="auth-box">
     <div class="auth-logo">✦ GoChat</div>
     <div class="auth-sub">Connect and share your moments</div>
-    <div class="auth-tabs">
-      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</div>
-      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</div>
+    
+    <div style="margin-top:30px;">
+        <button class="google-btn" onclick="signInWithGoogle()">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+          <span>Continue with Google</span>
+        </button>
     </div>
-    <div id="login-form">
-      <div class="input-group"><label>Email</label><input type="email" id="login-email" placeholder="example@gmail.com"></div>
-      <div class="input-group"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••"></div>
-      <button class="btn-primary" onclick="doLogin()">Login</button>
-      <div style="text-align:right; margin-top:12px;">
-         <span style="color:var(--accent); font-size:12px; cursor:pointer; font-weight:700;" onclick="openForgotPass()">Forgot Password?</span>
-      </div>
-    </div>
-    <div id="register-form" style="display:none">
-      <div class="input-group"><label>Name (No Emojis)</label><input type="text" id="reg-name" placeholder="Your real name"></div>
-      <div class="input-group"><label>Email</label><input type="email" id="reg-email" placeholder="example@gmail.com"></div>
-      <div class="input-group"><label>Password</label><input type="password" id="reg-pass" placeholder="At least 6 characters"></div>
-      <button class="btn-primary" onclick="doRegister()">Create Account</button>
-    </div>
+    
     <div id="auth-msg" class="auth-msg"></div>
   </div>
 </div>
@@ -222,7 +206,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
         <span class="material-symbols-outlined">settings</span>
         <div class="settings-menu" id="settings-menu" style="text-align:left;">
           <div class="setting-item" onclick="toggleDarkMode()"><span class="material-symbols-outlined">dark_mode</span> Dark mode</div>
-          <div class="setting-item" onclick="openSwitchAccountModal()"><span class="material-symbols-outlined">swap_horiz</span> Switch account</div>
           <div class="setting-item" style="color:var(--danger)" onclick="doLogout()"><span class="material-symbols-outlined">logout</span> Log out</div>
         </div>
       </div>
@@ -327,36 +310,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   <div id="chat-blocked-area" style="display:none; padding:16px; background:var(--surface); text-align:center; border-top:1px solid var(--border); color:var(--muted); font-size:13px; font-weight:600;"></div>
 </div>
 
-<!-- New OTP Forgot Password Modal -->
-<div class="modal-overlay" id="forgot-pass-modal">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeForgotPass()"><span class="material-symbols-outlined">close</span></button>
-    <div id="forgot-step-1">
-        <div style="font-weight:800; font-size:18px; margin-bottom:10px;">Forgot Password</div>
-        <div style="font-size:13px; color:var(--muted); margin-bottom:15px;">Enter your Gmail. We will send a 6-digit verification code.</div>
-        <div class="input-group"><input type="email" id="forgot-email-input" placeholder="example@gmail.com"></div>
-        <div id="forgot-msg-1" style="font-size:12px; margin-bottom:12px; text-align:center; display:none; font-weight:bold;"></div>
-        <button class="btn-primary" onclick="sendOtpCode()">Send SMS</button>
-    </div>
-    <div id="forgot-step-2" style="display:none;">
-        <div style="font-weight:800; font-size:18px; margin-bottom:10px;">Enter code</div>
-        <div style="font-size:13px; color:var(--muted); margin-bottom:15px;">Enter the 6-digit code sent to your email.</div>
-        <div class="input-group"><input type="number" id="forgot-otp-input" placeholder="••••••" style="text-align:center; font-size:24px; letter-spacing:8px; font-weight:bold;"></div>
-        <div id="forgot-msg-2" style="font-size:12px; margin-bottom:12px; text-align:center; display:none; font-weight:bold;"></div>
-        <button class="btn-primary" onclick="verifyOtpCode()">Login</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-overlay" id="tag-modal"><div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;"><button class="modal-close" onclick="closeTagModal()"><span class="material-symbols-outlined">close</span></button><div class="modal-title">Tag Friends</div><div id="tag-friends-list" style="overflow-y:auto; flex:1; margin-bottom:15px; max-height:300px;"></div><button class="btn-primary" onclick="closeTagModal()">Done</button></div></div>
 <div class="modal-overlay" id="mention-modal"><div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;"><button class="modal-close" onclick="closeMentionModal()"><span class="material-symbols-outlined">close</span></button><div class="modal-title">Mention Friends</div><div id="mention-friends-list" style="overflow-y:auto; flex:1; max-height:300px;"></div></div></div>
-<div class="modal-overlay" id="switch-account-modal">
-  <div class="modal-box" style="padding:0; overflow:hidden;">
-    <div style="padding:16px; border-bottom:1px solid var(--border); font-weight:700; text-align:center;">Switch accounts</div><div id="saved-accounts-list" style="max-height:300px; overflow-y:auto;"></div>
-    <div class="msg-item" onclick="loginAnotherAccount()" style="border-bottom:none; border-top:1px solid var(--border);"><div class="avatar" style="background:var(--bg); color:var(--text); border:1px solid var(--border);"><span class="material-symbols-outlined">add</span></div><div class="msg-info" style="font-weight:700;">Log in to another account</div></div>
-    <div style="padding:16px;"><button class="btn-outline" style="width:100%;" onclick="closeSwitchAccountModal()">Cancel</button></div>
-  </div>
-</div>
 <div id="toast"></div>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -380,62 +335,48 @@ function setOnlineStatus(status) { if(currentUser) db.collection('users').doc(cu
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') setOnlineStatus(true); else setOnlineStatus(false); });
 function refreshFeed() { window.scrollTo({top: 0, behavior: 'smooth'}); showToast('Refreshing...'); if(currentFeedTab === 'foryou' || currentFeedTab === 'friends') { loadFeed(); } }
 
-function saveAccountToLocal(email, pass, name, avatar) { let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); const index = accounts.findIndex(a => a.email === email); if(index > -1) { accounts[index] = {email, pass, name, avatar}; } else { accounts.push({email, pass, name, avatar}); } localStorage.setItem('savedAccounts', JSON.stringify(accounts)); }
-function openSwitchAccountModal() { document.getElementById('settings-menu').classList.remove('open'); const list = document.getElementById('saved-accounts-list'); let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); if(accounts.length === 0) { list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted); font-size:13px;">No saved accounts</div>'; } else { list.innerHTML = accounts.map(a => { const av = a.avatar ? `<img src="${a.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(a.name); const isActive = currentUser && currentUser.email === a.email; return `<div class="msg-item" onclick="doSwitchAccount('${a.email}', '${a.pass}')" style="background:${isActive ? 'var(--surface)' : 'transparent'};"><div class="avatar">${av}</div><div class="msg-info" style="font-weight:700;">${a.name} ${isActive ? '<span style="color:var(--success); font-size:11px; font-weight:normal; display:block;">● Logged In</span>' : ''}</div></div>`; }).join(''); } document.getElementById('switch-account-modal').classList.add('open'); }
-function closeSwitchAccountModal() { document.getElementById('switch-account-modal').classList.remove('open'); }
-async function doSwitchAccount(email, pass) { if(currentUser && currentUser.email === email) { closeSwitchAccountModal(); return; } showToast('Switching account...'); closeSwitchAccountModal(); try { window.tempLoginPass = pass; if(notifUnsub) notifUnsub(); await auth.signOut(); await auth.signInWithEmailAndPassword(email, pass); setTimeout(() => { document.getElementById('toast').classList.remove('show'); }, 1500); } catch(e) { document.getElementById('toast').classList.remove('show'); showToast('Session expired. Please login again.'); loginAnotherAccount(); } }
-function loginAnotherAccount() { closeSwitchAccountModal(); doLogout(); }
-async function doLogout(){ try{ setOnlineStatus(false); } catch(e){} try{ await auth.signOut(); } catch(e){} window.location.reload(); }
+/* Google Login System */
+const provider = new firebase.auth.GoogleAuthProvider();
+provider.setCustomParameters({ prompt: 'select_account' }); // Shows all device accounts
 
-async function doRegister(){ const name=document.getElementById('reg-name').value.trim(); const email=document.getElementById('reg-email').value.trim(); const pass=document.getElementById('reg-pass').value; const msg=document.getElementById('auth-msg'); if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;} if(hasEmoji(name)){msg.textContent='নামে কোনো ইমোজি ব্যবহার করা যাবে না!';msg.className='auth-msg error';return;} try{ window.tempLoginPass = pass; const cred=await auth.createUserWithEmailAndPassword(email,pass); await cred.user.updateProfile({displayName:name}); await db.collection('users').doc(cred.user.uid).set({name,email,password:pass,bio:'',location:'',hometown:'',relationship:'',partnerName:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],online:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); msg.textContent='Account created successfully!';msg.className='auth-msg success'; }catch(e){msg.textContent='Error: '+e.message;msg.className='auth-msg error';} }
-async function doLogin(){ const email=document.getElementById('login-email').value.trim(); const pass=document.getElementById('login-pass').value; const msg=document.getElementById('auth-msg'); try{ window.tempLoginPass = pass; const cred=await auth.signInWithEmailAndPassword(email,pass); await db.collection('users').doc(cred.user.uid).set({password: pass}, {merge:true}); }catch(e){msg.textContent='Incorrect email or password.';msg.className='auth-msg error';} }
-function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('auth-msg').className='auth-msg';}
-
-/* 6-Digit OTP Magic Logic */
-let generatedOtp = ""; let forgotEmail = ""; let recoveredPassword = "";
-function openForgotPass() { document.getElementById('forgot-pass-modal').classList.add('open'); document.getElementById('forgot-step-1').style.display='block'; document.getElementById('forgot-step-2').style.display='none'; document.getElementById('forgot-msg-1').style.display='none'; document.getElementById('forgot-msg-2').style.display='none'; document.getElementById('forgot-email-input').value=''; document.getElementById('forgot-otp-input').value=''; }
-function closeForgotPass() { document.getElementById('forgot-pass-modal').classList.remove('open'); }
-
-async function sendOtpCode() {
-    forgotEmail = document.getElementById('forgot-email-input').value.trim();
-    const msg = document.getElementById('forgot-msg-1');
-    if(!forgotEmail) { msg.textContent = "Please enter your email."; msg.style.color = "var(--danger)"; msg.style.display = "block"; return; }
-    msg.textContent = "Checking account..."; msg.style.color = "var(--text)"; msg.style.display = "block";
+async function signInWithGoogle() {
+    const msg = document.getElementById('auth-msg');
+    msg.textContent = 'Connecting to Google...'; msg.className = 'auth-msg success'; msg.style.display = 'block';
     try {
-        const snap = await db.collection('users').where('email', '==', forgotEmail).get();
-        if(snap.empty) {
-            msg.textContent = "There is no account in this Gmail.";
-            msg.style.color = "var(--danger)";
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+        const snap = await db.collection('users').doc(user.uid).get();
+        if(!snap.exists) {
+            // New account creation
+            await db.collection('users').doc(user.uid).set({
+                name: user.displayName || 'GoChat User',
+                email: user.email,
+                avatar: user.photoURL || '',
+                bio: '', location: '', hometown: '', relationship: '', partnerName: '', gender: '',
+                friends: [], sentRequests: [], receivedRequests: [], online: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
         } else {
-            recoveredPassword = snap.docs[0].data().password;
-            if(!recoveredPassword) { msg.textContent = "Old account detected. Cannot use OTP."; msg.style.color = "var(--danger)"; return; }
-            msg.textContent = "Sending code...";
-            generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-            await emailjs.send("service_mblckus", "template_p4lc2dp", { to_email: forgotEmail, otp_code: generatedOtp });
-            document.getElementById('forgot-step-1').style.display = 'none';
-            document.getElementById('forgot-step-2').style.display = 'block';
+            // Update online status for existing account
+            await db.collection('users').doc(user.uid).update({ online: true, avatar: user.photoURL || snap.data().avatar });
         }
-    } catch(e) { msg.textContent = "Error sending code."; msg.style.color = "var(--danger)"; }
-}
-
-async function verifyOtpCode() {
-    const userOtp = document.getElementById('forgot-otp-input').value.trim();
-    const msg = document.getElementById('forgot-msg-2');
-    if(!userOtp) return;
-    if(userOtp === generatedOtp) {
-        msg.textContent = "Code verified! Logging in..."; msg.style.color = "var(--success)"; msg.style.display = "block";
-        try {
-            window.tempLoginPass = recoveredPassword;
-            await auth.signInWithEmailAndPassword(forgotEmail, recoveredPassword);
-            closeForgotPass();
-        } catch(e) { msg.textContent = "Error logging in."; msg.style.color = "var(--danger)"; }
-    } else {
-        msg.textContent = "Incorrect code"; msg.style.color = "var(--danger)"; msg.style.display = "block";
+    } catch(e) {
+        msg.textContent = 'Login failed: ' + e.message; msg.className = 'auth-msg error';
     }
 }
+
+async function doLogout(){ try{ setOnlineStatus(false); } catch(e){} try{ await auth.signOut(); } catch(e){} window.location.reload(); }
 auth.onAuthStateChanged(async(user)=>{
     if(user){
         currentUser=user;setOnlineStatus(true); 
+        
+        const snap = await db.collection('users').doc(user.uid).get();
+        if(snap.exists) { currentUserData = snap.data(); } else { currentUserData = {name:user.displayName||'User',email:user.email}; }
+
+        document.getElementById('auth-screen').style.display='none'; document.getElementById('app-screen').style.display='block';
+        loadUserUI(); loadFeed(); loadMessages(); cleanupExpiredPosts();
+
+        /* Live Friend Requests Badge Sync */
         db.collection('users').doc(user.uid).onSnapshot(doc => {
             if(doc.exists) {
                 currentUserData = doc.data();
@@ -446,10 +387,6 @@ auth.onAuthStateChanged(async(user)=>{
                 if(document.getElementById('page-profile').classList.contains('active')) loadUserUI();
             }
         });
-        
-        if(window.tempLoginPass) { saveAccountToLocal(user.email, window.tempLoginPass, currentUserData.name, currentUserData.avatar||''); window.tempLoginPass = null; }
-        document.getElementById('auth-screen').style.display='none'; document.getElementById('app-screen').style.display='block';
-        loadFeed();loadMessages();cleanupExpiredPosts();
         
         notifUnsub = db.collection('notifications').where('toUid', '==', user.uid).onSnapshot(nSnap => {
             let notifs = nSnap.docs.map(nd => ({ id: nd.id, ...nd.data() }));
@@ -481,7 +418,7 @@ auth.onAuthStateChanged(async(user)=>{
 function showPage(page){
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
     document.getElementById('page-'+page).classList.add('active'); if(document.getElementById('nav-'+page)) document.getElementById('nav-'+page).classList.add('active');
-    if(page==='messages') loadMessages(); if(page==='profile'){ loadMyPosts(); } if(page==='friends'){ loadFriendRequests(); }
+    if(page==='messages') loadMessages(); if(page==='profile'){ loadUserUI(); loadMyPosts(); } if(page==='friends'){ loadFriendRequests(); }
 }
 async function markNotifAsRead(id) { await db.collection('notifications').doc(id).update({read: true}); }
 
@@ -524,7 +461,6 @@ function loadFeed(){
         }).join('');
     });
 }
-/* Notification Router & Single Post Viewer */
 async function handleNotifClick(id, element, postId, type) {
     if(isNotifEditMode) {
         const cb = element.querySelector('.notif-checkbox'); cb.checked = !cb.checked; updateNotifCount();
@@ -587,7 +523,7 @@ function toggleReplyBox(postId, commentId) { document.getElementById(`reply-box-
 async function submitReply(postId, commentId) { const input = document.getElementById(`reply-input-${postId}-${commentId}`); const text = input.value.trim(); if(!text) return; try { const postRef = db.collection('posts').doc(postId); const doc = await postRef.get(); if(doc.exists) { const data = doc.data(); const comments = data.comments || []; const cIndex = comments.findIndex(c => c.id === commentId); if(cIndex > -1) { if(!comments[cIndex].replies) comments[cIndex].replies = []; comments[cIndex].replies.push({ uid: currentUser.uid, name: currentUserData.name || currentUser.displayName, text: text, createdAt: Date.now() }); await postRef.update({ comments: comments }); } } input.value = ''; toggleReplyBox(postId, commentId); } catch(e) { showToast("Error adding reply!"); } }
 
 async function toggleLike(postId) { const postRef = db.collection('posts').doc(postId); const doc = await postRef.get(); if(doc.exists) { const p = doc.data(); let likedBy = p.likedBy || []; let likes = p.likes || 0; if(likedBy.includes(currentUser.uid)) { likedBy = likedBy.filter(id => id !== currentUser.uid); likes = Math.max(0, likes - 1); } else { likedBy.push(currentUser.uid); likes++; if(p.uid !== currentUser.uid) { await db.collection('notifications').add({ toUid: p.uid, fromUid: currentUser.uid, fromName: currentUserData.name, type: 'like', postId: postId, postTitle: p.title || 'Photo', read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); } } await postRef.update({ likes, likedBy }); } }
-async function searchUsers() { const q = document.getElementById('search-input').value.trim().toLowerCase();const list = document.getElementById('search-results-list'); if(!q) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Search users...</div>'; return; } const snap = await db.collection('users').get();let html = ''; snap.forEach(d => { if(d.id === currentUser.uid) return; const u = d.data(); if(u.name.toLowerCase().includes(q)) { let btnHtml = '';const friends = currentUserData.friends || [];const sent = currentUserData.sentRequests || [];const received = currentUserData.receivedRequests || []; if(friends.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 16px; font-size:11px;" disabled>Friends</button>'; else if(sent.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 16px; font-size:11px;" disabled>Sent</button>'; else if(received.includes(d.id)) btnHtml = `<button class="btn-primary" style="padding:6px 16px; font-size:11px; width:auto; margin:0;" onclick="acceptRequest('${d.id}')">Accept</button>`; else btnHtml = `<button class="btn-primary" style="padding:6px 16px; font-size:11px; width:auto; margin:0;" onclick="sendRequest('${d.id}')">Add</button>`; const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name); const dot = u.online ? '<div class="online-dot"></div>' : ''; html += `<div class="msg-item"><div class="avatar" style="width:40px;height:40px;cursor:pointer;position:relative;" onclick="viewUserProfile('${d.id}')">${av}${dot}</div><div class="msg-info" onclick="viewUserProfile('${d.id}')">${u.name} ${getVerifiedBadge(u.email)}</div><div>${btnHtml}</div></div>`; } }); list.innerHTML = html || '<div style="text-align:center; padding:20px;">No users found.</div>'; }
+async function searchUsers() { const q = document.getElementById('search-input').value.trim().toLowerCase();const list = document.getElementById('search-results-list'); if(!q) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Search users...</div>'; return; } const snap = await db.collection('users').get();let html = ''; snap.forEach(d => { if(d.id === currentUser.uid) return; const u = d.data(); if(u.name && u.name.toLowerCase().includes(q)) { let btnHtml = '';const friends = currentUserData.friends || [];const sent = currentUserData.sentRequests || [];const received = currentUserData.receivedRequests || []; if(friends.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 16px; font-size:11px;" disabled>Friends</button>'; else if(sent.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 16px; font-size:11px;" disabled>Sent</button>'; else if(received.includes(d.id)) btnHtml = `<button class="btn-primary" style="padding:6px 16px; font-size:11px; width:auto; margin:0;" onclick="acceptRequest('${d.id}')">Accept</button>`; else btnHtml = `<button class="btn-primary" style="padding:6px 16px; font-size:11px; width:auto; margin:0;" onclick="sendRequest('${d.id}')">Add</button>`; const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name); const dot = u.online ? '<div class="online-dot"></div>' : ''; html += `<div class="msg-item"><div class="avatar" style="width:40px;height:40px;cursor:pointer;position:relative;" onclick="viewUserProfile('${d.id}')">${av}${dot}</div><div class="msg-info" onclick="viewUserProfile('${d.id}')">${u.name} ${getVerifiedBadge(u.email)}</div><div>${btnHtml}</div></div>`; } }); list.innerHTML = html || '<div style="text-align:center; padding:20px;">No users found.</div>'; }
 async function sendRequest(targetUid) { await db.collection('users').doc(currentUser.uid).update({ sentRequests: firebase.firestore.FieldValue.arrayUnion(targetUid) }); await db.collection('users').doc(targetUid).update({ receivedRequests: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); searchUsers();showToast('Friend request sent!'); }
 async function acceptRequest(requesterUid) { await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); loadFriendRequests(); if(document.getElementById('page-search').classList.contains('active')) searchUsers(); showToast('Connected as friends!'); }
 function loadFriendRequests() { const reqs = currentUserData.receivedRequests || [];const list = document.getElementById('friend-requests-list'); if(reqs.length === 0) { list.innerHTML = '<div style="padding:10px; color:var(--muted); font-size:12px; text-align:center;">No requests</div>'; return; } db.collection('users').get().then(snap => { let html = '';snap.forEach(d => { if(reqs.includes(d.id)) { const u = d.data(); html += `<div class="msg-item"><div>${u.name}</div><button class="btn-primary" style="padding:6px 14px; font-size:10px; width:auto;" onclick="acceptRequest('${d.id}')">Accept</button></div>`; } }); list.innerHTML = html; }); }
@@ -595,10 +531,10 @@ function loadFriendRequests() { const reqs = currentUserData.receivedRequests ||
 function togglePartnerField() { const rel = document.getElementById('edit-relationship').value; document.getElementById('partner-field-wrap').style.display = (rel === 'In a relationship' || rel === 'Married') ? 'block' : 'none'; }
 function openProfileEdit() { document.getElementById('profile-display-section').style.display = 'none'; document.getElementById('profile-edit-section').style.display = 'block'; document.getElementById('edit-name').value = currentUserData.name || ''; document.getElementById('edit-bio').value = currentUserData.bio || ''; document.getElementById('edit-gender').value = currentUserData.gender || ''; document.getElementById('edit-hometown').value = currentUserData.hometown || ''; document.getElementById('edit-location').value = currentUserData.location || ''; document.getElementById('edit-relationship').value = currentUserData.relationship || ''; document.getElementById('edit-partner').value = currentUserData.partnerName || ''; togglePartnerField(); }
 function closeProfileEdit() { document.getElementById('profile-display-section').style.display = 'block'; document.getElementById('profile-edit-section').style.display = 'none'; }
-async function saveProfileChanges() { const name = document.getElementById('edit-name').value.trim(); const bio = document.getElementById('edit-bio').value.trim(); const gender = document.getElementById('edit-gender').value; const hometown = document.getElementById('edit-hometown').value.trim(); const location = document.getElementById('edit-location').value.trim(); const relationship = document.getElementById('edit-relationship').value; const partnerName = document.getElementById('edit-partner').value.trim(); if(!name) { showToast('Name is required!'); return; } if(hasEmoji(name)) { showToast('No Emojis allowed in Name!'); return; } try { showToast('Saving...'); await db.collection('users').doc(currentUser.uid).set({ name, bio, gender, hometown, location, relationship, partnerName }, { merge: true }); let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); const idx = accounts.findIndex(a => a.email === currentUser.email); if(idx > -1) { accounts[idx].name = name; localStorage.setItem('savedAccounts', JSON.stringify(accounts)); } loadUserUI(); closeProfileEdit(); showToast('Profile Updated! 🎉'); } catch(e) { showToast('Error saving data.'); } }
+async function saveProfileChanges() { const name = document.getElementById('edit-name').value.trim(); const bio = document.getElementById('edit-bio').value.trim(); const gender = document.getElementById('edit-gender').value; const hometown = document.getElementById('edit-hometown').value.trim(); const location = document.getElementById('edit-location').value.trim(); const relationship = document.getElementById('edit-relationship').value; const partnerName = document.getElementById('edit-partner').value.trim(); if(!name) { showToast('Name is required!'); return; } if(hasEmoji(name)) { showToast('No Emojis allowed in Name!'); return; } try { showToast('Saving...'); await db.collection('users').doc(currentUser.uid).set({ name, bio, gender, hometown, location, relationship, partnerName }, { merge: true }); loadUserUI(); closeProfileEdit(); showToast('Profile Updated! 🎉'); } catch(e) { showToast('Error saving data.'); } }
 
 function loadUserUI(){ const name=currentUserData.name||currentUser.displayName||'User'; const av=currentUserData.avatar; const avHtml = av?'<img src="'+av+'">':avatarInitial(name); document.getElementById('composer-avatar-trigger').innerHTML=avHtml; document.getElementById('modal-composer-avatar').innerHTML=avHtml; document.getElementById('modal-composer-name').innerHTML=name + getVerifiedBadge(currentUserData.email); document.getElementById('profile-name-display').innerHTML=name + getVerifiedBadge(currentUserData.email); document.getElementById('profile-my-status').innerHTML='<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:8px;">● Active Now</div>'; document.getElementById('profile-bio-display').textContent=currentUserData.bio||''; document.getElementById('profile-avatar-big').innerHTML=avHtml; let dHtml = ''; if(currentUserData.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">person</span> <strong>${currentUserData.gender}</strong></div>`; if(currentUserData.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">location_on</span> Lives in <strong>${currentUserData.location}</strong></div>`; if(currentUserData.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">home</span> From <strong>${currentUserData.hometown}</strong></div>`; if(currentUserData.relationship) { if((currentUserData.relationship === 'In a relationship' || currentUserData.relationship === 'Married') && currentUserData.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${currentUserData.relationship}</strong> with <strong>${currentUserData.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${currentUserData.relationship}</strong></div>`; } } document.getElementById('profile-details-display').innerHTML = dHtml; }
-function uploadAvatar(input){ const file=input.files[0];if(!file)return; showToast('Uploading profile photo...'); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }).then(res => res.json()).then(async data => { if(data.secure_url) { await db.collection('users').doc(currentUser.uid).set({avatar: data.secure_url},{merge:true}); currentUserData.avatar=data.secure_url; let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); const idx = accounts.findIndex(a => a.email === currentUser.email); if(idx > -1) { accounts[idx].avatar = data.secure_url; localStorage.setItem('savedAccounts', JSON.stringify(accounts)); } loadUserUI(); showToast('Profile photo updated! ✅'); } else { showToast('Upload failed.'); } }).catch(e => showToast('Network error.')); }
+function uploadAvatar(input){ const file=input.files[0];if(!file)return; showToast('Uploading profile photo...'); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }).then(res => res.json()).then(async data => { if(data.secure_url) { await db.collection('users').doc(currentUser.uid).set({avatar: data.secure_url},{merge:true}); currentUserData.avatar=data.secure_url; loadUserUI(); showToast('Profile photo updated! ✅'); } else { showToast('Upload failed.'); } }).catch(e => showToast('Network error.')); }
 
 async function viewUserProfile(uid) { if(uid === currentUser.uid) { showPage('profile'); return; } document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-other-profile').classList.add('active'); const snap = await db.collection('users').doc(uid).get(); if(snap.exists) { const data = snap.data(); const name = data.name || 'User'; document.getElementById('other-profile-name').innerHTML = name + getVerifiedBadge(data.email); const otherAv = data.avatar ? `<img src="${data.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(name); document.getElementById('other-profile-avatar').innerHTML = otherAv; const isOnline = data.online; document.getElementById('other-profile-status').innerHTML = isOnline ? '<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:8px;">● Active Now</div>' : '<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">Offline</div>'; let dHtml = ''; if(data.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">person</span> <strong>${data.gender}</strong></div>`; if(data.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">location_on</span> Lives in <strong>${data.location}</strong></div>`; if(data.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">home</span> From <strong>${data.hometown}</strong></div>`; if(data.relationship) { if((data.relationship === 'In a relationship' || data.relationship === 'Married') && data.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${data.relationship}</strong> with <strong>${data.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${data.relationship}</strong></div>`; } } document.getElementById('other-profile-details').innerHTML = dHtml; const isFriend = currentUserData.friends && currentUserData.friends.includes(uid); if(isFriend) { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Message'; document.getElementById('other-unfriend-btn').style.display = 'inline-block'; document.getElementById('other-unfriend-btn').onclick = () => unfriendUser(uid); } else { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Send Message'; document.getElementById('other-unfriend-btn').style.display = 'none'; } document.getElementById('other-msg-btn').onclick = () => openChatByUid(uid, name, data.avatar||'', isOnline, data.email); loadOtherUserPosts(uid); } }
 function closeUserProfile() { document.getElementById('page-other-profile').classList.remove('active'); showPage('feed'); }

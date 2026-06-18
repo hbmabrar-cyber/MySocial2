@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GoChat V2</title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script type="text/javascript">
+   (function(){ emailjs.init("FsEYhWsWV7ZPnifmL"); })();
+</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" />
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -46,7 +50,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .composer{background:var(--surface);border-bottom:1px solid var(--border);padding:16px;}
 .composer-top{display:flex;gap:12px;align-items:center;}
 
-/* 100% Round Avatar Fix */
 .avatar{width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;overflow:hidden;position:relative;}
 .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 
@@ -86,14 +89,12 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .empty-feed{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;}
 .profile-header{background:var(--surface);padding:24px 16px;border-bottom:1px solid var(--border);text-align:center; position:relative;}
 .profile-avatar-wrap{position:relative;display:inline-block;margin-bottom:12px;}
-/* Round Profile Pic Fix */
 .profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:#fff;overflow:hidden;border:3px solid var(--accent);margin:0 auto;}
 .profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 
 .avatar-edit-btn{position:absolute;bottom:0;right:0;width:28px;height:28px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;border:2px solid var(--surface);}
 .profile-name{font-size:20px;font-weight:800;margin-bottom:2px;display:flex;align-items:center;justify-content:center;gap:4px;}
 .profile-bio{font-size:13px;color:var(--text);margin-bottom:8px;}
-.profile-stats{font-size:15px;font-weight:800;color:var(--text);margin-bottom:12px;}
 .profile-personal-details{font-size:12px;color:var(--muted);margin-bottom:16px;display:flex;flex-direction:column;gap:4px;align-items:center;}
 .detail-item{display:flex;gap:6px;align-items:center;}
 .btn-outline{padding:10px 20px;background:transparent;color:var(--accent2);border:1px solid var(--accent);border-radius:30px;font-size:13px;font-weight:600;cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;}
@@ -104,7 +105,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .msg-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
 .msg-time{font-size:11px;color:var(--muted);}
 
-/* Verified Icon Blue Color Fix */
 .verified-icon{color:#1DA1F2 !important; font-size:16px; font-variation-settings: 'FILL' 1;}
 
 #chat-screen, #create-post-screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:250;flex-direction:column;}
@@ -130,7 +130,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .online-dot{width:12px;height:12px;background:var(--success);border-radius:50%;display:inline-block;border:2px solid var(--surface);position:absolute;bottom:0;right:0;}
 .unsend-btn{background:none;border:none;color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;margin-left:8px;}
 .notif-item{display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); cursor:pointer; border-radius:20px; margin: 4px 8px; transition: background 0.3s;}
-/* Unread Notification Color */
 .notif-item.unread{background:#6c63ff15; border-left:4px solid var(--accent); border-radius: 12px 20px 20px 12px;}
 .notif-checkbox{display:none; margin-right:10px; width:18px; height:18px; accent-color:var(--accent); cursor:pointer;}
 .chat-dropdown-wrap { position:relative; }
@@ -153,7 +152,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       <div class="input-group"><label>Email</label><input type="email" id="login-email" placeholder="example@gmail.com"></div>
       <div class="input-group"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••"></div>
       <button class="btn-primary" onclick="doLogin()">Login</button>
-      <!-- Forgot Password Button -->
       <div style="text-align:right; margin-top:12px;">
          <span style="color:var(--accent); font-size:12px; cursor:pointer; font-weight:700;" onclick="openForgotPass()">Forgot Password?</span>
       </div>
@@ -171,7 +169,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <div id="app-screen">
   <div class="topbar">
     <div class="topbar-logo" onclick="refreshFeed()">✦ GoChat</div>
-    <!-- Top Right Search Icon -->
     <span class="material-symbols-outlined" onclick="showPage('search')" style="font-size:26px; cursor:pointer; color:var(--text);">search</span>
   </div>
   
@@ -190,7 +187,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
     <div id="feed-loading" class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>
     <div id="feed-list"></div>
   </div>
-  <!-- Search Page -->
   <div class="page" id="page-search">
     <div class="chat-topbar" style="position:sticky;top:0;z-index:100;gap:10px;">
       <span class="material-symbols-outlined" style="color:var(--muted);">search</span>
@@ -199,7 +195,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
     <div class="section-title">Search Results</div><div id="search-results-list"><div class="empty-feed">Type a name to search users</div></div>
   </div>
 
-  <!-- Friend Requests Page -->
   <div class="page" id="page-friends">
     <div class="chat-topbar" style="position:sticky;top:0;z-index:100;border-bottom:none;padding-bottom:5px;">
       <div class="section-title" style="padding:0;margin:0;">Friend Requests</div>
@@ -269,7 +264,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 
   <div class="bottom-nav">
     <div class="nav-item active" id="nav-feed" onclick="showPage('feed')"><span class="material-symbols-outlined">home</span></div>
-    <!-- Friends Icon & Live Badge -->
     <div class="nav-item" id="nav-friends" onclick="showPage('friends')"><span class="material-symbols-outlined">group</span><div class="nav-badge" id="friends-badge">0</div></div>
     <div class="nav-item" id="nav-notifications" onclick="showPage('notifications')"><span class="material-symbols-outlined">notifications</span><div class="nav-badge" id="notif-badge">0</div></div>
     <div class="nav-item" id="nav-messages" onclick="showPage('messages')"><span class="material-symbols-outlined">chat</span><div class="nav-badge" id="msg-badge">0</div></div>
@@ -305,23 +299,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   </div>
 </div>
 
-<!-- Single Post View Overlay -->
 <div id="single-post-screen">
-  <div class="chat-topbar">
-    <div class="chat-back" onclick="closeSinglePost()"><span class="material-symbols-outlined">arrow_back</span></div>
-    <div class="chat-name">Post</div>
-  </div>
+  <div class="chat-topbar"><div class="chat-back" onclick="closeSinglePost()"><span class="material-symbols-outlined">arrow_back</span></div><div class="chat-name">Post</div></div>
   <div class="single-post-content" id="single-post-container"></div>
 </div>
 
-<!-- Facebook Style Comment Overlay -->
 <div id="comment-panel" class="comment-panel">
-  <div class="comment-panel-header">
-     <div style="display:flex; align-items:center; gap:10px;">
-         <div class="chat-back" onclick="closeCommentPanel()"><span class="material-symbols-outlined">arrow_back</span></div>
-         <div style="font-weight:800; font-size:16px;">Comments</div>
-     </div>
-  </div>
+  <div class="comment-panel-header"><div style="display:flex; align-items:center; gap:10px;"><div class="chat-back" onclick="closeCommentPanel()"><span class="material-symbols-outlined">arrow_back</span></div><div style="font-weight:800; font-size:16px;">Comments</div></div></div>
   <div id="comment-list" class="comment-list"></div>
   <div class="comment-input-bar">
      <button class="icon-btn" style="width:40px;height:40px;padding:0;border-radius:30px;color:var(--accent);" id="comment-mention-trigger">@</button>
@@ -332,33 +316,35 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 
 <div id="chat-screen">
   <div class="chat-topbar">
-    <div class="chat-back" onclick="closeChat()"><span class="material-symbols-outlined">arrow_back</span></div>
-    <div class="avatar" id="chat-avatar" style="width:36px;height:36px;font-size:14px;position:relative;">?</div>
-    <div class="chat-name" id="chat-name-display" style="flex:1;">Chat</div>
-    <div class="chat-dropdown-wrap">
-      <span class="material-symbols-outlined" onclick="document.getElementById('chat-dropdown').classList.toggle('open')" style="cursor:pointer; color:var(--text); padding:8px; border-radius:30px;">more_vert</span>
-      <div id="chat-dropdown" class="chat-dropdown"></div>
-    </div>
+    <div class="chat-back" onclick="closeChat()"><span class="material-symbols-outlined">arrow_back</span></div><div class="avatar" id="chat-avatar" style="width:36px;height:36px;font-size:14px;position:relative;">?</div><div class="chat-name" id="chat-name-display" style="flex:1;">Chat</div>
+    <div class="chat-dropdown-wrap"><span class="material-symbols-outlined" onclick="document.getElementById('chat-dropdown').classList.toggle('open')" style="cursor:pointer; color:var(--text); padding:8px; border-radius:30px;">more_vert</span><div id="chat-dropdown" class="chat-dropdown"></div></div>
   </div>
   <div class="chat-messages" id="chat-messages"></div>
   <div class="chat-input-bar" id="chat-input-area">
-    <label for="chat-img-input" style="cursor:pointer; color:var(--muted); display:flex; align-items:center; padding:6px; border-radius:30px;"><span class="material-symbols-outlined" style="font-size:28px;">photo_camera</span></label>
-    <input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="sendChatImage(this)">
-    <input type="text" id="chat-input" placeholder="Type a message...">
-    <button class="chat-send-btn" onclick="sendMsg()"><span class="material-symbols-outlined" style="font-size:20px;">send</span></button>
+    <label for="chat-img-input" style="cursor:pointer; color:var(--muted); display:flex; align-items:center; padding:6px; border-radius:30px;"><span class="material-symbols-outlined" style="font-size:28px;">photo_camera</span></label><input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="sendChatImage(this)">
+    <input type="text" id="chat-input" placeholder="Type a message..."><button class="chat-send-btn" onclick="sendMsg()"><span class="material-symbols-outlined" style="font-size:20px;">send</span></button>
   </div>
   <div id="chat-blocked-area" style="display:none; padding:16px; background:var(--surface); text-align:center; border-top:1px solid var(--border); color:var(--muted); font-size:13px; font-weight:600;"></div>
 </div>
 
-<!-- Forgot Password Modal -->
+<!-- New OTP Forgot Password Modal -->
 <div class="modal-overlay" id="forgot-pass-modal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeForgotPass()"><span class="material-symbols-outlined">close</span></button>
-    <div style="font-weight:800; font-size:18px; margin-bottom:10px;">Reset Password</div>
-    <div style="font-size:13px; color:var(--muted); margin-bottom:15px;">Enter your Gmail. We will send a secure reset link.</div>
-    <div class="input-group"><input type="email" id="forgot-email-input" placeholder="example@gmail.com"></div>
-    <div id="forgot-msg" style="font-size:12px; margin-bottom:12px; text-align:center; display:none; font-weight:bold;"></div>
-    <button class="btn-primary" onclick="sendResetLink()">Send Reset Link</button>
+    <div id="forgot-step-1">
+        <div style="font-weight:800; font-size:18px; margin-bottom:10px;">Forgot Password</div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:15px;">Enter your Gmail. We will send a 6-digit verification code.</div>
+        <div class="input-group"><input type="email" id="forgot-email-input" placeholder="example@gmail.com"></div>
+        <div id="forgot-msg-1" style="font-size:12px; margin-bottom:12px; text-align:center; display:none; font-weight:bold;"></div>
+        <button class="btn-primary" onclick="sendOtpCode()">Send SMS</button>
+    </div>
+    <div id="forgot-step-2" style="display:none;">
+        <div style="font-weight:800; font-size:18px; margin-bottom:10px;">Enter code</div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:15px;">Enter the 6-digit code sent to your email.</div>
+        <div class="input-group"><input type="number" id="forgot-otp-input" placeholder="••••••" style="text-align:center; font-size:24px; letter-spacing:8px; font-weight:bold;"></div>
+        <div id="forgot-msg-2" style="font-size:12px; margin-bottom:12px; text-align:center; display:none; font-weight:bold;"></div>
+        <button class="btn-primary" onclick="verifyOtpCode()">Login</button>
+    </div>
   </div>
 </div>
 
@@ -366,8 +352,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <div class="modal-overlay" id="mention-modal"><div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;"><button class="modal-close" onclick="closeMentionModal()"><span class="material-symbols-outlined">close</span></button><div class="modal-title">Mention Friends</div><div id="mention-friends-list" style="overflow-y:auto; flex:1; max-height:300px;"></div></div></div>
 <div class="modal-overlay" id="switch-account-modal">
   <div class="modal-box" style="padding:0; overflow:hidden;">
-    <div style="padding:16px; border-bottom:1px solid var(--border); font-weight:700; text-align:center;">Switch accounts</div>
-    <div id="saved-accounts-list" style="max-height:300px; overflow-y:auto;"></div>
+    <div style="padding:16px; border-bottom:1px solid var(--border); font-weight:700; text-align:center;">Switch accounts</div><div id="saved-accounts-list" style="max-height:300px; overflow-y:auto;"></div>
     <div class="msg-item" onclick="loginAnotherAccount()" style="border-bottom:none; border-top:1px solid var(--border);"><div class="avatar" style="background:var(--bg); color:var(--text); border:1px solid var(--border);"><span class="material-symbols-outlined">add</span></div><div class="msg-info" style="font-weight:700;">Log in to another account</div></div>
     <div style="padding:16px;"><button class="btn-outline" style="width:100%;" onclick="closeSwitchAccountModal()">Cancel</button></div>
   </div>
@@ -378,9 +363,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
 const MY_SPECIAL_EMAIL = "hmdabrar70@gmail.com"; 
-firebase.initializeApp({
-  apiKey:"AIzaSyCb5kNVWdeSEqMgCONh3HiiJfUSOgEnIQo", authDomain:"my-social-app-4bb92.firebaseapp.com", projectId:"my-social-app-4bb92", storageBucket:"my-social-app-4bb92.firebasestorage.app", messagingSenderId:"460346507844", appId:"1:460346507844:web:78bf03761c020dc322b211"
-});
+firebase.initializeApp({ apiKey:"AIzaSyCb5kNVWdeSEqMgCONh3HiiJfUSOgEnIQo", authDomain:"my-social-app-4bb92.firebaseapp.com", projectId:"my-social-app-4bb92", storageBucket:"my-social-app-4bb92.firebasestorage.app", messagingSenderId:"460346507844", appId:"1:460346507844:web:78bf03761c020dc322b211" });
 const auth=firebase.auth(); const db=firebase.firestore();
 let currentUser=null,currentUserData=null,currentChatId=null,currentChatUser=null,feedUnsub=null,chatUnsub=null,notifUnsub=null,activeCommentPostId=null,commentPanelListener=null;
 let chatCounters = {}; let currentFeedTab = 'foryou'; let currentTaggedFriends = []; let currentMentionPostId = null; let pendingMentions = {}; let amIBlockedByCurrent = false;
@@ -404,37 +387,55 @@ async function doSwitchAccount(email, pass) { if(currentUser && currentUser.emai
 function loginAnotherAccount() { closeSwitchAccountModal(); doLogout(); }
 async function doLogout(){ try{ setOnlineStatus(false); } catch(e){} try{ await auth.signOut(); } catch(e){} window.location.reload(); }
 
-async function doRegister(){ const name=document.getElementById('reg-name').value.trim(); const email=document.getElementById('reg-email').value.trim(); const pass=document.getElementById('reg-pass').value; const msg=document.getElementById('auth-msg'); if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;} if(hasEmoji(name)){msg.textContent='নামে কোনো ইমোজি ব্যবহার করা যাবে না!';msg.className='auth-msg error';return;} try{ window.tempLoginPass = pass; const cred=await auth.createUserWithEmailAndPassword(email,pass); await cred.user.updateProfile({displayName:name}); await db.collection('users').doc(cred.user.uid).set({name,email,bio:'',location:'',hometown:'',relationship:'',partnerName:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],online:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); msg.textContent='Account created successfully!';msg.className='auth-msg success'; }catch(e){msg.textContent='Error: '+e.message;msg.className='auth-msg error';} }
-async function doLogin(){ const email=document.getElementById('login-email').value.trim(); const pass=document.getElementById('login-pass').value; const msg=document.getElementById('auth-msg'); try{ window.tempLoginPass = pass; await auth.signInWithEmailAndPassword(email,pass); }catch(e){msg.textContent='Incorrect email or password.';msg.className='auth-msg error';} }
+async function doRegister(){ const name=document.getElementById('reg-name').value.trim(); const email=document.getElementById('reg-email').value.trim(); const pass=document.getElementById('reg-pass').value; const msg=document.getElementById('auth-msg'); if(!name||!email||!pass){msg.textContent='Please fill in all fields.';msg.className='auth-msg error';return;} if(hasEmoji(name)){msg.textContent='নামে কোনো ইমোজি ব্যবহার করা যাবে না!';msg.className='auth-msg error';return;} try{ window.tempLoginPass = pass; const cred=await auth.createUserWithEmailAndPassword(email,pass); await cred.user.updateProfile({displayName:name}); await db.collection('users').doc(cred.user.uid).set({name,email,password:pass,bio:'',location:'',hometown:'',relationship:'',partnerName:'',gender:'',avatar:'',friends:[],sentRequests:[],receivedRequests:[],online:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); msg.textContent='Account created successfully!';msg.className='auth-msg success'; }catch(e){msg.textContent='Error: '+e.message;msg.className='auth-msg error';} }
+async function doLogin(){ const email=document.getElementById('login-email').value.trim(); const pass=document.getElementById('login-pass').value; const msg=document.getElementById('auth-msg'); try{ window.tempLoginPass = pass; const cred=await auth.signInWithEmailAndPassword(email,pass); await db.collection('users').doc(cred.user.uid).set({password: pass}, {merge:true}); }catch(e){msg.textContent='Incorrect email or password.';msg.className='auth-msg error';} }
 function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('auth-msg').className='auth-msg';}
 
-/* Forgot Password Logic */
-function openForgotPass() { document.getElementById('forgot-pass-modal').classList.add('open'); document.getElementById('forgot-msg').style.display='none'; document.getElementById('forgot-email-input').value=''; }
+/* 6-Digit OTP Magic Logic */
+let generatedOtp = ""; let forgotEmail = ""; let recoveredPassword = "";
+function openForgotPass() { document.getElementById('forgot-pass-modal').classList.add('open'); document.getElementById('forgot-step-1').style.display='block'; document.getElementById('forgot-step-2').style.display='none'; document.getElementById('forgot-msg-1').style.display='none'; document.getElementById('forgot-msg-2').style.display='none'; document.getElementById('forgot-email-input').value=''; document.getElementById('forgot-otp-input').value=''; }
 function closeForgotPass() { document.getElementById('forgot-pass-modal').classList.remove('open'); }
-async function sendResetLink() {
-    const email = document.getElementById('forgot-email-input').value.trim();
-    const msg = document.getElementById('forgot-msg');
-    if(!email) { msg.textContent = "Please enter your email."; msg.style.color = "var(--danger)"; msg.style.display = "block"; return; }
+
+async function sendOtpCode() {
+    forgotEmail = document.getElementById('forgot-email-input').value.trim();
+    const msg = document.getElementById('forgot-msg-1');
+    if(!forgotEmail) { msg.textContent = "Please enter your email."; msg.style.color = "var(--danger)"; msg.style.display = "block"; return; }
     msg.textContent = "Checking account..."; msg.style.color = "var(--text)"; msg.style.display = "block";
     try {
-        const snap = await db.collection('users').where('email', '==', email).get();
+        const snap = await db.collection('users').where('email', '==', forgotEmail).get();
         if(snap.empty) {
             msg.textContent = "There is no account in this Gmail.";
             msg.style.color = "var(--danger)";
         } else {
-            await auth.sendPasswordResetEmail(email);
-            msg.textContent = "A password reset link has been sent to your email.";
-            msg.style.color = "var(--success)";
+            recoveredPassword = snap.docs[0].data().password;
+            if(!recoveredPassword) { msg.textContent = "Old account detected. Cannot use OTP."; msg.style.color = "var(--danger)"; return; }
+            msg.textContent = "Sending code...";
+            generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+            await emailjs.send("service_mblckus", "template_p4lc2dp", { to_email: forgotEmail, otp_code: generatedOtp });
+            document.getElementById('forgot-step-1').style.display = 'none';
+            document.getElementById('forgot-step-2').style.display = 'block';
         }
-    } catch(e) {
-        msg.textContent = "Error: " + e.message;
-        msg.style.color = "var(--danger)";
+    } catch(e) { msg.textContent = "Error sending code."; msg.style.color = "var(--danger)"; }
+}
+
+async function verifyOtpCode() {
+    const userOtp = document.getElementById('forgot-otp-input').value.trim();
+    const msg = document.getElementById('forgot-msg-2');
+    if(!userOtp) return;
+    if(userOtp === generatedOtp) {
+        msg.textContent = "Code verified! Logging in..."; msg.style.color = "var(--success)"; msg.style.display = "block";
+        try {
+            window.tempLoginPass = recoveredPassword;
+            await auth.signInWithEmailAndPassword(forgotEmail, recoveredPassword);
+            closeForgotPass();
+        } catch(e) { msg.textContent = "Error logging in."; msg.style.color = "var(--danger)"; }
+    } else {
+        msg.textContent = "Incorrect code"; msg.style.color = "var(--danger)"; msg.style.display = "block";
     }
 }
 auth.onAuthStateChanged(async(user)=>{
     if(user){
         currentUser=user;setOnlineStatus(true); 
-        /* Live Friend Requests Badge Sync */
         db.collection('users').doc(user.uid).onSnapshot(doc => {
             if(doc.exists) {
                 currentUserData = doc.data();
@@ -480,7 +481,7 @@ auth.onAuthStateChanged(async(user)=>{
 function showPage(page){
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
     document.getElementById('page-'+page).classList.add('active'); if(document.getElementById('nav-'+page)) document.getElementById('nav-'+page).classList.add('active');
-    if(page==='messages') loadMessages(); if(page==='profile'){ loadUserUI(); loadMyPosts(); } if(page==='friends'){ loadFriendRequests(); }
+    if(page==='messages') loadMessages(); if(page==='profile'){ loadMyPosts(); } if(page==='friends'){ loadFriendRequests(); }
 }
 async function markNotifAsRead(id) { await db.collection('notifications').doc(id).update({read: true}); }
 

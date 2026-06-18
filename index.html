@@ -12,7 +12,6 @@ body.light-mode{--bg:#ffffff;--surface:#f0f2f5;--card:#ffffff;--border:#cccccc;-
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh; overscroll-behavior-y: none; touch-action: manipulation;}
 .material-symbols-outlined { display: inline-block; white-space: nowrap; overflow: hidden; max-width: 1em; word-wrap: normal; direction: ltr; -webkit-font-smoothing: antialiased; }
 
-/* New Clean Auth Screen */
 #auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0f13 0%,#1a1228 100%);}
 .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px 32px;width:92%;max-width:380px; text-align:center;}
 .auth-logo{font-size:32px;font-weight:900;color:var(--accent2);margin-bottom:8px; letter-spacing:1px;}
@@ -27,7 +26,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 #app-screen{display:none;max-width:480px;margin:0 auto;padding-bottom:95px;}
 .topbar{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
 .topbar-logo{font-size:20px;font-weight:800;color:var(--accent2); cursor:pointer; transition: 0.2s; user-select: none;}
-.topbar-logo:active{transform: scale(0.95);}
+.topbar-logo:active{transform: scale(0.955);}
 .icon-btn{padding:8px 16px;border-radius:30px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);position:relative; transition:0.2s; font-size:13px; font-weight:600;}
 .icon-btn:hover{background:var(--border);}
 .settings-menu{display:none;position:absolute;top:50px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px;z-index:1000;width:180px;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
@@ -81,25 +80,29 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .single-post-content { flex:1; overflow-y:auto; padding-bottom:20px; background:var(--bg); }
 
 .empty-feed{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;}
-.profile-header{background:var(--surface);padding:24px 16px;border-bottom:1px solid var(--border);text-align:center; position:relative;}
-.profile-avatar-wrap{position:relative;display:inline-block;margin-bottom:12px;}
-.profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:#fff;overflow:hidden;border:3px solid var(--accent);margin:0 auto;}
-.profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 
-.avatar-edit-btn{position:absolute;bottom:0;right:0;width:28px;height:28px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;border:2px solid var(--surface);}
-.profile-name{font-size:20px;font-weight:800;margin-bottom:2px;display:flex;align-items:center;justify-content:center;gap:4px;}
-.profile-bio{font-size:13px;color:var(--text);margin-bottom:8px;}
-.profile-personal-details{font-size:12px;color:var(--muted);margin-bottom:16px;display:flex;flex-direction:column;gap:4px;align-items:center;}
-.detail-item{display:flex;gap:6px;align-items:center;}
-.btn-outline{padding:10px 20px;background:transparent;color:var(--accent2);border:1px solid var(--accent);border-radius:30px;font-size:13px;font-weight:600;cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;}
+/* New Facebook Lite Style Left Aligned Profile Layout CSS */
+.profile-header{background:var(--surface); padding:20px 16px; border-bottom:1px solid var(--border); text-align:left; position:relative; display:flex; flex-direction:column; gap:12px;}
+.profile-main-row{display:flex; align-items:center; gap:16px; width:100%;}
+.profile-avatar-wrap{position:relative; display:inline-block; flex-shrink:0;}
+.profile-avatar{width:84px; height:80px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700; color:#fff; overflow:hidden; border:3px solid var(--accent);}
+.profile-avatar img{width:100%; height:100%; object-fit:cover; border-radius:50%;}
+.profile-info-col{display:flex; flex-direction:column; gap:2px; flex:1;}
+.profile-name{font-size:21px; font-weight:800; display:flex; align-items:center; gap:5px; color:var(--text); justify-content:flex-start;}
+.profile-friend-count{font-size:13px; color:var(--muted); font-weight:600; margin-top:1px;}
+.profile-bio{font-size:14px; color:var(--text); line-height:1.4; font-weight:500; margin-top:4px; padding:0 4px;}
+.profile-personal-details{font-size:13px; color:var(--muted); display:flex; flex-direction:column; gap:8px; margin-top:6px; padding:0 4px;}
+.detail-item{display:flex; gap:10px; align-items:center; color:var(--text);}
+.detail-item .material-symbols-outlined{font-size:18px; color:var(--muted);}
 
+.avatar-edit-btn{position:absolute; bottom:0; right:0; width:26px; height:28px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer; border:2px solid var(--surface);}
 .msg-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;}
 .msg-info{flex:1;}
 .msg-name{font-weight:700;font-size:14px;margin-bottom:2px;display:flex;align-items:center;gap:4px;}
 .msg-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
 .msg-time{font-size:11px;color:var(--muted);}
 
-.verified-icon{color:#1DA1F2 !important; font-size:16px; font-variation-settings: 'FILL' 1;}
+.verified-icon{color:#1DA1F2 !important; font-size:18px; font-variation-settings: 'FILL' 1;}
 
 #chat-screen, #create-post-screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:250;flex-direction:column;}
 #chat-screen.open, #create-post-screen.open{display:flex;}
@@ -209,14 +212,27 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
           <div class="setting-item" style="color:var(--danger)" onclick="doLogout()"><span class="material-symbols-outlined">logout</span> Log out</div>
         </div>
       </div>
-      <div class="profile-avatar-wrap"><div class="profile-avatar" id="profile-avatar-big">?</div><label class="avatar-edit-btn" for="avatar-input"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></label><input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="uploadAvatar(this)"></div>
-      <div id="profile-display-section">
-          <div class="profile-name" id="profile-name-display">Loading...</div><div id="profile-my-status"></div>
+      
+      <div class="profile-main-row">
+         <div class="profile-avatar-wrap">
+            <div class="profile-avatar" id="profile-avatar-big">?</div>
+            <label class="avatar-edit-btn" for="avatar-input"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></label>
+            <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+         </div>
+         <div class="profile-info-col">
+            <div class="profile-name" id="profile-name-display">Loading...</div>
+            <div id="profile-friend-count" class="profile-friend-count">0 friends</div>
+            <div id="profile-my-status" style="margin-top:2px;"></div>
+         </div>
+      </div>
+
+      <div id="profile-display-section" style="width:100%;">
           <div class="profile-bio" id="profile-bio-display"></div>
           <div class="profile-personal-details" id="profile-details-display"></div>
-          <button class="btn-outline" onclick="openProfileEdit()" style="margin-top:10px; padding:8px 24px; font-size:12px; width:100%;"><span class="material-symbols-outlined" style="font-size:16px;">edit</span> Edit Profile</button>
+          <button class="btn-outline" onclick="openProfileEdit()" style="margin-top:14px; padding:10px 24px; font-size:13px; width:100%; border-radius:12px; background:var(--card); font-weight:700;"><span class="material-symbols-outlined" style="font-size:16px;">edit</span> Edit Profile</button>
       </div>
-      <div id="profile-edit-section" style="display:none; text-align:left; background:var(--bg); padding:16px; border-radius:24px; margin-top:15px; border:1px solid var(--border);">
+      
+      <div id="profile-edit-section" style="display:none; text-align:left; background:var(--bg); padding:16px; border-radius:24px; margin-top:5px; border:1px solid var(--border); width:100%;">
          <div style="font-weight:700; margin-bottom:12px; text-align:center; font-size:14px; color:var(--text);">Edit Profile Information</div>
          <div class="input-group"><label>Name (No Emojis)</label><input type="text" id="edit-name"></div>
          <div class="input-group"><label>Bio</label><input type="text" id="edit-bio"></div>
@@ -234,12 +250,19 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   <div class="page" id="page-other-profile">
     <div class="chat-topbar" style="position:sticky;top:0;z-index:100;"><div class="chat-back" onclick="closeUserProfile()"><span class="material-symbols-outlined">arrow_back</span></div><div class="chat-name" id="other-profile-top-name" style="margin-left:10px;">Profile</div></div>
     <div class="profile-header">
-      <div class="profile-avatar-wrap"><div class="profile-avatar" id="other-profile-avatar">?</div></div>
-      <div class="profile-name" id="other-profile-name">Loading...</div><div id="other-profile-status"></div>
-      <div class="profile-bio" id="other-profile-bio"></div><div class="profile-personal-details" id="other-profile-details"></div>
-      <div class="profile-btns" style="margin-top:10px; display:flex; gap:10px; justify-content:center;">
-        <button class="btn-primary" id="other-msg-btn" style="width:auto;padding:10px 24px;border-radius:30px;font-size:13px;"><span class="material-symbols-outlined" style="font-size:18px;">chat</span> Message</button>
-        <button class="btn-outline" id="other-unfriend-btn" style="width:auto;padding:10px 20px;border-radius:30px;font-size:13px;border-color:var(--danger);color:var(--danger);display:none;"><span class="material-symbols-outlined" style="font-size:18px;">person_remove</span> Unfriend</button>
+      <div class="profile-main-row">
+         <div class="profile-avatar-wrap"><div class="profile-avatar" id="other-profile-avatar">?</div></div>
+         <div class="profile-info-col">
+            <div class="profile-name" id="other-profile-name">Loading...</div>
+            <div id="other-profile-friend-count" class="profile-friend-count">0 friends</div>
+            <div id="other-profile-status" style="margin-top:2px;"></div>
+         </div>
+      </div>
+      <div class="profile-bio" id="other-profile-bio"></div>
+      <div class="profile-personal-details" id="other-profile-details"></div>
+      <div class="profile-btns" style="margin-top:10px; display:flex; gap:10px; width:100%;">
+        <button class="btn-primary" id="other-msg-btn" style="flex:1; padding:10px 24px; border-radius:12px; font-size:13px; margin:0;"><span class="material-symbols-outlined" style="font-size:18px;">chat</span> Message</button>
+        <button class="btn-outline" id="other-unfriend-btn" style="padding:10px 20px; border-radius:12px; font-size:13px; border-color:var(--danger); color:var(--danger); display:none; font-weight:700;"><span class="material-symbols-outlined" style="font-size:18px;">person_remove</span> Unfriend</button>
       </div>
     </div>
     <div class="section-title" style="margin-top:10px;">Recent Posts</div><div id="other-user-posts-list"></div>
@@ -337,7 +360,7 @@ function refreshFeed() { window.scrollTo({top: 0, behavior: 'smooth'}); showToas
 
 /* Google Login System */
 const provider = new firebase.auth.GoogleAuthProvider();
-provider.setCustomParameters({ prompt: 'select_account' }); // Shows all device accounts
+provider.setCustomParameters({ prompt: 'select_account' });
 
 async function signInWithGoogle() {
     const msg = document.getElementById('auth-msg');
@@ -347,7 +370,6 @@ async function signInWithGoogle() {
         const user = result.user;
         const snap = await db.collection('users').doc(user.uid).get();
         if(!snap.exists) {
-            // New account creation
             await db.collection('users').doc(user.uid).set({
                 name: user.displayName || 'GoChat User',
                 email: user.email,
@@ -357,7 +379,6 @@ async function signInWithGoogle() {
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         } else {
-            // Update online status for existing account
             await db.collection('users').doc(user.uid).update({ online: true, avatar: user.photoURL || snap.data().avatar });
         }
     } catch(e) {
@@ -376,7 +397,7 @@ auth.onAuthStateChanged(async(user)=>{
         document.getElementById('auth-screen').style.display='none'; document.getElementById('app-screen').style.display='block';
         loadUserUI(); loadFeed(); loadMessages(); cleanupExpiredPosts();
 
-        /* Live Friend Requests Badge Sync */
+        /* Live Friend Requests & Profile UI Sync */
         db.collection('users').doc(user.uid).onSnapshot(doc => {
             if(doc.exists) {
                 currentUserData = doc.data();
@@ -427,7 +448,6 @@ function closeCreatePost() { document.getElementById('create-post-screen').class
 function checkPostInputs() { const text = document.getElementById('post-title').value.trim(); const img = document.getElementById('post-img-input').files.length > 0; const btn = document.getElementById('modal-post-btn'); if (text || img) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; } else { btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; } }
 function previewImage(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{document.getElementById('compose-img-preview').style.display='block';document.getElementById('compose-preview-img').src=e.target.result;checkPostInputs();};reader.readAsDataURL(file);}
 function removePostImage() { document.getElementById('post-img-input').value = ''; document.getElementById('compose-img-preview').style.display = 'none'; document.getElementById('compose-preview-img').src = ''; checkPostInputs(); }
-
 function openTagModal() { document.getElementById('tag-modal').classList.add('open'); const list = document.getElementById('tag-friends-list'); const friends = currentUserData.friends || []; if(friends.length === 0) { list.innerHTML = '<div class="empty-feed" style="padding:20px;">No friends to tag</div>'; return; } list.innerHTML = ''; friends.forEach(async fId => { const snap = await db.collection('users').doc(fId).get(); if(snap.exists) { const u = snap.data(); const isTagged = currentTaggedFriends.includes(fId); list.innerHTML += `<div class="msg-item" onclick="toggleTag('${fId}', this)"><div class="avatar" style="width:36px;height:36px;">${avatarInitial(u.name)}</div><div class="msg-info">${u.name}</div><input type="checkbox" ${isTagged?'checked':''} style="pointer-events:none; width:18px; height:18px; accent-color:var(--accent);"></div>`; } }); }
 function toggleTag(uid, el) { const cb = el.querySelector('input'); if(currentTaggedFriends.includes(uid)) { currentTaggedFriends = currentTaggedFriends.filter(id => id !== uid); cb.checked = false; } else { currentTaggedFriends.push(uid); cb.checked = true; } const tagCount = document.getElementById('tag-count'); tagCount.style.display = currentTaggedFriends.length > 0 ? 'inline-block' : 'none'; tagCount.textContent = currentTaggedFriends.length; }
 function closeTagModal() { document.getElementById('tag-modal').classList.remove('open'); }
@@ -445,7 +465,7 @@ async function submitPost() {
         closeCreatePost(); showToast('Posted! ✦');
     } catch (e) { showToast('Error saving post.'); }
 }
-function setFeedTab(tab) { currentFeedTab = tab; document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active')); document.getElementById('tab-' + tab).classList.add('active'); loadFeed(); }
+function setFeedTab(tab) { currentFeedTab = tab; document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active')); document.getElementById('tab-' + tab).add('active'); loadFeed(); }
 
 function loadFeed(){
     const feedList=document.getElementById('feed-list'); if(feedUnsub) feedUnsub();
@@ -461,6 +481,7 @@ function loadFeed(){
         }).join('');
     });
 }
+
 async function handleNotifClick(id, element, postId, type) {
     if(isNotifEditMode) {
         const cb = element.querySelector('.notif-checkbox'); cb.checked = !cb.checked; updateNotifCount();
@@ -525,7 +546,7 @@ async function submitReply(postId, commentId) { const input = document.getElemen
 async function toggleLike(postId) { const postRef = db.collection('posts').doc(postId); const doc = await postRef.get(); if(doc.exists) { const p = doc.data(); let likedBy = p.likedBy || []; let likes = p.likes || 0; if(likedBy.includes(currentUser.uid)) { likedBy = likedBy.filter(id => id !== currentUser.uid); likes = Math.max(0, likes - 1); } else { likedBy.push(currentUser.uid); likes++; if(p.uid !== currentUser.uid) { await db.collection('notifications').add({ toUid: p.uid, fromUid: currentUser.uid, fromName: currentUserData.name, type: 'like', postId: postId, postTitle: p.title || 'Photo', read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); } } await postRef.update({ likes, likedBy }); } }
 async function searchUsers() { const q = document.getElementById('search-input').value.trim().toLowerCase();const list = document.getElementById('search-results-list'); if(!q) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Search users...</div>'; return; } const snap = await db.collection('users').get();let html = ''; snap.forEach(d => { if(d.id === currentUser.uid) return; const u = d.data(); if(u.name && u.name.toLowerCase().includes(q)) { let btnHtml = '';const friends = currentUserData.friends || [];const sent = currentUserData.sentRequests || [];const received = currentUserData.receivedRequests || []; if(friends.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 16px; font-size:11px;" disabled>Friends</button>'; else if(sent.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 16px; font-size:11px;" disabled>Sent</button>'; else if(received.includes(d.id)) btnHtml = `<button class="btn-primary" style="padding:6px 16px; font-size:11px; width:auto; margin:0;" onclick="acceptRequest('${d.id}')">Accept</button>`; else btnHtml = `<button class="btn-primary" style="padding:6px 16px; font-size:11px; width:auto; margin:0;" onclick="sendRequest('${d.id}')">Add</button>`; const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name); const dot = u.online ? '<div class="online-dot"></div>' : ''; html += `<div class="msg-item"><div class="avatar" style="width:40px;height:40px;cursor:pointer;position:relative;" onclick="viewUserProfile('${d.id}')">${av}${dot}</div><div class="msg-info" onclick="viewUserProfile('${d.id}')">${u.name} ${getVerifiedBadge(u.email)}</div><div>${btnHtml}</div></div>`; } }); list.innerHTML = html || '<div style="text-align:center; padding:20px;">No users found.</div>'; }
 async function sendRequest(targetUid) { await db.collection('users').doc(currentUser.uid).update({ sentRequests: firebase.firestore.FieldValue.arrayUnion(targetUid) }); await db.collection('users').doc(targetUid).update({ receivedRequests: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); searchUsers();showToast('Friend request sent!'); }
-async function acceptRequest(requesterUid) { await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); loadFriendRequests(); if(document.getElementById('page-search').classList.contains('active')) searchUsers(); showToast('Connected as friends!'); }
+async function acceptRequest(requesterUid) { await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); loadFriendRequests(); if(document.getElementById('page-search').classList.contains('active')) searchUsers(); showToast('Connected as friends!'); }
 function loadFriendRequests() { const reqs = currentUserData.receivedRequests || [];const list = document.getElementById('friend-requests-list'); if(reqs.length === 0) { list.innerHTML = '<div style="padding:10px; color:var(--muted); font-size:12px; text-align:center;">No requests</div>'; return; } db.collection('users').get().then(snap => { let html = '';snap.forEach(d => { if(reqs.includes(d.id)) { const u = d.data(); html += `<div class="msg-item"><div>${u.name}</div><button class="btn-primary" style="padding:6px 14px; font-size:10px; width:auto;" onclick="acceptRequest('${d.id}')">Accept</button></div>`; } }); list.innerHTML = html; }); }
 
 function togglePartnerField() { const rel = document.getElementById('edit-relationship').value; document.getElementById('partner-field-wrap').style.display = (rel === 'In a relationship' || rel === 'Married') ? 'block' : 'none'; }
@@ -533,10 +554,55 @@ function openProfileEdit() { document.getElementById('profile-display-section').
 function closeProfileEdit() { document.getElementById('profile-display-section').style.display = 'block'; document.getElementById('profile-edit-section').style.display = 'none'; }
 async function saveProfileChanges() { const name = document.getElementById('edit-name').value.trim(); const bio = document.getElementById('edit-bio').value.trim(); const gender = document.getElementById('edit-gender').value; const hometown = document.getElementById('edit-hometown').value.trim(); const location = document.getElementById('edit-location').value.trim(); const relationship = document.getElementById('edit-relationship').value; const partnerName = document.getElementById('edit-partner').value.trim(); if(!name) { showToast('Name is required!'); return; } if(hasEmoji(name)) { showToast('No Emojis allowed in Name!'); return; } try { showToast('Saving...'); await db.collection('users').doc(currentUser.uid).set({ name, bio, gender, hometown, location, relationship, partnerName }, { merge: true }); loadUserUI(); closeProfileEdit(); showToast('Profile Updated! 🎉'); } catch(e) { showToast('Error saving data.'); } }
 
-function loadUserUI(){ const name=currentUserData.name||currentUser.displayName||'User'; const av=currentUserData.avatar; const avHtml = av?'<img src="'+av+'">':avatarInitial(name); document.getElementById('composer-avatar-trigger').innerHTML=avHtml; document.getElementById('modal-composer-avatar').innerHTML=avHtml; document.getElementById('modal-composer-name').innerHTML=name + getVerifiedBadge(currentUserData.email); document.getElementById('profile-name-display').innerHTML=name + getVerifiedBadge(currentUserData.email); document.getElementById('profile-my-status').innerHTML='<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:8px;">● Active Now</div>'; document.getElementById('profile-bio-display').textContent=currentUserData.bio||''; document.getElementById('profile-avatar-big').innerHTML=avHtml; let dHtml = ''; if(currentUserData.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">person</span> <strong>${currentUserData.gender}</strong></div>`; if(currentUserData.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">location_on</span> Lives in <strong>${currentUserData.location}</strong></div>`; if(currentUserData.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">home</span> From <strong>${currentUserData.hometown}</strong></div>`; if(currentUserData.relationship) { if((currentUserData.relationship === 'In a relationship' || currentUserData.relationship === 'Married') && currentUserData.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${currentUserData.relationship}</strong> with <strong>${currentUserData.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${currentUserData.relationship}</strong></div>`; } } document.getElementById('profile-details-display').innerHTML = dHtml; }
+/* Facebook Lite Render Sync with Friend Counts */
+function loadUserUI(){ 
+    const name=currentUserData.name||currentUser.displayName||'User'; const av=currentUserData.avatar; const avHtml = av?'<img src="'+av+'">':avatarInitial(name); 
+    document.getElementById('composer-avatar-trigger').innerHTML=avHtml; document.getElementById('modal-composer-avatar').innerHTML=avHtml; document.getElementById('modal-composer-name').innerHTML=name + getVerifiedBadge(currentUserData.email); 
+    document.getElementById('profile-name-display').innerHTML=name + getVerifiedBadge(currentUserData.email); 
+    
+    // Live Rendering Friend Counts on My Profile
+    const fCount = currentUserData.friends ? currentUserData.friends.length : 0;
+    document.getElementById('profile-friend-count').textContent = `${fCount} friends`;
+    
+    document.getElementById('profile-my-status').innerHTML='<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:4px;">● Active Now</div>'; 
+    document.getElementById('profile-bio-display').textContent=currentUserData.bio||''; document.getElementById('profile-avatar-big').innerHTML=avHtml; 
+    let dHtml = ''; 
+    if(currentUserData.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">person</span> Gender: <strong>${currentUserData.gender}</strong></div>`; 
+    if(currentUserData.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">location_on</span> Lives in <strong>${currentUserData.location}</strong></div>`; 
+    if(currentUserData.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">home</span> From <strong>${currentUserData.hometown}</strong></div>`; 
+    if(currentUserData.relationship) { if((currentUserData.relationship === 'In a relationship' || currentUserData.relationship === 'Married') && currentUserData.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined">favorite</span> <strong>${currentUserData.relationship}</strong> with <strong>${currentUserData.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined">favorite</span> <strong>${currentUserData.relationship}</strong></div>`; } } 
+    document.getElementById('profile-details-display').innerHTML = dHtml; 
+}
 function uploadAvatar(input){ const file=input.files[0];if(!file)return; showToast('Uploading profile photo...'); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }).then(res => res.json()).then(async data => { if(data.secure_url) { await db.collection('users').doc(currentUser.uid).set({avatar: data.secure_url},{merge:true}); currentUserData.avatar=data.secure_url; loadUserUI(); showToast('Profile photo updated! ✅'); } else { showToast('Upload failed.'); } }).catch(e => showToast('Network error.')); }
 
-async function viewUserProfile(uid) { if(uid === currentUser.uid) { showPage('profile'); return; } document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-other-profile').classList.add('active'); const snap = await db.collection('users').doc(uid).get(); if(snap.exists) { const data = snap.data(); const name = data.name || 'User'; document.getElementById('other-profile-name').innerHTML = name + getVerifiedBadge(data.email); const otherAv = data.avatar ? `<img src="${data.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(name); document.getElementById('other-profile-avatar').innerHTML = otherAv; const isOnline = data.online; document.getElementById('other-profile-status').innerHTML = isOnline ? '<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:8px;">● Active Now</div>' : '<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">Offline</div>'; let dHtml = ''; if(data.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">person</span> <strong>${data.gender}</strong></div>`; if(data.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">location_on</span> Lives in <strong>${data.location}</strong></div>`; if(data.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">home</span> From <strong>${data.hometown}</strong></div>`; if(data.relationship) { if((data.relationship === 'In a relationship' || data.relationship === 'Married') && data.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${data.relationship}</strong> with <strong>${data.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined" style="font-size:16px;">favorite</span> <strong>${data.relationship}</strong></div>`; } } document.getElementById('other-profile-details').innerHTML = dHtml; const isFriend = currentUserData.friends && currentUserData.friends.includes(uid); if(isFriend) { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Message'; document.getElementById('other-unfriend-btn').style.display = 'inline-block'; document.getElementById('other-unfriend-btn').onclick = () => unfriendUser(uid); } else { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Send Message'; document.getElementById('other-unfriend-btn').style.display = 'none'; } document.getElementById('other-msg-btn').onclick = () => openChatByUid(uid, name, data.avatar||'', isOnline, data.email); loadOtherUserPosts(uid); } }
+async function viewUserProfile(uid) { 
+    if(uid === currentUser.uid) { showPage('profile'); return; } 
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-other-profile').classList.add('active'); 
+    const snap = await db.collection('users').doc(uid).get(); 
+    if(snap.exists) { 
+        const data = snap.data(); const name = data.name || 'User'; 
+        document.getElementById('other-profile-name').innerHTML = name + getVerifiedBadge(data.email); 
+        
+        // Rendering Friend Counts on Other's Profile
+        const otherFCount = data.friends ? data.friends.length : 0;
+        document.getElementById('other-profile-friend-count').textContent = `${otherFCount} friends`;
+        
+        const otherAv = data.avatar ? `<img src="${data.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(name); 
+        document.getElementById('other-profile-avatar').innerHTML = otherAv; 
+        const isOnline = data.online; document.getElementById('other-profile-status').innerHTML = isOnline ? '<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:4px;">● Active Now</div>' : '<div style="color:var(--muted); font-size:11px; margin-bottom:4px;">Offline</div>'; 
+        document.getElementById('other-profile-bio').textContent = data.bio || '';
+        let dHtml = ''; 
+        if(data.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">person</span> Gender: <strong>${data.gender}</strong></div>`; 
+        if(data.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">location_on</span> Lives in <strong>${data.location}</strong></div>`; 
+        if(data.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">home</span> From <strong>${data.hometown}</strong></div>`; 
+        if(data.relationship) { if((data.relationship === 'In a relationship' || data.relationship === 'Married') && data.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined">favorite</span> <strong>${data.relationship}</strong> with <strong>${data.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined">favorite</span> <strong>${data.relationship}</strong></div>`; } } 
+        document.getElementById('other-profile-details').innerHTML = dHtml; 
+        const isFriend = currentUserData.friends && currentUserData.friends.includes(uid); 
+        if(isFriend) { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Message'; document.getElementById('other-unfriend-btn').style.display = 'inline-block'; document.getElementById('other-unfriend-btn').onclick = () => unfriendUser(uid); } 
+        else { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Send Message'; document.getElementById('other-unfriend-btn').style.display = 'none'; } 
+        document.getElementById('other-msg-btn').onclick = () => openChatByUid(uid, name, data.avatar||'', isOnline, data.email); loadOtherUserPosts(uid); 
+    } 
+}
 function closeUserProfile() { document.getElementById('page-other-profile').classList.remove('active'); showPage('feed'); }
 async function loadOtherUserPosts(uid) { const list = document.getElementById('other-user-posts-list'); list.innerHTML = '<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; const snap = await db.collection('posts').where('uid', '==', uid).get(); let posts = snap.docs.map(d => ({ id: d.id, ...d.data() })); const now = Date.now(); posts = posts.filter(p => { if(!p.expiresAt) return true; const expMs = p.expiresAt.toMillis ? p.expiresAt.toMillis() : new Date(p.expiresAt).getTime(); return expMs > now; }); posts.sort((a,b) => { let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : 0; let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : 0; return tb - ta; }); if(posts.length === 0) { list.innerHTML = '<div class="empty-feed">No posts yet</div>'; return; } list.innerHTML = posts.map(p => { return `<div class="post-card"><div class="post-header"><div class="post-name">${p.title ? p.title : 'Photo post'}</div><div class="post-time">${getRelativeTime(p.createdAt)}</div></div>${p.imgUrl ? `<img class="post-img" src="${p.imgUrl}" style="max-height:180px;">` : ''}<div class="post-actions"><span class="material-symbols-outlined" onclick="sharePost('${p.id}')" style="cursor:pointer; padding:4px; border-radius:30px;">share</span></div></div>`; }).join(''); }
 async function unfriendUser(uid) { if(!confirm('Unfriend?')) return; await db.collection('users').doc(currentUser.uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(uid) }); await db.collection('users').doc(uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) }); showToast('Unfriended!'); viewUserProfile(uid); }

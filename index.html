@@ -375,11 +375,28 @@ async function signInWithGoogle() {
     const msg = document.getElementById('auth-msg');
     msg.textContent = 'Connecting to Google...'; msg.className = 'auth-msg success'; msg.style.display = 'block';
     try {
-        const result = await auth.signInWithPopup(provider); const user = result.user; const snap = await db.collection('users').doc(user.uid).get();
-        if(!snap.exists) { await db.collection('users').doc(user.uid).set({ name: user.displayName || 'GoChat User', email: user.email, avatar: user.photoURL || '', bio: '', location: '', hometown: '', relationship: '', partnerName: '', gender: '', friends: [], sentRequests: [], receivedRequests: [], online: true, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); } 
-        else { await db.collection('users').doc(user.uid).update({ online: true, avatar: user.photoURL || snap.data().avatar }); }
-    } catch(e) { msg.textContent = 'Login failed: ' + e.message; msg.className = 'auth-msg error'; }
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+        const snap = await db.collection('users').doc(user.uid).get();
+        if(!snap.exists) {
+            // নতুন অ্যাকাউন্ট: avatar একদম ফাঁকা ('') থাকবে, গুগল থেকে ছবি নেবে না!
+            await db.collection('users').doc(user.uid).set({
+                name: user.displayName || 'GoChat User',
+                email: user.email,
+                avatar: '', 
+                bio: '', location: '', hometown: '', relationship: '', partnerName: '', gender: '',
+                friends: [], sentRequests: [], receivedRequests: [], online: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } else {
+            // পুরোনো অ্যাকাউন্ট: শুধু অনলাইন স্ট্যাটাস আপডেট হবে, ছবিতে হাতই দেবে না!
+            await db.collection('users').doc(user.uid).update({ online: true });
+        }
+    } catch(e) {
+        msg.textContent = 'Login failed: ' + e.message; msg.className = 'auth-msg error';
+    }
 }
+
 async function doLogout(){ try{ setOnlineStatus(false); } catch(e){} try{ await auth.signOut(); } catch(e){} window.location.reload(); }
 
 auth.onAuthStateChanged(async(user)=>{

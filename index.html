@@ -29,7 +29,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .topbar-logo:active{transform: scale(0.95);}
 .icon-btn{padding:8px 16px;border-radius:30px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);position:relative; transition:0.2s; font-size:13px; font-weight:600;}
 .icon-btn:hover{background:var(--border);}
-.settings-menu{display:none;position:absolute;top:50px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px;z-index:1000;width:180px;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+.settings-menu{display:none;position:absolute;top:50px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px;z-index:1000;width:190px;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
 .settings-menu.open{display:block;}
 .setting-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;font-weight:600; display:flex; align-items:center; gap:10px; border-radius:30px;}
 .bottom-nav{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);width:92%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:35px;display:flex;z-index:100; justify-content:space-around; padding:10px 0;box-shadow:0 8px 20px rgba(0,0,0,0.15);}
@@ -97,6 +97,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .detail-item .material-symbols-outlined{font-size:18px; color:var(--muted);}
 
 .avatar-edit-btn{position:absolute; bottom:0; right:0; width:26px; height:28px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer; border:2px solid var(--surface);}
+
+/* Premium Capsule Shape List Style Items */
 .msg-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:24px;margin:8px 16px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.05);transition:transform 0.2s;}
 .msg-item:active{transform:scale(0.97);}
 .msg-info{flex:1;}
@@ -106,8 +108,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 
 .verified-icon{color:#1DA1F2 !important; font-size:18px; font-variation-settings: 'FILL' 1;}
 
-#chat-screen, #create-post-screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:250;flex-direction:column;}
-#chat-screen.open, #create-post-screen.open{display:flex;}
+#chat-screen, #create-post-screen, #settings-privacy-screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:250;flex-direction:column;}
+#chat-screen.open, #create-post-screen.open, #settings-privacy-screen.open{display:flex;}
 .chat-topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center; justify-content:space-between; gap:12px;}
 .chat-back{font-size:24px;cursor:pointer;color:var(--accent2);display:flex; padding:8px; border-radius:30px;}
 .chat-name{font-weight:700;font-size:16px;flex:1;}
@@ -217,6 +219,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
         <span class="material-symbols-outlined">settings</span>
         <div class="settings-menu" id="settings-menu" style="text-align:left;">
           <div class="setting-item" onclick="toggleDarkMode()"><span class="material-symbols-outlined">dark_mode</span> Dark mode</div>
+          <div class="setting-item" onclick="openSettingsPrivacy()"><span class="material-symbols-outlined">shield_person</span> Settings & privacy</div>
           <div class="setting-item" style="color:var(--danger)" onclick="doLogout()"><span class="material-symbols-outlined">logout</span> Log out</div>
         </div>
       </div>
@@ -282,6 +285,24 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
     <div class="nav-item" id="nav-notifications" onclick="showPage('notifications')"><span class="material-symbols-outlined">notifications</span><div class="nav-badge" id="notif-badge">0</div></div>
     <div class="nav-item" id="nav-messages" onclick="showPage('messages')"><span class="material-symbols-outlined">chat</span><div class="nav-badge" id="msg-badge">0</div></div>
     <div class="nav-item" id="nav-profile" onclick="showPage('profile')"><span class="material-symbols-outlined">person</span></div>
+  </div>
+</div>
+
+<div id="settings-privacy-screen">
+  <div class="chat-topbar">
+    <div class="chat-back" onclick="closeSettingsPrivacy()"><span class="material-symbols-outlined">arrow_back</span></div>
+    <div class="chat-name">Settings & privacy</div>
+  </div>
+  <div style="padding:16px; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+     <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;">Account Control Panel</div>
+     
+     <div style="background:var(--surface); border:1px solid var(--border); padding:20px; border-radius:24px; display:flex; flex-direction:column; gap:10px;">
+        <h4 style="font-size:15px; font-weight:700; color:var(--text);">Danger Zone</h4>
+        <p style="font-size:12px; color:var(--muted); line-height:1.4;">Permanently delete your profile, posts, logs, data and security credentials from GoChat database.</p>
+        <button class="btn-primary" style="background:var(--danger); color:#fff; font-weight:700; margin-top:8px; border-radius:12px;" onclick="handleDeleteAccount()">
+          <span class="material-symbols-outlined" style="font-size:18px;">delete_forever</span> Delete Account
+        </button>
+     </div>
   </div>
 </div>
 
@@ -351,7 +372,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-const MY_SPECIAL_EMAIL = "hmdabrar70@gmail.com"; 
+const MY_SPECIAL_EMAIL = "gochat.official@gmail.com"; 
 firebase.initializeApp({ apiKey:"AIzaSyCb5kNVWdeSEqMgCONh3HiiJfUSOgEnIQo", authDomain:"my-social-app-4bb92.firebaseapp.com", projectId:"my-social-app-4bb92", storageBucket:"my-social-app-4bb92.firebasestorage.app", messagingSenderId:"460346507844", appId:"1:460346507844:web:78bf03761c020dc322b211" });
 const auth=firebase.auth(); const db=firebase.firestore();
 let currentUser=null,currentUserData=null,currentChatId=null,currentChatUser=null,feedUnsub=null,chatUnsub=null,notifUnsub=null,activeCommentPostId=null,commentPanelListener=null;
@@ -369,36 +390,54 @@ function setOnlineStatus(status) { if(currentUser) db.collection('users').doc(cu
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') setOnlineStatus(true); else setOnlineStatus(false); });
 function refreshFeed() { window.scrollTo({top: 0, behavior: 'smooth'}); showToast('Refreshing...'); if(currentFeedTab === 'foryou' || currentFeedTab === 'friends') { loadFeed(); } }
 
-/* Google Login System */
+function openSettingsPrivacy() { document.getElementById('settings-menu').classList.remove('open'); document.getElementById('settings-privacy-screen').classList.add('open'); }
+function closeSettingsPrivacy() { document.getElementById('settings-privacy-screen').classList.remove('open'); }
+
+/* Google Login System (Fixed to remove Gmail Avatar Overwrite) */
 const provider = new firebase.auth.GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
 async function signInWithGoogle() {
     const msg = document.getElementById('auth-msg');
     msg.textContent = 'Connecting to Google...'; msg.className = 'auth-msg success'; msg.style.display = 'block';
     try {
-        const result = await auth.signInWithPopup(provider);
-        const user = result.user;
-        const snap = await db.collection('users').doc(user.uid).get();
-        if(!snap.exists) {
-            // নতুন অ্যাকাউন্ট: avatar একদম ফাঁকা ('') থাকবে, গুগল থেকে ছবি নেবে না!
-            await db.collection('users').doc(user.uid).set({
-                name: user.displayName || 'GoChat User',
-                email: user.email,
-                avatar: '', 
-                bio: '', location: '', hometown: '', relationship: '', partnerName: '', gender: '',
-                friends: [], sentRequests: [], receivedRequests: [], online: true,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        } else {
-            // পুরোনো অ্যাকাউন্ট: শুধু অনলাইন স্ট্যাটাস আপডেট হবে, ছবিতে হাতই দেবে না!
-            await db.collection('users').doc(user.uid).update({ online: true });
-        }
+        const result = await auth.signInWithPopup(provider); const user = result.user; const snap = await db.collection('users').doc(user.uid).get();
+        if(!snap.exists) { await db.collection('users').doc(user.uid).set({ name: user.displayName || 'GoChat User', email: user.email, avatar: '', bio: '', location: '', hometown: '', relationship: '', partnerName: '', gender: '', friends: [], sentRequests: [], receivedRequests: [], online: true, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); } 
+        else { await db.collection('users').doc(user.uid).update({ online: true }); }
+    } catch(e) { msg.textContent = 'Login failed: ' + e.message; msg.className = 'auth-msg error'; }
+}
+async function doLogout(){ try{ setOnlineStatus(false); } catch(e){} try{ await auth.signOut(); } catch(e){} window.location.reload(); }
+
+/* Master Account Delete Functionality with Exact English Warning Prompt */
+async function handleDeleteAccount() {
+    const warningText = "If you delete this account, all your activities, photos, messages, everything will be deleted forever, and you will never get this account back.";
+    if (!confirm(warningText)) return;
+    if (!confirm("Are you absolutely sure? This action is permanent and cannot be undone.")) return;
+    
+    showToast("Processing account destruction...");
+    const uid = currentUser.uid;
+    try {
+        // 1. Delete user from Firestore Database
+        await db.collection('users').doc(uid).delete();
+        
+        // 2. Wipe their posts from Feed
+        const postsSnap = await db.collection('posts').where('uid', '==', uid).get();
+        const batch = db.batch();
+        postsSnap.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+        
+        // 3. Delete profile from Firebase Auth System
+        await auth.currentUser.delete();
+        
+        showToast("Account deleted forever! Goodbye.");
+        setTimeout(() => window.location.reload(), 1500);
     } catch(e) {
-        msg.textContent = 'Login failed: ' + e.message; msg.className = 'auth-msg error';
+        if(e.code === 'auth/requires-recent-login') {
+            showToast("Security notice: Please log out and sign back in to authorize account deletion.");
+        } else {
+            showToast("Failed to delete account: " + e.message);
+        }
     }
 }
-
-async function doLogout(){ try{ setOnlineStatus(false); } catch(e){} try{ await auth.signOut(); } catch(e){} window.location.reload(); }
 
 auth.onAuthStateChanged(async(user)=>{
     if(user){
@@ -467,6 +506,7 @@ async function submitPost() {
     try { const expireAt = new Date(Date.now() + 24 * 3600000); const newPostRef = await db.collection('posts').add({ uid: currentUser.uid, name: currentUserData.name || currentUser.displayName, email: currentUserData.email || '', avatar: currentUserData.avatar || '', title: title, text: '', imgUrl: imgUrl, likes: 0, likedBy: [], comments: [], tagged: currentTaggedFriends, createdAt: firebase.firestore.FieldValue.serverTimestamp(), expiresAt: expireAt }); currentTaggedFriends.forEach(uid => { db.collection('notifications').add({ toUid: uid, fromUid: currentUser.uid, fromName: currentUserData.name, type: 'tag', postId: newPostRef.id, postTitle: 'a post', read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); }); closeCreatePost(); showToast('Posted! ✦'); } catch (e) { showToast('Error saving post.'); }
 }
 
+/* Tab Filter Fix: .classList.add('active') */
 function setFeedTab(tab) { currentFeedTab = tab; document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active')); document.getElementById('tab-' + tab).classList.add('active'); loadFeed(); }
 
 function loadFeed(){
@@ -479,7 +519,7 @@ function loadFeed(){
             const p=d.data();const av=p.avatar?'<img src="'+p.avatar+'">':avatarInitial(p.name||'?'); const vBadge = getVerifiedBadge(p.email);
             const isLiked = p.likedBy && p.likedBy.includes(currentUser.uid); const likeColor = isLiked ? '#ff4f4f' : 'var(--text)'; const fillProp = isLiked ? '1' : '0'; const commentCount = p.comments ? p.comments.length : 0;
             let taggedText = ''; if(p.tagged && p.tagged.length > 0) { taggedText = `<span style="font-weight:normal; color:var(--muted); font-size:12px; margin-left:4px;"> is with <b>${p.tagged.length} others</b></span>`; }
-            return `<div class="post-card"><div class="post-header"><div class="avatar" style="width:36px;height:36px;cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${av}</div><div><div class="post-name" style="cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${p.name||'User'} ${vBadge} ${taggedText}</div><div class="post-time">${getRelativeTime(p.createdAt)}</div></div></div>${p.title?`<div style="font-weight:800; font-size:15px; margin-bottom:6px; color:var(--text);">${p.title}</div>`:''}${p.imgUrl?`<img class="post-img" src="${p.imgUrl}">`:''}<div class="post-actions"><button class="post-action-btn like-btn" style="color:${likeColor};" onclick="toggleLike('${d.id}')"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' ${fillProp};">favorite</span><span style="font-size:16px; font-weight:600;">${p.likes||0}</span></button><button class="post-action-btn" style="color:var(--text); margin-left:15px;" onclick="openCommentPanel('${d.id}')"><span class="material-symbols-outlined">chat</span><span style="font-size:16px; font-weight:600;">${commentCount}</span></button><span class="material-symbols-outlined" onclick="sharePost('${d.id}')" style="cursor:pointer; margin-left:15px; display:flex; align-items:center; color:var(--text); padding:4px;">share</span>${p.uid===currentUser.uid?`<button class="post-action-btn" style="color:var(--danger); margin-left:auto; padding:4px;" onclick="deletePost('${d.id}')"><span class="material-symbols-outlined">delete</span></button>`:''}</div></div>`;
+            return `<div class="post-card"><div class="post-header"><div class="avatar" style="width:36px;height:36px;cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${av}</div><div><div class="post-name" style="cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${p.name||'User'} ${vBadge} ${taggedText}</div><div class="post-time">${getRelativeTime(p.createdAt)}</div></div></div>${p.title?`<div style="font-weight:800; font-size:15px; margin-bottom:6px; color:var(--text);">${p.title}</div>`:''}${p.imgUrl?`<img class="post-img" src="${p.imgUrl}">`:''}<div class="post-actions"><button class="post-action-btn Schindler like-btn" style="color:${likeColor};" onclick="toggleLike('${d.id}')"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' ${fillProp};">favorite</span><span style="font-size:16px; font-weight:600;">${p.likes||0}</span></button><button class="post-action-btn" style="color:var(--text); margin-left:15px;" onclick="openCommentPanel('${d.id}')"><span class="material-symbols-outlined">chat</span><span style="font-size:16px; font-weight:600;">${commentCount}</span></button><span class="material-symbols-outlined" onclick="sharePost('${d.id}')" style="cursor:pointer; margin-left:15px; display:flex; align-items:center; color:var(--text); padding:4px;">share</span>${p.uid===currentUser.uid?`<button class="post-action-btn" style="color:var(--danger); margin-left:auto; padding:4px;" onclick="deletePost('${d.id}')"><span class="material-symbols-outlined">delete</span></button>`:''}</div></div>`;
         }).join('');
     });
 }
@@ -523,7 +563,7 @@ async function submitReply(postId, commentId) { const input = document.getElemen
 async function toggleLike(postId) { const postRef = db.collection('posts').doc(postId); const doc = await postRef.get(); if(doc.exists) { const p = doc.data(); let likedBy = p.likedBy || []; let likes = p.likes || 0; if(likedBy.includes(currentUser.uid)) { likedBy = likedBy.filter(id => id !== currentUser.uid); likes = Math.max(0, likes - 1); } else { likedBy.push(currentUser.uid); likes++; if(p.uid !== currentUser.uid) { await db.collection('notifications').add({ toUid: p.uid, fromUid: currentUser.uid, fromName: currentUserData.name, type: 'like', postId: postId, postTitle: p.title || 'Photo', read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); } } await postRef.update({ likes, likedBy }); } }
 async function searchUsers() { const q = document.getElementById('search-input').value.trim().toLowerCase();const list = document.getElementById('search-results-list'); if(!q) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Search users...</div>'; return; } const snap = await db.collection('users').get();let html = ''; snap.forEach(d => { if(d.id === currentUser.uid) return; const u = d.data(); if(u.name && u.name.toLowerCase().includes(q)) { let btnHtml = '';const friends = currentUserData.friends || [];const sent = currentUserData.sentRequests || [];const received = currentUserData.receivedRequests || []; if(friends.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 16px; font-size:11px;" disabled>Friends</button>'; else if(sent.includes(d.id)) btnHtml = '<button class="btn-outline" style="padding:6px 16px; font-size:11px;" disabled>Sent</button>'; else if(received.includes(d.id)) btnHtml = `<button class="btn-primary" style="padding:6px 16px; font-size:11px; width:auto; margin:0;" onclick="acceptRequest('${d.id}')">Accept</button>`; else btnHtml = `<button class="btn-primary" style="padding:6px 16px; font-size:11px; width:auto; margin:0;" onclick="sendRequest('${d.id}')">Add</button>`; const av = u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(u.name); const dot = u.online ? '<div class="online-dot"></div>' : ''; html += `<div class="msg-item"><div class="avatar" style="width:40px;height:40px;cursor:pointer;position:relative;" onclick="viewUserProfile('${d.id}')">${av}${dot}</div><div class="msg-info" onclick="viewUserProfile('${d.id}')">${u.name} ${getVerifiedBadge(u.email)}</div><div>${btnHtml}</div></div>`; } }); list.innerHTML = html || '<div style="text-align:center; padding:20px;">No users found.</div>'; }
 async function sendRequest(targetUid) { await db.collection('users').doc(currentUser.uid).update({ sentRequests: firebase.firestore.FieldValue.arrayUnion(targetUid) }); await db.collection('users').doc(targetUid).update({ receivedRequests: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); searchUsers();showToast('Friend request sent!'); }
-async function acceptRequest(requesterUid) { await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); loadFriendRequests(); if(document.getElementById('page-search').classList.contains('active')) searchUsers(); showToast('Connected as friends!'); }
+async function acceptRequest(requesterUid) { await db.collection('users').doc(currentUser.uid).update({ receivedRequests: firebase.firestore.FieldValue.arrayRemove(requesterUid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); await db.collection('users').doc(requesterUid).update({ sentRequests: firebase.firestore.FieldValue.arrayRemove(currentUser.uid), friends: firebase.firestore.FieldValue.arrayUnion(requesterUid) }); loadFriendRequests(); if(document.getElementById('page-search').classList.contains('active')) searchUsers(); showToast('Connected as friends!'); }
 function loadFriendRequests() { const reqs = currentUserData.receivedRequests || [];const list = document.getElementById('friend-requests-list'); if(reqs.length === 0) { list.innerHTML = '<div style="padding:10px; color:var(--muted); font-size:12px; text-align:center;">No requests</div>'; return; } db.collection('users').get().then(snap => { let html = '';snap.forEach(d => { if(reqs.includes(d.id)) { const u = d.data(); html += `<div class="msg-item"><div>${u.name}</div><button class="btn-primary" style="padding:6px 14px; font-size:10px; width:auto;" onclick="acceptRequest('${d.id}')">Accept</button></div>`; } }); list.innerHTML = html; }); }
 
 function togglePartnerField() { const rel = document.getElementById('edit-relationship').value; document.getElementById('partner-field-wrap').style.display = (rel === 'In a relationship' || rel === 'Married') ? 'block' : 'none'; }
@@ -531,6 +571,7 @@ function openProfileEdit() { document.getElementById('profile-display-section').
 function closeProfileEdit() { document.getElementById('profile-display-section').style.display = 'block'; document.getElementById('profile-edit-section').style.display = 'none'; }
 async function saveProfileChanges() { const name = document.getElementById('edit-name').value.trim(); const bio = document.getElementById('edit-bio').value.trim(); const gender = document.getElementById('edit-gender').value; const hometown = document.getElementById('edit-hometown').value.trim(); const location = document.getElementById('edit-location').value.trim(); const relationship = document.getElementById('edit-relationship').value; const partnerName = document.getElementById('edit-partner').value.trim(); if(!name) { showToast('Name is required!'); return; } if(hasEmoji(name)) { showToast('No Emojis allowed in Name!'); return; } try { showToast('Saving...'); await db.collection('users').doc(currentUser.uid).set({ name, bio, gender, hometown, location, relationship, partnerName }, { merge: true }); loadUserUI(); closeProfileEdit(); showToast('Profile Updated! 🎉'); } catch(e) { showToast('Error saving data.'); } }
 
+/* Popup Friend List Logic */
 async function openFriendsListModal(uid) {
     document.getElementById('friends-list-modal').classList.add('open'); const container = document.getElementById('friends-list-container'); container.innerHTML = '<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>';
     try {
@@ -552,6 +593,7 @@ async function openFriendsListModal(uid) {
 }
 function closeFriendsListModal() { document.getElementById('friends-list-modal').classList.remove('open'); }
 
+/* Facebook Lite Render Sync with Clickable Friend Row */
 function loadUserUI(){ 
     const name=currentUserData.name||currentUser.displayName||'User'; const av=currentUserData.avatar; const avHtml = av?'<img src="'+av+'">':avatarInitial(name); 
     document.getElementById('composer-avatar-trigger').innerHTML=avHtml; document.getElementById('modal-composer-avatar').innerHTML=avHtml; document.getElementById('modal-composer-name').innerHTML=name + getVerifiedBadge(currentUserData.email); 

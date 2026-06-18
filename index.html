@@ -45,11 +45,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .page.active{display:block;}
 .composer{background:var(--surface);border-bottom:1px solid var(--border);padding:16px;}
 .composer-top{display:flex;gap:12px;align-items:center;}
-
 /* 100% Round Avatar Fix */
 .avatar{width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;overflow:hidden;position:relative;}
 .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-
 .compose-btn{padding:8px 20px;background:var(--accent);color:#fff;border:none;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer; display:flex; align-items:center; gap:6px; transition:0.2s;}
 .img-btn{padding:8px 16px;background:var(--card);color:var(--accent2);border:1px solid var(--border);border-radius:30px;font-size:13px;cursor:pointer; display:flex; align-items:center; gap:6px;}
 .feed-tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border); margin-bottom:10px;}
@@ -64,7 +62,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .post-action-btn{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:4px 0;}
 .like-btn .material-symbols-outlined { font-size:28px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .like-btn:active .material-symbols-outlined { transform: scale(1.6); }
-
 /* Facebook Style Comment Panel */
 .comment-panel { display:none; position:fixed; inset:0; background:var(--bg); z-index:999; flex-direction:column; overscroll-behavior: contain; }
 .comment-panel.open { display:flex; }
@@ -79,13 +76,17 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .comment-input-bar { background:var(--surface); border-top:1px solid var(--border); padding:12px 16px; display:flex; gap:10px; align-items:center; }
 .comment-input-bar input { flex:1; background:var(--bg); border:1px solid var(--border); border-radius:30px; padding:12px 16px; color:var(--text); font-size:14px; outline:none; }
 
+/* Single Post View Overlay */
+#single-post-screen { display:none; position:fixed; inset:0; background:var(--bg); z-index:400; flex-direction:column; }
+#single-post-screen.open { display:flex; }
+.single-post-content { flex:1; overflow-y:auto; padding-bottom:20px; background:var(--bg); }
+
 .empty-feed{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;}
 .profile-header{background:var(--surface);padding:24px 16px;border-bottom:1px solid var(--border);text-align:center; position:relative;}
 .profile-avatar-wrap{position:relative;display:inline-block;margin-bottom:12px;}
 /* Round Profile Pic Fix */
 .profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:#fff;overflow:hidden;border:3px solid var(--accent);margin:0 auto;}
 .profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-
 .avatar-edit-btn{position:absolute;bottom:0;right:0;width:28px;height:28px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;border:2px solid var(--surface);}
 .profile-name{font-size:20px;font-weight:800;margin-bottom:2px;display:flex;align-items:center;justify-content:center;gap:4px;}
 .profile-bio{font-size:13px;color:var(--text);margin-bottom:8px;}
@@ -126,11 +127,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .online-dot{width:12px;height:12px;background:var(--success);border-radius:50%;display:inline-block;border:2px solid var(--surface);position:absolute;bottom:0;right:0;}
 .unsend-btn{background:none;border:none;color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;margin-left:8px;}
 .notif-item{display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); cursor:pointer; border-radius:20px; margin: 4px 8px;}
+/* Unread Notification Color Fix */
 .notif-item.unread{background:#6c63ff15; border-left:4px solid var(--accent); border-radius: 12px 20px 20px 12px;}
-
-/* Checkbox Hidden Fix */
 .notif-checkbox{display:none; margin-right:10px; width:18px; height:18px; accent-color:var(--accent); cursor:pointer;}
-
 .chat-dropdown-wrap { position:relative; }
 .chat-dropdown { display:none; position:absolute; top:40px; right:0; background:var(--surface); border:1px solid var(--border); border-radius:20px; width:180px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:1000; overflow:hidden; }
 .chat-dropdown.open { display:block; }
@@ -263,7 +262,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   </div>
 </div>
 <div id="create-post-screen">
-  <!-- Post Button Alignment Fix -->
   <div class="chat-topbar">
     <div style="display:flex; align-items:center; gap:10px;">
       <div class="chat-back" onclick="closeCreatePost()"><span class="material-symbols-outlined">arrow_back</span></div>
@@ -271,7 +269,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
     </div>
     <button class="compose-btn" onclick="submitPost()" id="modal-post-btn" style="margin:0; opacity:0.5; pointer-events:none; padding:8px 24px;">Post</button>
   </div>
-  
   <div style="padding:16px; flex:1; display:flex; flex-direction:column; overflow-y:auto;">
     <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
       <div class="avatar" id="modal-composer-avatar">?</div>
@@ -291,6 +288,15 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
        <input type="file" id="post-img-input" accept="image/*" style="display:none" onchange="previewImage(this)">
     </div>
   </div>
+</div>
+
+<!-- Single Post View Overlay -->
+<div id="single-post-screen">
+  <div class="chat-topbar">
+    <div class="chat-back" onclick="closeSinglePost()"><span class="material-symbols-outlined">arrow_back</span></div>
+    <div class="chat-name">Post</div>
+  </div>
+  <div class="single-post-content" id="single-post-container"></div>
 </div>
 
 <!-- Facebook Style Comment Overlay Panel -->
@@ -368,20 +374,7 @@ function refreshFeed() { window.scrollTo({top: 0, behavior: 'smooth'}); showToas
 function saveAccountToLocal(email, pass, name, avatar) { let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); const index = accounts.findIndex(a => a.email === email); if(index > -1) { accounts[index] = {email, pass, name, avatar}; } else { accounts.push({email, pass, name, avatar}); } localStorage.setItem('savedAccounts', JSON.stringify(accounts)); }
 function openSwitchAccountModal() { document.getElementById('settings-menu').classList.remove('open'); const list = document.getElementById('saved-accounts-list'); let accounts = JSON.parse(localStorage.getItem('savedAccounts') || '[]'); if(accounts.length === 0) { list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted); font-size:13px;">No saved accounts</div>'; } else { list.innerHTML = accounts.map(a => { const av = a.avatar ? `<img src="${a.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(a.name); const isActive = currentUser && currentUser.email === a.email; return `<div class="msg-item" onclick="doSwitchAccount('${a.email}', '${a.pass}')" style="background:${isActive ? 'var(--surface)' : 'transparent'};"><div class="avatar">${av}</div><div class="msg-info" style="font-weight:700;">${a.name} ${isActive ? '<span style="color:var(--success); font-size:11px; font-weight:normal; display:block;">● Logged In</span>' : ''}</div></div>`; }).join(''); } document.getElementById('switch-account-modal').classList.add('open'); }
 function closeSwitchAccountModal() { document.getElementById('switch-account-modal').classList.remove('open'); }
-
-/* Account Switch Bug Fix */
-async function doSwitchAccount(email, pass) { 
-  if(currentUser && currentUser.email === email) { closeSwitchAccountModal(); return; } 
-  showToast('Switching account...'); closeSwitchAccountModal(); 
-  try { 
-     window.tempLoginPass = pass; if(notifUnsub) notifUnsub(); 
-     await auth.signOut(); await auth.signInWithEmailAndPassword(email, pass); 
-     setTimeout(() => { document.getElementById('toast').classList.remove('show'); }, 1500);
-  } catch(e) { 
-     document.getElementById('toast').classList.remove('show'); showToast('Session expired. Please login again.'); loginAnotherAccount(); 
-  } 
-}
-
+async function doSwitchAccount(email, pass) { if(currentUser && currentUser.email === email) { closeSwitchAccountModal(); return; } showToast('Switching account...'); closeSwitchAccountModal(); try { window.tempLoginPass = pass; if(notifUnsub) notifUnsub(); await auth.signOut(); await auth.signInWithEmailAndPassword(email, pass); setTimeout(() => { document.getElementById('toast').classList.remove('show'); }, 1500); } catch(e) { document.getElementById('toast').classList.remove('show'); showToast('Session expired. Please login again.'); loginAnotherAccount(); } }
 function loginAnotherAccount() { closeSwitchAccountModal(); doLogout(); }
 async function doLogout(){ try{ setOnlineStatus(false); } catch(e){} try{ await auth.signOut(); } catch(e){} window.location.reload(); }
 
@@ -405,10 +398,9 @@ auth.onAuthStateChanged(async(user)=>{
             const nList = document.getElementById('notifications-list'); if(notifs.length === 0) { nList.innerHTML = '<div class="empty-feed">No notifications yet</div>'; return; }
             nList.innerHTML = notifs.map(data => {
                 let textDesc = 'interacted with your post'; let icon = 'notifications'; let iconColor = 'var(--accent)'; if(data.type === 'like') { textDesc = 'liked your post'; icon = 'favorite'; iconColor = 'var(--danger)'; } else if(data.type === 'comment') { textDesc = 'commented on your post'; icon = 'chat_bubble'; } else if(data.type === 'tag') { textDesc = 'tagged you in a post'; icon = 'person_add'; } else if(data.type === 'mention') { textDesc = 'mentioned you in a comment'; icon = 'alternate_email'; }
-                return `<div class="notif-item ${data.read?'':'unread'}" onclick="handleNotifClick('${data.id}', this)"><input type="checkbox" class="notif-checkbox" value="${data.id}" onclick="event.stopPropagation(); updateNotifCount()"><div class="notif-icon-wrap" style="background:${iconColor}22; color:${iconColor};"><span class="material-symbols-outlined">${icon}</span></div><div class="notif-text"><strong>${data.fromName}</strong> ${textDesc} <div style="font-size:10px; color:var(--muted); margin-top:2px;">${getRelativeTime(data.createdAt)}</div></div></div>`;
+                /* Notification routing logic embedded here */
+                return `<div class="notif-item ${data.read?'':'unread'}" onclick="handleNotifClick('${data.id}', this, '${data.postId}', '${data.type}')"><input type="checkbox" class="notif-checkbox" value="${data.id}" onclick="event.stopPropagation(); updateNotifCount()"><div class="notif-icon-wrap" style="background:${iconColor}22; color:${iconColor};"><span class="material-symbols-outlined">${icon}</span></div><div class="notif-text"><strong>${data.fromName}</strong> ${textDesc} <div style="font-size:10px; color:var(--muted); margin-top:2px;">${getRelativeTime(data.createdAt)}</div></div></div>`;
             }).join('');
-            
-            /* Notification Checkbox Fix */
             if(typeof isNotifEditMode !== 'undefined' && isNotifEditMode) { document.querySelectorAll('.notif-checkbox').forEach(cb => cb.style.display = 'block'); }
         });
 
@@ -437,7 +429,6 @@ function closeCreatePost() { document.getElementById('create-post-screen').class
 function checkPostInputs() { const text = document.getElementById('post-title').value.trim(); const img = document.getElementById('post-img-input').files.length > 0; const btn = document.getElementById('modal-post-btn'); if (text || img) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; } else { btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; } }
 function previewImage(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{document.getElementById('compose-img-preview').style.display='block';document.getElementById('compose-preview-img').src=e.target.result;checkPostInputs();};reader.readAsDataURL(file);}
 function removePostImage() { document.getElementById('post-img-input').value = ''; document.getElementById('compose-img-preview').style.display = 'none'; document.getElementById('compose-preview-img').src = ''; checkPostInputs(); }
-
 function openTagModal() { document.getElementById('tag-modal').classList.add('open'); const list = document.getElementById('tag-friends-list'); const friends = currentUserData.friends || []; if(friends.length === 0) { list.innerHTML = '<div class="empty-feed" style="padding:20px;">No friends to tag</div>'; return; } list.innerHTML = ''; friends.forEach(async fId => { const snap = await db.collection('users').doc(fId).get(); if(snap.exists) { const u = snap.data(); const isTagged = currentTaggedFriends.includes(fId); list.innerHTML += `<div class="msg-item" onclick="toggleTag('${fId}', this)"><div class="avatar" style="width:36px;height:36px;">${avatarInitial(u.name)}</div><div class="msg-info">${u.name}</div><input type="checkbox" ${isTagged?'checked':''} style="pointer-events:none; width:18px; height:18px; accent-color:var(--accent);"></div>`; } }); }
 function toggleTag(uid, el) { const cb = el.querySelector('input'); if(currentTaggedFriends.includes(uid)) { currentTaggedFriends = currentTaggedFriends.filter(id => id !== uid); cb.checked = false; } else { currentTaggedFriends.push(uid); cb.checked = true; } const tagCount = document.getElementById('tag-count'); tagCount.style.display = currentTaggedFriends.length > 0 ? 'inline-block' : 'none'; tagCount.textContent = currentTaggedFriends.length; }
 function closeTagModal() { document.getElementById('tag-modal').classList.remove('open'); }
@@ -449,9 +440,10 @@ async function submitPost() {
         try { const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }); const data = await res.json(); if (data.secure_url) { imgUrl = data.secure_url; } else { showToast('Image upload failed!'); return; } } catch (e) { showToast('Network error uploading image.'); return; }
     }
     try {
-        const expireAt = new Date(Date.now() + 5 * 3600000); 
-        await db.collection('posts').add({ uid: currentUser.uid, name: currentUserData.name || currentUser.displayName, email: currentUserData.email || '', avatar: currentUserData.avatar || '', title: title, text: '', imgUrl: imgUrl, likes: 0, likedBy: [], comments: [], tagged: currentTaggedFriends, createdAt: firebase.firestore.FieldValue.serverTimestamp(), expiresAt: expireAt });
-        currentTaggedFriends.forEach(uid => { db.collection('notifications').add({ toUid: uid, fromUid: currentUser.uid, fromName: currentUserData.name, type: 'tag', postId: '', postTitle: 'a post', read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); });
+        /* 24 Hours Post Expiration Added Here */
+        const expireAt = new Date(Date.now() + 24 * 3600000); 
+        const newPostRef = await db.collection('posts').add({ uid: currentUser.uid, name: currentUserData.name || currentUser.displayName, email: currentUserData.email || '', avatar: currentUserData.avatar || '', title: title, text: '', imgUrl: imgUrl, likes: 0, likedBy: [], comments: [], tagged: currentTaggedFriends, createdAt: firebase.firestore.FieldValue.serverTimestamp(), expiresAt: expireAt });
+        currentTaggedFriends.forEach(uid => { db.collection('notifications').add({ toUid: uid, fromUid: currentUser.uid, fromName: currentUserData.name, type: 'tag', postId: newPostRef.id, postTitle: 'a post', read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); });
         closeCreatePost(); showToast('Posted! ✦');
     } catch (e) { showToast('Error saving post.'); }
 }
@@ -471,6 +463,33 @@ function loadFeed(){
         }).join('');
     });
 }
+/* Notification Router & Single Post Viewer */
+async function handleNotifClick(id, element, postId, type) {
+    if(isNotifEditMode) {
+        const cb = element.querySelector('.notif-checkbox'); cb.checked = !cb.checked; updateNotifCount();
+    } else {
+        element.classList.remove('unread'); markNotifAsRead(id);
+        if(postId && postId !== 'undefined' && postId !== '') {
+            await openSinglePost(postId);
+            if(type === 'comment' || type === 'mention') { setTimeout(() => openCommentPanel(postId), 500); }
+        }
+    }
+}
+async function openSinglePost(postId) {
+    document.getElementById('single-post-screen').classList.add('open');
+    const container = document.getElementById('single-post-container');
+    container.innerHTML = '<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading post...</div>';
+    try {
+        const doc = await db.collection('posts').doc(postId).get();
+        if(!doc.exists) { container.innerHTML = '<div class="empty-feed">Post not found or expired.</div>'; return; }
+        const p = doc.data(); const av=p.avatar?'<img src="'+p.avatar+'">':avatarInitial(p.name||'?'); const vBadge = getVerifiedBadge(p.email);
+        const isLiked = p.likedBy && p.likedBy.includes(currentUser.uid); const likeColor = isLiked ? '#ff4f4f' : 'var(--text)'; const fillProp = isLiked ? '1' : '0'; const commentCount = p.comments ? p.comments.length : 0;
+        let taggedText = ''; if(p.tagged && p.tagged.length > 0) { taggedText = `<span style="font-weight:normal; color:var(--muted); font-size:12px; margin-left:4px;"> is with <b>${p.tagged.length} others</b></span>`; }
+        container.innerHTML = `<div class="post-card" style="border-bottom:none; margin-top:10px;"><div class="post-header"><div class="avatar" style="width:36px;height:36px;cursor:pointer;" onclick="closeSinglePost(); viewUserProfile('${p.uid}')">${av}</div><div><div class="post-name" style="cursor:pointer;" onclick="closeSinglePost(); viewUserProfile('${p.uid}')">${p.name||'User'} ${vBadge} ${taggedText}</div><div class="post-time">${getRelativeTime(p.createdAt)}</div></div></div>${p.title?`<div style="font-weight:800; font-size:15px; margin-bottom:6px; color:var(--text);">${p.title}</div>`:''}${p.imgUrl?`<img class="post-img" src="${p.imgUrl}">`:''}<div class="post-actions"><button class="post-action-btn like-btn" style="color:${likeColor};" onclick="toggleLike('${doc.id}'); closeSinglePost();"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' ${fillProp};">favorite</span><span style="font-size:16px; font-weight:600;">${p.likes||0}</span></button><button class="post-action-btn" style="color:var(--text); margin-left:15px;" onclick="openCommentPanel('${doc.id}')"><span class="material-symbols-outlined">chat</span><span style="font-size:16px; font-weight:600;">${commentCount}</span></button><span class="material-symbols-outlined" onclick="sharePost('${doc.id}')" style="cursor:pointer; margin-left:15px; display:flex; align-items:center; color:var(--text); padding:4px;">share</span>${p.uid===currentUser.uid?`<button class="post-action-btn" style="color:var(--danger); margin-left:auto; padding:4px;" onclick="deletePost('${doc.id}'); closeSinglePost();"><span class="material-symbols-outlined">delete</span></button>`:''}</div></div>`;
+    } catch (e) { container.innerHTML = '<div class="empty-feed">Error loading post.</div>'; }
+}
+function closeSinglePost() { document.getElementById('single-post-screen').classList.remove('open'); }
+
 function openCommentPanel(postId) {
     activeCommentPostId = postId; document.getElementById('comment-panel').classList.add('open');
     document.getElementById('comment-list').innerHTML = '<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading comments...</div>';
@@ -594,7 +613,6 @@ function getRelativeTime(timestamp) { if (!timestamp) return "Just now"; const n
 
 let isNotifEditMode = false;
 function toggleNotifEditMode() { isNotifEditMode = !isNotifEditMode; const btn = document.getElementById('notif-edit-btn'); const actionBar = document.getElementById('notif-action-bar'); const checkboxes = document.querySelectorAll('.notif-checkbox'); if(isNotifEditMode) { btn.textContent = 'Cancel'; actionBar.style.display = 'flex'; checkboxes.forEach(cb => cb.style.display = 'block'); } else { btn.textContent = 'Edit'; actionBar.style.display = 'none'; checkboxes.forEach(cb => { cb.style.display = 'none'; cb.checked = false; }); updateNotifCount(); } }
-function handleNotifClick(id, element) { if(isNotifEditMode) { const cb = element.querySelector('.notif-checkbox'); cb.checked = !cb.checked; updateNotifCount(); } else { element.classList.remove('unread'); markNotifAsRead(id); } }
 function updateNotifCount() { const count = document.querySelectorAll('.notif-checkbox:checked').length; document.getElementById('notif-select-count').textContent = count; }
 async function deleteSelectedNotifs() { const selected = Array.from(document.querySelectorAll('.notif-checkbox:checked')).map(cb => cb.value); if(selected.length === 0) { showToast('No notification selected!'); return; } if(!confirm(`Delete ${selected.length} notifications?`)) return; showToast('Deleting...'); try { await Promise.all(selected.map(id => db.collection('notifications').doc(id).delete())); showToast('Deleted successfully! ✅'); toggleNotifEditMode(); } catch(e) { showToast('Error deleting!'); } }
 

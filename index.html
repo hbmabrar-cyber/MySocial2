@@ -215,15 +215,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 
   <div class="page" id="page-profile">
     <div class="profile-header">
-         <div class="icon-btn" onclick="toggleSettingsMenu()" style="position:absolute; top:16px; right:16px; background:var(--surface); padding:8px;">
+      <div class="icon-btn" onclick="toggleSettingsMenu()" style="position:absolute; top:16px; right:16px; background:var(--surface); padding:8px;">
         <span class="material-symbols-outlined">settings</span>
         <div class="settings-menu" id="settings-menu" style="text-align:left;">
           <div class="setting-item" onclick="event.stopPropagation(); toggleDarkMode(); toggleSettingsMenu();"><span class="material-symbols-outlined">dark_mode</span> Dark mode</div>
-          <div class="setting-item" onclick="event.stopPropagation(); openSettingsPrivacy();"><span class="material-symbols-outlined">shield_person</span> Settings & privacy</div>
+          <div class="setting-item" onclick="event.stopPropagation(); openSettingsPrivacy();"><span class="material-symbols-outlined">info</span> Account info</div>
           <div class="setting-item" style="color:var(--danger)" onclick="event.stopPropagation(); doLogout();"><span class="material-symbols-outlined">logout</span> Log out</div>
         </div>
       </div>
-      
       
       <div class="profile-main-row">
          <div class="profile-avatar-wrap">
@@ -289,9 +288,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   </div>
 </div>
 
-<div id="account-info-screen">
+<!-- New Full Screen Account Info Overlay -->
+<div id="settings-privacy-screen">
   <div class="chat-topbar">
-    <div class="chat-back" onclick="closeAccountInfo()"><span class="material-symbols-outlined">arrow_back</span></div>
+    <div class="chat-back" onclick="closeSettingsPrivacy()"><span class="material-symbols-outlined">arrow_back</span></div>
     <div class="chat-name">Account info</div>
   </div>
   <div style="padding:16px; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">

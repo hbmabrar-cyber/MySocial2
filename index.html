@@ -36,7 +36,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .bottom-nav{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);width:92%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:35px;display:flex;z-index:100; justify-content:space-around; padding:10px 0;box-shadow:0 8px 20px rgba(0,0,0,0.15);}
 .nav-item{flex:1;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted); transition:0.3s; position:relative; will-change: transform;}
 .nav-item .material-symbols-outlined{font-size:28px;}
-.nav-item.active{color:var(--accent);}
+.nav-item.active{color:var(--accent); border-bottom-color:var(--accent);}
 .nav-item.active .material-symbols-outlined{font-variation-settings: 'FILL' 1;}
 .nav-badge{position:absolute; top:2px; right:14px; background:var(--danger); color:white; border-radius:30px; min-width:18px; height:18px; padding:0 6px; font-size:10px; display:none; align-items:center; justify-content:center; font-weight:bold; border:2px solid var(--surface);}
 .page{display:none;padding:0 0 12px;}
@@ -76,7 +76,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .img-btn{padding:8px 16px;background:var(--card);color:var(--accent2);border:1px solid var(--border);border-radius:30px;font-size:13px;cursor:pointer; display:flex; align-items:center; gap:6px;}
 .feed-tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border); margin-bottom:10px;}
 .feed-tab{flex:1;text-align:center;padding:12px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:0.3s;}
-.feed-tab.active{colorvar(--accent);border-bottom-color:var(--accent);}
+.feed-tab.active{color: var(--accent); border-bottom-color:var(--accent);}
 
 /* Stable Layout Post Card */
 .post-card{background:var(--surface);border-bottom:1px solid var(--border);padding:16px; will-change: transform;}
@@ -495,12 +495,6 @@ async function signInWithGoogle() {
 }
 async function doLogout(){ try{ setOnlineStatus(false); } catch(e){} try{ await auth.signOut(); } catch(e){} window.location.reload(); }
 
-async function handleDeleteAccount() {
-    if (!confirm("If you delete this account, all your activities will be deleted forever.")) return; if (!confirm("Are you absolutely sure? This action is permanent.")) return;
-    showToast("Processing account destruction..."); const uid = currentUser.uid;
-    try { await db.collection('users').doc(uid).delete(); const postsSnap = await db.collection('posts').where('uid', '==', uid).get(); const batch = db.batch(); postsSnap.forEach(doc => batch.delete(doc.ref)); await batch.commit(); await auth.currentUser.delete(); showToast("Account deleted forever! Goodbye."); setTimeout(() => window.location.reload(), 1500); } catch(e) { if(e.code === 'auth/requires-recent-login') { showToast("Security notice: Please log out and sign back in to authorize account deletion."); } else { showToast("Failed to delete account: " + e.message); } }
-}
-
 auth.onAuthStateChanged(async(user)=>{
     if(user){
         currentUser=user;setOnlineStatus(true); 
@@ -675,23 +669,37 @@ function setFeedTab(tab) { currentFeedTab = tab; document.querySelectorAll('.fee
 
 function loadFeed(){
     const feedList=document.getElementById('feed-list'); if(!feedList) return; if(feedUnsub) feedUnsub();
-    feedUnsub=db.collection('posts').orderBy('createdAt','desc').onSnapshot((snap)=>{
+    feedUnsub=db.collection('posts').onSnapshot((snap)=>{
         let loadEl = document.getElementById('feed-loading'); if(loadEl) loadEl.style.display='none'; 
-        const now=Date.now();
-        let posts=snap.docs.filter(d=>{ 
+        const now=Date.now(); const friendsList = currentUserData?.friends || [];
+        
+        let postsData = [];
+        snap.forEach(d => {
             try {
-                const data=d.data(); 
+                const data = d.data();
                 let expMs = data.expiresAt ? (data.expiresAt.toMillis ? data.expiresAt.toMillis() : (typeof data.expiresAt === 'number' ? data.expiresAt : new Date(data.expiresAt).getTime())) : (Date.now() + 86400000);
-                if(expMs <= now) return false; 
-                const friendsList = currentUserData?.friends || [];
-                const isFriend = friendsList.includes(data.uid); 
-                const isMe = data.uid === currentUser?.uid; 
-                if (currentFeedTab === 'foryou') { return !isFriend && !isMe; } else { return isFriend || isMe; } 
-            } catch(err) { return false; }
+                if(isNaN(expMs) || expMs > now) {
+                    const isFriend = friendsList.includes(data.uid);
+                    const isMe = data.uid === currentUser?.uid;
+                    if (currentFeedTab === 'foryou') {
+                        if(!isFriend && !isMe) postsData.push({ id: d.id, ...data });
+                    } else {
+                        if(isFriend || isMe) postsData.push({ id: d.id, ...data });
+                    }
+                }
+            } catch(e){}
         });
-        if(posts.length===0){feedList.innerHTML='<div class="empty-feed">No posts yet in this feed</div>';return;}
-        feedList.innerHTML=posts.map(d=>{
-            const p=d.data(); const pid=d.id; const av=p.avatar?'<img src="'+p.avatar+'">':avatarInitial(p.name||'?'); const vBadge = getVerifiedBadge(p.email);
+
+        postsData.sort((a,b) => {
+            let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : (typeof a.createdAt === 'number' ? a.createdAt : new Date(a.createdAt).getTime())) : 0;
+            let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : (typeof b.createdAt === 'number' ? b.createdAt : new Date(b.createdAt).getTime())) : 0;
+            if(isNaN(ta)) ta = 0; if(isNaN(tb)) tb = 0;
+            return tb - ta;
+        });
+
+        if(postsData.length===0){feedList.innerHTML='<div class="empty-feed">No posts yet in this feed</div>';return;}
+        feedList.innerHTML=postsData.map(p=>{
+            const pid=p.id; const av=p.avatar?'<img src="'+p.avatar+'">':avatarInitial(p.name||'?'); const vBadge = getVerifiedBadge(p.email);
             const isLiked = p.likedBy && p.likedBy.includes(currentUser?.uid); const likeColor = isLiked ? '#ff4f4f' : 'var(--text)'; const fillProp = isLiked ? '1' : '0'; const commentCount = p.comments ? p.comments.length : 0;
             let taggedText = ''; if(p.tagged && p.tagged.length > 0) { taggedText = `<span style="font-weight:normal; color:var(--muted); font-size:12px; margin-left:4px;"> is with <b>${p.tagged.length} others</b></span>`; }
             let mediaHtml = ''; if(p.imgUrl) { if(p.imgUrl.match(/\.(mp4|webm|mov)$/i)) mediaHtml = `<video controls class="post-img" src="${p.imgUrl}"></video>`; else mediaHtml = `<img class="post-img" src="${p.imgUrl}">`; }
@@ -749,13 +757,12 @@ async function loadOtherUserPosts(uid) {
     list.innerHTML = '<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; 
     try {
         const snap = await db.collection('posts').where('uid', '==', uid).get(); 
-        let posts = []; 
-        const now = Date.now();
+        let posts = []; const now = Date.now(); 
         snap.forEach(d => {
             try {
                 const p = d.data();
                 let expMs = p.expiresAt ? (p.expiresAt.toMillis ? p.expiresAt.toMillis() : (typeof p.expiresAt === 'number' ? p.expiresAt : new Date(p.expiresAt).getTime())) : (Date.now() + 86400000);
-                if(expMs > now) { posts.push({ id: d.id, ...p }); }
+                if(isNaN(expMs) || expMs > now) { posts.push({ id: d.id, ...p }); }
             } catch(e){}
         });
         posts.sort((a,b) => { if(a.isPinned && !b.isPinned) return -1; if(!a.isPinned && b.isPinned) return 1; let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : 0; let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : 0; return tb - ta; }); 
@@ -797,18 +804,24 @@ async function loadMyPosts(){
     const list=document.getElementById('my-posts-list'); if(!list) return;
     list.innerHTML='<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; 
     try {
-        const snap=await db.collection('posts').orderBy('createdAt','desc').get(); const now=Date.now(); 
+        const snap=await db.collection('posts').get(); const now=Date.now(); 
         let mine=[];
         snap.forEach(d => {
             try {
                 const p = d.data();
                 if(p.uid === currentUser.uid) {
                     let expMs = p.expiresAt ? (p.expiresAt.toMillis ? p.expiresAt.toMillis() : (typeof p.expiresAt === 'number' ? p.expiresAt : new Date(p.expiresAt).getTime())) : (Date.now() + 86400000);
-                    if(expMs > now) { mine.push({ id: d.id, ...p }); }
+                    if(isNaN(expMs) || expMs > now) { mine.push({ id: d.id, ...p }); }
                 }
             } catch(err){}
         });
-        mine.sort((a,b) => { if(a.isPinned && !b.isPinned) return -1; if(!a.isPinned && b.isPinned) return 1; let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : 0; let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : 0; return tb - ta; });
+        mine.sort((a,b) => { 
+            if(a.isPinned && !b.isPinned) return -1; if(!a.isPinned && b.isPinned) return 1; 
+            let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : (typeof a.createdAt === 'number' ? a.createdAt : new Date(a.createdAt).getTime())) : 0; 
+            let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : (typeof b.createdAt === 'number' ? b.createdAt : new Date(b.createdAt).getTime())) : 0; 
+            if(isNaN(ta)) ta = 0; if(isNaN(tb)) tb = 0;
+            return tb - ta; 
+        });
         if(mine.length===0){list.innerHTML='<div class="empty-feed">No posts yet</div>';return;} 
         list.innerHTML=mine.map(p=>{ 
             let taggedText = ''; if(p.tagged && p.tagged.length > 0) { taggedText = `<span style="font-weight:normal; color:var(--muted); font-size:12px; margin-left:4px;"> is with <b>${p.tagged.length} others</b></span>`; } 
@@ -827,78 +840,14 @@ async function loadMyPosts(){
                 </div>`;
             }
             let pinIcon = p.isPinned ? `<span class="material-symbols-outlined" style="font-size:14px; color:var(--accent); margin-left:6px; transform:rotate(45deg);" title="Pinned Post">push_pin</span>` : '';
-            return`<div class="post-card"><div class="post-header"><div class="post-name" style="flex:1;">${(p.title?p.title:(p.text?p.text.substring(0,40):'Photo post'))}${taggedText}</div><div class="post-time">${getRelativeTime(p.createdAt)} ${pinIcon}</div> ${postDropdownHtml}</div>${mediaHtml}<div class="post-actions"><span class="material-symbols-outlined" onclick="sharePost('${p.id}')" style="cursor:pointer; margin-right:15px; padding:4px;">share</span></div></div>`; 
+            return`<div class="post-card"><div class="post-header"><div class="avatar" style="width:36px;height:36px;cursor:pointer;" onclick="viewUserProfile('${p.uid}')">${av}</div><div><div class="post-name" style="flex:1;">${(p.title?p.title:(p.text?p.text.substring(0,40):'Photo post'))}${taggedText}</div><div class="post-time">${getRelativeTime(p.createdAt)} ${pinIcon}</div> ${postDropdownHtml}</div>${mediaHtml}<div class="post-actions"><span class="material-symbols-outlined" onclick="sharePost('${p.id}')" style="cursor:pointer; margin-right:15px; padding:4px;">share</span></div></div>`; 
         }).join(''); 
     } catch(e) { list.innerHTML = '<div class="empty-feed">Network issue. Could not load posts.</div>'; }
 }
 
 function uploadAvatar(input){ const file=input.files[0];if(!file)return; showToast('Uploading profile photo...'); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }).then(res => res.json()).then(async data => { if(data.secure_url) { await db.collection('users').doc(currentUser.uid).set({avatar: data.secure_url},{merge:true}); currentUserData.avatar=data.secure_url; loadUserUI(); showToast('Profile photo updated! ✅'); } else { showToast('Upload failed.'); } }).catch(e => showToast('Network error.')); }
-
-function viewUserProfile(uid) { if(uid === currentUser?.uid) { showPage('profile'); return; } document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-other-profile').classList.add('active'); db.collection('users').doc(uid).get().then(snap => { if(snap.exists) { const data = snap.data(); const name = data.name || 'User'; document.getElementById('other-profile-name').innerHTML = name + getVerifiedBadge(data.email); document.getElementById('other-profile-friend-count').innerHTML = `<span onclick="openFriendsListModal('${uid}')">${data.friends ? data.friends.length : 0} friends</span>`; document.getElementById('other-profile-avatar').innerHTML = data.avatar ? `<img src="${data.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(name); const isOnline = data.online; document.getElementById('other-profile-status').innerHTML = isOnline ? '<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:4px;">● Active Now</div>' : '<div style="color:var(--muted); font-size:11px; margin-bottom:4px;">Offline</div>'; document.getElementById('other-profile-bio').textContent = data.bio || ''; let dHtml = ''; if(data.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">person</span> Gender: <strong>${data.gender}</strong></div>`; if(data.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">location_on</span> Lives in <strong>${data.location}</strong></div>`; if(data.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">home</span> From <strong>${data.hometown}</strong></div>`; if(data.relationship) { if((data.relationship === 'In a relationship' || data.relationship === 'Married') && data.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined">favorite</span> <strong>${data.relationship}</strong> with <strong>${data.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined">favorite</span> <strong>${data.relationship}</strong></div>`; } } document.getElementById('other-profile-details').innerHTML = dHtml; const isFriend = currentUserData?.friends && currentUserData.friends.includes(uid); if(isFriend) { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Message'; document.getElementById('other-unfriend-btn').style.display = 'inline-block'; document.getElementById('other-unfriend-btn').onclick = () => unfriendUser(uid); } else { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Send Message'; document.getElementById('other-unfriend-btn').style.display = 'none'; } document.getElementById('other-msg-btn').onclick = () => openChatByUid(uid, name, data.avatar||'', isOnline, data.email); loadOtherUserPosts(uid); } }); }
-function closeUserProfile() { document.getElementById('page-other-profile').classList.remove('active'); showPage('feed'); }
-
-async function loadMessages(){ const list=document.getElementById('msg-list'); if(!list) return; list.innerHTML='<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; const snap=await db.collection('chats').get();const myChats=snap.docs.filter(d=>d.id.includes(currentUser.uid)); if(myChats.length===0){list.innerHTML='<div class="empty-feed">No messages yet</div>';return;} let html = ''; for(let d of myChats) { const data=d.data(); const otherUid=d.id.replace(currentUser.uid,'').replace('_',''); const otherName=(data.names&&data.names[otherUid])?data.names[otherUid]:'User'; const otherAvatar=(data.avatars&&data.avatars[otherUid])?data.avatars[otherUid]:''; const userSnap = await db.collection('users').doc(otherUid).get(); const isOnline = userSnap.exists && userSnap.data().online; const email = userSnap.exists ? userSnap.data().email : ''; const av=otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName); const dot = isOnline ? '<div class="online-dot"></div>' : ''; html += '<div class="msg-item" onclick="openChatById(\''+d.id+'\',\''+otherUid+'\',\''+otherName+'\',\''+otherAvatar+'\','+isOnline+',\''+email+'\')">'+'<div class="avatar" style="width:44px;height:44px;position:relative;">'+av+dot+'</div>'+'<div class="msg-info"><div class="msg-name">'+otherName+' '+getVerifiedBadge(email)+'</div><div class="msg-preview">'+(data.lastMsg||'...')+'</div></div>'+'<div class="msg-time">'+(data.lastAt?timeAgo(data.lastAt):'')+'</div></div>'; } list.innerHTML = html; }
-function openChatByUid(uid,name,avatar,isOnline=false,email=''){openChatById([currentUser.uid,uid].sort().join('_'),uid,name,avatar,isOnline,email);}
-async function unsendMessage(msgId) { if(!confirm('Remove message?')) return; await db.collection('chats').doc(currentChatId).collection('messages').doc(msgId).delete(); }
-
-function updateChatBlockUI() {
-    let blocked = currentUserData.blockedUsers || []; let isBlocked = blocked.includes(currentChatUser.uid); let isMuted = currentUserData.mutedChats?.includes(currentChatId);
-    let dropdownHtml = `<div class="chat-dropdown-item" onclick="event.stopPropagation(); toggleMuteChat()"><span class="material-symbols-outlined" style="font-size:18px;">notifications_off</span> <span id="mute-text">${isMuted?'Unmute':'Mute'}</span></div><div class="chat-dropdown-item" style="color:var(--danger)" onclick="event.stopPropagation(); deleteCurrentChat()"><span class="material-symbols-outlined" style="font-size:18px;">delete</span> Delete Chat</div>`;
-    if(isBlocked) { dropdownHtml += `<div class="chat-dropdown-item" style="color:var(--success)" onclick="event.stopPropagation(); unblockUser()"><span class="material-symbols-outlined" style="font-size:18px;">check_circle</span> Unblock User</div>`; } else { dropdownHtml += `<div class="chat-dropdown-item" style="color:var(--danger)" onclick="event.stopPropagation(); msgBlockUser()"><span class="material-symbols-outlined" style="font-size:18px;">block</span> Message Block</div><div class="chat-dropdown-item" style="color:var(--danger)" onclick="event.stopPropagation(); fullBlockUser()"><span class="material-symbols-outlined" style="font-size:18px;">person_remove</span> Full Block</div>`; }
-    document.getElementById('chat-dropdown').innerHTML = dropdownHtml;
-    if(isBlocked) { document.getElementById('chat-input-area').style.display = 'none'; document.getElementById('chat-blocked-area').style.display = 'block'; document.getElementById('chat-blocked-area').innerHTML = 'You blocked this user. <span style="color:var(--accent); cursor:pointer; margin-left:5px;" onclick="unblockUser()">Unblock</span>'; } else if (amIBlockedByCurrent) { document.getElementById('chat-input-area').style.display = 'none'; document.getElementById('chat-blocked-area').style.display = 'block'; document.getElementById('chat-blocked-area').innerHTML = 'You cannot reply to this conversation.'; } else { document.getElementById('chat-input-area').style.display = 'flex'; document.getElementById('chat-blocked-area').style.display = 'none'; }
-}
-
-async function unblockUser() { if(!confirm('Unblock this user?')) return; closeAllDropdowns(); let blocked = currentUserData.blockedUsers || []; blocked = blocked.filter(id => id !== currentChatUser.uid); currentUserData.blockedUsers = blocked; await db.collection('users').doc(currentUser.uid).update({ blockedUsers: blocked }); updateChatBlockUI(); showToast('User Unblocked'); }
-async function msgBlockUser() { if(!confirm('Block messages from this user? They will still be your friend.')) return; closeAllDropdowns(); let blocked = currentUserData.blockedUsers || []; blocked.push(currentChatUser.uid); currentUserData.blockedUsers = blocked; await db.collection('users').doc(currentUser.uid).update({ blockedUsers: blocked }); updateChatBlockUI(); showToast('Messages Blocked'); }
-async function fullBlockUser() { if(!confirm('Fully block and unfriend this user?')) return; closeAllDropdowns(); let blocked = currentUserData.blockedUsers || []; blocked.push(currentChatUser.uid); currentUserData.blockedUsers = blocked; await db.collection('users').doc(currentUser.uid).update({ blockedUsers: blocked, friends: firebase.firestore.FieldValue.arrayRemove(currentChatUser.uid) }); await db.collection('users').doc(currentChatUser.uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) }); updateChatBlockUI(); showToast('Fully Blocked and Unfriended'); }
-
-async function openChatById(chatId,otherUid,otherName,otherAvatar,isOnline=false,email=''){ 
-    currentChatId=chatId;currentChatUser={uid:otherUid,name:otherName,avatar:otherAvatar}; const vBadge = getVerifiedBadge(email); 
-    document.getElementById('chat-name-display').innerHTML=`<div style="font-size:16px;">${otherName} ${vBadge}</div>${isOnline?'<div style="font-size:11px;color:var(--success);font-weight:normal;">Active Now</div>':''}`; 
-    const av=document.getElementById('chat-avatar'); const dot = isOnline ? '<div class="online-dot" style="bottom:-2px;right:-2px;"></div>' : ''; av.innerHTML = (otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName)) + dot; 
-    const snap = await db.collection('users').doc(otherUid).get(); amIBlockedByCurrent = snap.exists ? (snap.data().blockedUsers || []).includes(currentUser.uid) : false;
-    updateChatBlockUI(); document.getElementById('chat-screen').classList.add('open'); document.getElementById('chat-messages').innerHTML='<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; 
-    if(chatUnsub)chatUnsub(); 
-    chatUnsub=db.collection('chats').doc(chatId).collection('messages').orderBy('createdAt','asc').onSnapshot(snap=>{ const msgs=snap.docs; let unreadDocs = []; let html = msgs.length === 0 ? '<div style="text-align:center;color:var(--muted);padding:40px;font-size:13px;">Send the first message!</div>' : msgs.map(d=>{ const m=d.data(); const mine=m.uid===currentUser.uid; if(!mine && m.read===false) unreadDocs.push(d.ref); let seenStatus = ''; if(mine) { seenStatus = m.read ? '<span style="color:#0084ff;font-size:14px;font-weight:bold;">✓✓</span>' : '<span style="color:var(--muted);font-size:14px;font-weight:bold;">✓</span>'; } const unsendBtn = mine ? `<button class="unsend-btn" onclick="unsendMessage('${d.id}')"><span class="material-symbols-outlined" style="font-size:14px;">delete</span> Unsend</button>` : ''; const displayContent = m.imgUrl ? `<img src="${m.imgUrl}" style="max-width:200px; border-radius:20px; display:block;">` : m.text; const bubbleStyle = m.imgUrl ? 'padding:6px; background:var(--surface);' : ''; return `<div style="display:flex;flex-direction:column;align-items:${mine?'flex-end':'flex-start'};"><div class="chat-bubble ${mine?'mine':'theirs'}" style="${bubbleStyle}">${displayContent}</div><div style="align-self:${mine?'flex-end':'flex-start'};color:var(--muted);font-size:10px;margin-top:2px;display:flex;gap:4px;align-items:center;">${timeAgo(m.createdAt)} ${seenStatus}${unsendBtn}</div></div>`; }).join(''); document.getElementById('chat-messages').innerHTML = html; const cm=document.getElementById('chat-messages');cm.scrollTop=cm.scrollHeight; if(unreadDocs.length > 0) { unreadDocs.forEach(ref => ref.update({read: true})); } }); 
-}
-function closeChat(){ document.getElementById('chat-screen').classList.remove('open'); closeAllDropdowns(); if(chatUnsub)chatUnsub(); loadMessages(); }
-async function toggleMuteChat() { closeAllDropdowns(); let muted = currentUserData.mutedChats || []; if(muted.includes(currentChatId)) { muted = muted.filter(id => id !== currentChatId); showToast('Chat unmuted'); } else { muted.push(currentChatId); showToast('Chat muted'); } currentUserData.mutedChats = muted; await db.collection('users').doc(currentUser.uid).update({ mutedChats: muted }); updateChatBlockUI(); }
-async function deleteCurrentChat() { if(!confirm('Delete this chat history?')) return; closeAllDropdowns(); await db.collection('chats').doc(currentChatId).delete(); showToast('Chat Deleted'); closeChat(); }
-
-async function sendMsg(){ 
-    let blocked = currentUserData.blockedUsers || []; if(blocked.includes(currentChatUser.uid)) { showToast("You can't send messages to blocked users."); return; }
-    const snap = await db.collection('users').doc(currentChatUser.uid).get(); if(snap.exists && (snap.data().blockedUsers || []).includes(currentUser.uid)) { amIBlockedByCurrent = true; updateChatBlockUI(); showToast("Message failed."); return; }
-    const input=document.getElementById('chat-input');const text=input.value.trim(); if(!text||!currentChatId)return; input.value=''; 
-    await db.collection('chats').doc(currentChatId).collection('messages').add({uid:currentUser.uid,text,read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); 
-    await db.collection('chats').doc(currentChatId).set({lastMsg:text,lastAt:firebase.firestore.FieldValue.serverTimestamp(),names:{[currentUser.uid]:currentUserData.name||currentUser.displayName,[currentChatUser.uid]:currentChatUser.name},avatars:{[currentUser.uid]:currentUserData.avatar||'',[currentChatUser.uid]:currentChatUser.avatar||''}},{merge:true}); 
-}
-document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
-async function sendChatImage(input) { 
-    let blocked = currentUserData.blockedUsers || []; if(blocked.includes(currentChatUser.uid)) { showToast("You can't send photos to blocked users."); return; }
-    const snap = await db.collection('users').doc(currentChatUser.uid).get(); if(snap.exists && (snap.data().blockedUsers || []).includes(currentUser.uid)) { amIBlockedByCurrent = true; updateChatBlockUI(); showToast("Message failed."); return; }
-    const file = input.files[0]; if (!file || !currentChatId) return; showToast('Uploading photo...'); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); 
-    try { const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }); const data = await res.json(); if(data.secure_url) { await db.collection('chats').doc(currentChatId).collection('messages').add({ uid: currentUser.uid, text: '📷 Photo', imgUrl: data.secure_url, read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); await db.collection('chats').doc(currentChatId).set({ lastMsg: '📷 Photo', lastAt: firebase.firestore.FieldValue.serverTimestamp(), names: {[currentUser.uid]: currentUserData.name, [currentChatUser.uid]: currentChatUser.name}, avatars: {[currentUser.uid]: currentUserData.avatar||'', [currentChatUser.uid]: currentChatUser.avatar||''} }, {merge: true}); showToast('Photo sent! ✅'); } else { showToast('Upload failed'); } } catch (e) { showToast('Network error!'); } input.value = ''; 
-}  
-
-let currentShareUrl = ''; const shareModalDiv = document.createElement('div'); shareModalDiv.id = 'custom-share-modal'; shareModalDiv.style.cssText = 'display:none; justify-content:center; align-items:center; z-index:9999; background:rgba(0,0,0,0.6); position:fixed; top:0; left:0; right:0; bottom:0; padding:20px;';
-shareModalDiv.innerHTML = `
-    <div style="background:var(--surface); padding:25px; border-radius:30px; width:100%; max-width:340px; text-align:center; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
-        <h3 style="margin-top:0; margin-bottom:20px; color:var(--text); font-family:inherit; font-size: 18px;">Choose the platform!</h3>
-        <div style="display:flex; justify-content:space-around; align-items:center; margin-bottom:25px; flex-wrap:wrap; gap:10px;">
-            <button onclick="shareToApp('facebook')" style="background:#1877F2; color:#fff; border:none; border-radius:30px; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">FB</button>
-            <button onclick="shareToApp('messenger')" style="background:#00B2FF; color:#fff; border:none; border-radius:30px; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:11px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">MSG</button>
-            <button onclick="shareToApp('whatsapp')" style="background:#25D366; color:#fff; border:none; border-radius:30px; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">WA</button>
-            <button onclick="shareToApp('gochat')" style="background:var(--accent); color:#fff; border:none; border-radius:30px; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:10px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">GoChat</button>
-            <button onclick="shareToApp('copy')" style="background:#6c757d; color:#fff; border:none; border-radius:30px; width:50px; height:50px; cursor:pointer; font-weight:bold; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">Copy</button>
-        </div><button onclick="closeShareMenu()" style="background:var(--danger); color:#fff; border:none; padding:10px 30px; border-radius:30px; cursor:pointer; font-size:14px; font-weight:bold;">Cancel</button>
-    </div>`;
-document.body.appendChild(shareModalDiv);
-function sharePost(postId) { currentShareUrl = window.location.href.split('?')[0]; document.getElementById('custom-share-modal').style.display = 'flex'; }
-function closeShareMenu() { document.getElementById('custom-share-modal').style.display = 'none'; }
-function shareToApp(platform) { const text = "GoChat-see-this-post! ✨"; const url = encodeURIComponent(currentShareUrl); const textEncoded = encodeURIComponent(text); if(platform === 'facebook') { window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank'); } else if(platform === 'messenger') { window.open(`fb-messenger://share/?link=${url}`, '_blank'); } else if(platform === 'whatsapp') { window.open(`https://api.whatsapp.com/send?text=${textEncoded} ${url}`, '_blank'); } else if(platform === 'gochat' || platform === 'copy') { navigator.clipboard.writeText(currentShareUrl); showToast('Link copied!'); } closeShareMenu(); }
-
-if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').then(reg => { console.log('SW setup!'); }).catch(err => console.log('SW fail', err)); }); }
+async function unfriendUser(uid) { if(!confirm('Unfriend?')) return; await db.collection('users').doc(currentUser.uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(uid) }); await db.collection('users').doc(uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) }); showToast('Unfriended!'); viewUserProfile(uid); }
+async function cleanupExpiredPosts(){ const now=Date.now(); const pSnap=await db.collection('posts').get(); pSnap.forEach(d=>{try{const exp=d.data().expiresAt; if(exp && (exp.toMillis?exp.toMillis():new Date(exp).getTime())<now) d.ref.delete();}catch(e){}}); const sSnap=await db.collection('stories').get(); sSnap.forEach(d=>{try{const exp=d.data().expiresAt; if(exp && (exp.toMillis?exp.toMillis():new Date(exp).getTime())<now) d.ref.delete();}catch(e){}}); } setInterval(cleanupExpiredPosts,5*60000);
 </script>
 </body>
 </html>

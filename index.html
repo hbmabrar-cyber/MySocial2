@@ -193,13 +193,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   
   <div class="page active" id="page-feed">
     
-    <!-- Instagram Style Story Container -->
-    <div class="story-container" id="story-container">
-        <!-- Stories will load here -->
-    </div>
-    <!-- Hidden input for uploading stories -->
-    <input type="file" id="story-upload-input" accept="image/*,video/*" style="display:none;" onchange="handleStoryUpload(this)">
-
+    <!-- ১. সবার আগে কম্পোজার (What's on your mind) -->
     <div class="composer" onclick="openCreatePost()" style="cursor:pointer;">
       <div class="composer-top">
         <div class="avatar" id="composer-avatar-trigger">?</div>
@@ -207,13 +201,25 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
         <span class="material-symbols-outlined" style="color:var(--success); font-size:28px;">image</span>
       </div>
     </div>
+
+    <!-- ২. এরপর স্টোরি সেকশন -->
+    <div class="story-container" id="story-container">
+        <!-- Stories will load here -->
+    </div>
+    <input type="file" id="story-upload-input" accept="image/*,video/*" style="display:none;" onchange="handleStoryUpload(this)">
+
+    <!-- ৩. তারপর ফিড ট্যাব (For You / Friends) -->
     <div class="feed-tabs">
         <div class="feed-tab active" id="tab-foryou" onclick="setFeedTab('foryou')">For You</div>
         <div class="feed-tab" id="tab-friends" onclick="setFeedTab('friends')">Friends</div>
     </div>
+    
+    <!-- ৪. সবার নিচে পোস্টের লিস্ট -->
     <div id="feed-loading" class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>
     <div id="feed-list"></div>
+    
   </div>
+  
 
   <div class="page" id="page-search">
     <div class="chat-topbar" style="position:sticky;top:0;z-index:100;gap:10px;">

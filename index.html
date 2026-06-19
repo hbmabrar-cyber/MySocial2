@@ -201,6 +201,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   
   <div class="page active" id="page-feed">
     
+    <!-- 1. Composer Box At the Top -->
     <div class="composer" onclick="openCreatePost()" style="cursor:pointer;">
       <div class="composer-top">
         <div class="avatar" id="composer-avatar-trigger">?</div>
@@ -209,10 +210,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       </div>
     </div>
 
+    <!-- 2. Instagram Style Story Container below Composer -->
     <div class="story-container" id="story-container">
-        </div>
+        <!-- Stories will load here -->
+    </div>
     <input type="file" id="story-upload-input" accept="image/*,video/*" style="display:none;" onchange="handleStoryUpload(this)">
 
+    <!-- 3. Feed Tabs -->
     <div class="feed-tabs">
         <div class="feed-tab active" id="tab-foryou" onclick="setFeedTab('foryou')">For You</div>
         <div class="feed-tab" id="tab-friends" onclick="setFeedTab('friends')">Friends</div>
@@ -376,6 +380,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   <div class="single-post-content" id="single-post-container"></div>
 </div>
 
+<!-- Advanced Story Viewer Modal -->
 <div id="story-viewer-screen">
     <div class="story-progress-bar"><div class="story-progress-inner" id="story-progress-inner"></div></div>
     <div class="story-viewer-header">
@@ -391,7 +396,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
               <div class="chat-dropdown-item" style="color:var(--danger);" onclick="event.stopPropagation(); deleteCurrentStory()"><span class="material-symbols-outlined" style="font-size:18px;">delete</span> Delete Story</div>
           </div>
         </div>
-
         <button onclick="closeStoryViewer()" style="background:none; border:none; color:#fff; display:flex; padding:8px; cursor:pointer;"><span class="material-symbols-outlined" style="font-size:28px; text-shadow:0 1px 3px rgba(0,0,0,0.8);">close</span></button>
     </div>
     <div class="story-viewer-content" id="story-viewer-content-zone">
@@ -442,6 +446,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   <div id="chat-blocked-area" style="display:none; padding:16px; background:var(--surface); text-align:center; border-top:none; color:var(--muted); font-size:13px; font-weight:600;"></div>
 </div>
 
+<!-- All Modals Overlay Container -->
 <div class="modal-overlay" id="tag-modal"><div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;"><button class="modal-close" onclick="closeTagModal()"><span class="material-symbols-outlined">close</span></button><div class="modal-title" style="font-weight:800; font-size:18px; margin-bottom:15px;">Tag Friends</div><div id="tag-friends-list" style="overflow-y:auto; flex:1; margin-bottom:15px; max-height:300px;"></div><button class="btn-primary" onclick="closeTagModal()">Done</button></div></div>
 <div class="modal-overlay" id="mention-modal"><div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;"><button class="modal-close" onclick="closeMentionModal()"><span class="material-symbols-outlined">close</span></button><div class="modal-title" style="font-weight:800; font-size:18px; margin-bottom:15px;">Mention Friends</div><div id="mention-friends-list" style="overflow-y:auto; flex:1; max-height:300px;"></div></div></div>
 <div class="modal-overlay" id="friends-list-modal"><div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;"><button class="modal-close" onclick="closeFriendsListModal()"><span class="material-symbols-outlined">close</span></button><div class="modal-title" style="font-weight:800; font-size:18px; margin-bottom:15px;">Friends</div><div id="friends-list-container" style="overflow-y:auto; flex:1; max-height:400px;"></div></div></div>
@@ -470,14 +475,13 @@ const auth=firebase.auth(); const db=firebase.firestore();
 let currentUser=null,currentUserData=null,currentChatId=null,currentChatUser=null,feedUnsub=null,chatUnsub=null,notifUnsub=null,activeCommentPostId=null,commentPanelListener=null;
 let chatCounters = {}; let currentFeedTab = 'foryou'; let currentTaggedFriends = []; let currentMentionPostId = null; let pendingMentions = {}; let amIBlockedByCurrent = false;
 
-/* Multi-User Advanced Story Control Variables */
 let storiesUnsub = null; let globalStoriesGrouped = {}; let storyUserOrder = []; let currentUserOrderIndex = 0; let activeStoryIndex = 0; let storyTimer = null;
 let currentEditPostId = null;
 
 if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
 function toggleDarkMode() { document.body.classList.toggle('light-mode'); localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark'); }
 function toggleSettingsMenu() { closeAllDropdowns(); document.getElementById('settings-menu').classList.toggle('open'); }
-function closeAllDropdowns() { document.querySelectorAll('.story-dropdown-menu, .chat-dropdown, .settings-menu, .story-dropdown-menu').forEach(m => m.classList.remove('open')); }
+function closeAllDropdowns() { document.querySelectorAll('.story-dropdown-menu, .chat-dropdown, .settings-menu').forEach(m => m.classList.remove('open')); }
 window.addEventListener('click', closeAllDropdowns);
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
@@ -501,8 +505,7 @@ async function signInWithGoogle() {
 async function doLogout(){ try{ setOnlineStatus(false); } catch(e){} try{ await auth.signOut(); } catch(e){} window.location.reload(); }
 
 async function handleDeleteAccount() {
-    const warningText = "If you delete this account, all your activities, photos, messages, everything will be deleted forever, and you will never get this account back.";
-    if (!confirm(warningText)) return; if (!confirm("Are you absolutely sure? This action is permanent and cannot be undone.")) return;
+    if (!confirm("If you delete this account, all your activities will be deleted forever.")) return; if (!confirm("Are you absolutely sure? This action is permanent.")) return;
     showToast("Processing account destruction..."); const uid = currentUser.uid;
     try { await db.collection('users').doc(uid).delete(); const postsSnap = await db.collection('posts').where('uid', '==', uid).get(); const batch = db.batch(); postsSnap.forEach(doc => batch.delete(doc.ref)); await batch.commit(); await auth.currentUser.delete(); showToast("Account deleted forever! Goodbye."); setTimeout(() => window.location.reload(), 1500); } catch(e) { if(e.code === 'auth/requires-recent-login') { showToast("Security notice: Please log out and sign back in to authorize account deletion."); } else { showToast("Failed to delete account: " + e.message); } }
 }
@@ -510,15 +513,20 @@ async function handleDeleteAccount() {
 auth.onAuthStateChanged(async(user)=>{
     if(user){
         currentUser=user;setOnlineStatus(true); 
-        const snap = await db.collection('users').doc(user.uid).get();
-        if(snap.exists) { currentUserData = snap.data(); } else { currentUserData = {name:user.displayName||'User',email:user.email}; }
+        try {
+            const snap = await db.collection('users').doc(user.uid).get();
+            if(snap.exists) { currentUserData = snap.data(); } else { currentUserData = {name:user.displayName||'User',email:user.email}; }
+        } catch(e) {
+            currentUserData = {name:user.displayName||'User',email:user.email};
+        }
         document.getElementById('auth-screen').style.display='none'; document.getElementById('app-screen').style.display='block';
         loadUserUI(); loadFeed(); loadMessages(); loadStories(); cleanupExpiredPosts();
 
         db.collection('users').doc(user.uid).onSnapshot(doc => {
             if(doc.exists) {
-                currentUserData = doc.data(); let reqs = currentUserData.receivedRequests || []; let fBadge = document.getElementById('friends-badge');
-                if(reqs.length > 0) { fBadge.textContent = reqs.length; fBadge.style.display = 'flex'; } else { fBadge.style.display = 'none'; }
+                currentUserData = doc.data(); let reqs = currentUserData.receivedRequests || []; 
+                let fBadge = document.getElementById('friends-badge');
+                if(fBadge) { if(reqs.length > 0) { fBadge.textContent = reqs.length; fBadge.style.display = 'flex'; } else { fBadge.style.display = 'none'; } }
                 if(document.getElementById('page-friends').classList.contains('active')) loadFriendRequests();
                 if(document.getElementById('page-profile').classList.contains('active')) loadUserUI();
             }
@@ -526,8 +534,9 @@ auth.onAuthStateChanged(async(user)=>{
         notifUnsub = db.collection('notifications').where('toUid', '==', user.uid).onSnapshot(nSnap => {
             let notifs = nSnap.docs.map(nd => ({ id: nd.id, ...nd.data() })); notifs.sort((a,b) => { let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : Date.now(); let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : Date.now(); return tb - ta; });
             let unreadNotif = notifs.filter(nd => nd.read === false).length; let nBadge = document.getElementById('notif-badge');
-            if(unreadNotif > 0) { nBadge.textContent = unreadNotif; nBadge.style.display = 'flex'; } else { nBadge.style.display = 'none'; }
-            const nList = document.getElementById('notifications-list'); if(notifs.length === 0) { nList.innerHTML = '<div class="empty-feed">No notifications yet</div>'; return; }
+            if(nBadge) { if(unreadNotif > 0) { nBadge.textContent = unreadNotif; nBadge.style.display = 'flex'; } else { nBadge.style.display = 'none'; } }
+            const nList = document.getElementById('notifications-list'); if(!nList) return;
+            if(notifs.length === 0) { nList.innerHTML = '<div class="empty-feed">No notifications yet</div>'; return; }
             nList.innerHTML = notifs.map(data => {
                 let textDesc = 'interacted with your post'; let icon = 'notifications'; let iconColor = 'var(--accent)'; if(data.type === 'like') { textDesc = 'liked your post'; icon = 'favorite'; iconColor = 'var(--danger)'; } else if(data.type === 'comment') { textDesc = 'commented on your post'; icon = 'chat_bubble'; } else if(data.type === 'tag') { textDesc = 'tagged you in a post'; icon = 'person_add'; } else if(data.type === 'mention') { textDesc = 'mentioned you in a comment'; icon = 'alternate_email'; }
                 return `<div class="notif-item ${data.read?'':'unread'}" onclick="handleNotifClick('${data.id}', this, '${data.postId}', '${data.type}')"><input type="checkbox" class="notif-checkbox" value="${data.id}" onclick="event.stopPropagation(); updateNotifCount()"><div class="notif-icon-wrap" style="background:${iconColor}22; color:${iconColor};"><span class="material-symbols-outlined">${icon}</span></div><div class="notif-text"><strong>${data.fromName}</strong> ${textDesc} <div style="font-size:10px; color:var(--muted); margin-top:2px;">${getRelativeTime(data.createdAt)}</div></div></div>`;
@@ -540,7 +549,7 @@ auth.onAuthStateChanged(async(user)=>{
                 db.collection('chats').doc(cd.id).collection('messages').where('read', '==', false).onSnapshot(mSnap => {
                     let muted = currentUserData.mutedChats || []; if(muted.includes(cd.id)) { chatCounters[cd.id] = 0; } else { chatCounters[cd.id] = mSnap.docs.filter(md => md.data().uid !== user.uid).length; }
                     let totalUnreadMsgs = Object.values(chatCounters).reduce((a, b) => a + b, 0); let mBadge = document.getElementById('msg-badge');
-                    if(totalUnreadMsgs > 0) { mBadge.textContent = totalUnreadMsgs; mBadge.style.display = 'flex'; } else { mBadge.style.display = 'none'; }
+                    if(mBadge) { if(totalUnreadMsgs > 0) { mBadge.textContent = totalUnreadMsgs; mBadge.style.display = 'flex'; } else { mBadge.style.display = 'none'; } }
                 });
             });
         });
@@ -549,12 +558,12 @@ auth.onAuthStateChanged(async(user)=>{
 
 function showPage(page){
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-    document.getElementById('page-'+page).classList.add('active'); if(document.getElementById('nav-'+page)) document.getElementById('nav-'+page).classList.add('active');
+    let pEl = document.getElementById('page-'+page); if(pEl) pEl.classList.add('active'); 
+    let nEl = document.getElementById('nav-'+page); if(nEl) nEl.classList.add('active');
     if(page==='messages') loadMessages(); if(page==='profile'){ loadUserUI(); loadMyPosts(); } if(page==='friends'){ loadFriendRequests(); }
 }
 async function markNotifAsRead(id) { await db.collection('notifications').doc(id).update({read: true}); }
 
-/* --- STORY RENDERING SYSTEM --- */
 function loadStories() {
     if(storiesUnsub) storiesUnsub();
     storiesUnsub = db.collection('stories').onSnapshot(snap => {
@@ -566,7 +575,7 @@ function loadStories() {
         
         storyUserOrder = []; let html = ''; let myAv = currentUserData?.avatar ? `<img src="${currentUserData.avatar}">` : `<div class="avatar-placeholder">${avatarInitial(currentUserData?.name || 'User')}</div>`;
         html += `<div class="story-item" onclick="document.getElementById('story-upload-input').click()"><div class="story-ring" style="background:var(--border);">${myAv}<div class="story-add-btn"><span class="material-symbols-outlined" style="font-size:16px; font-weight:bold;">add</span></div></div><div class="story-name">Create story</div></div>`;
-        if(globalStoriesGrouped[currentUser.uid]) { storyUserOrder.push(currentUser.uid); html += `<div class="story-item" onclick="openStoryViewer('${currentUser.uid}')"><div class="story-ring active">${myAv}</div><div class="story-name">Your story</div></div>`; }
+        if(globalStoriesGrouped[currentUser?.uid]) { storyUserOrder.push(currentUser.uid); html += `<div class="story-item" onclick="openStoryViewer('${currentUser.uid}')"><div class="story-ring active">${myAv}</div><div class="story-name">Your story</div></div>`; }
         const friends = currentUserData?.friends || [];
         friends.forEach(fId => {
             if(globalStoriesGrouped[fId]) {
@@ -574,12 +583,13 @@ function loadStories() {
                 html += `<div class="story-item" onclick="openStoryViewer('${fId}')"><div class="story-ring active">${avHtml}</div><div class="story-name">${firstStory.name.split(' ')[0]} ${vBadge}</div></div>`;
             }
         });
-        document.getElementById('story-container').innerHTML = html;
-        if(document.getElementById('story-viewer-screen').classList.contains('open')) {
+        const container = document.getElementById('story-container'); if(container) container.innerHTML = html;
+        if(document.getElementById('story-viewer-screen')?.classList.contains('open')) {
             const curUid = storyUserOrder[currentUserOrderIndex];
-            if(curUid === currentUser.uid && globalStoriesGrouped[curUid]) {
+            if(curUid === currentUser?.uid && globalStoriesGrouped[curUid]) {
                 const st = globalStoriesGrouped[curUid][activeStoryIndex];
-                if(st) document.getElementById('story-views-count').textContent = st.viewedBy ? st.viewedBy.length : 0;
+                let countEl = document.getElementById('story-views-count');
+                if(st && countEl) countEl.textContent = st.viewedBy ? st.viewedBy.length : 0;
             }
         }
     });
@@ -670,22 +680,23 @@ async function submitPost() {
     try { const expireAt = new Date(Date.now() + 24 * 3600000); const newPostRef = await db.collection('posts').add({ uid: currentUser.uid, name: currentUserData.name || currentUser.displayName, email: currentUserData.email || '', avatar: currentUserData.avatar || '', title: title, text: '', imgUrl: imgUrl, likes: 0, likedBy: [], comments: [], tagged: currentTaggedFriends, isPinned: false, createdAt: firebase.firestore.FieldValue.serverTimestamp(), expiresAt: expireAt }); currentTaggedFriends.forEach(uid => { db.collection('notifications').add({ toUid: uid, fromUid: currentUser.uid, fromName: currentUserData.name, type: 'tag', postId: newPostRef.id, postTitle: 'a post', read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); }); closeCreatePost(); showToast('Posted! ✦'); } catch (e) { showToast('Error saving post.'); }
 }
 
-function setFeedTab(tab) { currentFeedTab = tab; document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active')); document.getElementById('tab-' + tab).classList.add('active'); loadFeed(); }
+function setFeedTab(tab) { currentFeedTab = tab; document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active')); let tabEl = document.getElementById('tab-' + tab); if(tabEl) tabEl.classList.add('active'); loadFeed(); }
 
 function loadFeed(){
-    const feedList=document.getElementById('feed-list'); if(feedUnsub) feedUnsub();
+    const feedList=document.getElementById('feed-list'); if(!feedList) return; if(feedUnsub) feedUnsub();
     feedUnsub=db.collection('posts').orderBy('createdAt','desc').onSnapshot((snap)=>{
-        document.getElementById('feed-loading').style.display='none'; const now=Date.now(); const friendsList = currentUserData.friends || [];
-        let posts=snap.docs.filter(d=>{ const data=d.data(); if(data.expiresAt && (data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime()) <= now) return false; const isFriend = friendsList.includes(data.uid); const isMe = data.uid === currentUser.uid; if (currentFeedTab === 'foryou') { return !isFriend && !isMe; } else { return isFriend || isMe; } });
+        let loadEl = document.getElementById('feed-loading'); if(loadEl) loadEl.style.display='none'; 
+        const now=Date.now(); const friendsList = currentUserData?.friends || [];
+        let posts=snap.docs.filter(d=>{ const data=d.data(); if(data.expiresAt && (data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime()) <= now) return false; const isFriend = friendsList.includes(data.uid); const isMe = data.uid === currentUser?.uid; if (currentFeedTab === 'foryou') { return !isFriend && !isMe; } else { return isFriend || isMe; } });
         if(posts.length===0){feedList.innerHTML='<div class="empty-feed">No posts yet in this feed</div>';return;}
         feedList.innerHTML=posts.map(d=>{
             const p=d.data(); const pid=d.id; const av=p.avatar?'<img src="'+p.avatar+'">':avatarInitial(p.name||'?'); const vBadge = getVerifiedBadge(p.email);
-            const isLiked = p.likedBy && p.likedBy.includes(currentUser.uid); const likeColor = isLiked ? '#ff4f4f' : 'var(--text)'; const fillProp = isLiked ? '1' : '0'; const commentCount = p.comments ? p.comments.length : 0;
+            const isLiked = p.likedBy && p.likedBy.includes(currentUser?.uid); const likeColor = isLiked ? '#ff4f4f' : 'var(--text)'; const fillProp = isLiked ? '1' : '0'; const commentCount = p.comments ? p.comments.length : 0;
             let taggedText = ''; if(p.tagged && p.tagged.length > 0) { taggedText = `<span style="font-weight:normal; color:var(--muted); font-size:12px; margin-left:4px;"> is with <b>${p.tagged.length} others</b></span>`; }
             let mediaHtml = ''; if(p.imgUrl) { if(p.imgUrl.match(/\.(mp4|webm|mov)$/i)) mediaHtml = `<video controls class="post-img" src="${p.imgUrl}"></video>`; else mediaHtml = `<img class="post-img" src="${p.imgUrl}">`; }
             
             let postDropdownHtml = '';
-            if(p.uid === currentUser.uid) {
+            if(p.uid === currentUser?.uid) {
                 const safeTitle = (p.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
                 postDropdownHtml = `
                 <div style="position:relative; margin-left:auto;">
@@ -733,48 +744,86 @@ async function openSinglePost(postId) {
 }
 
 async function loadOtherUserPosts(uid) { 
-    const list = document.getElementById('other-user-posts-list'); list.innerHTML = '<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; 
-    const snap = await db.collection('posts').where('uid', '==', uid).get(); 
-    let posts = snap.docs.map(d => ({ id: d.id, ...d.data() })); const now = Date.now(); 
-    posts = posts.filter(p => { if(!p.expiresAt) return true; const expMs = p.expiresAt.toMillis ? p.expiresAt.toMillis() : new Date(p.expiresAt).getTime(); return expMs > now; }); 
-    posts.sort((a,b) => { if(a.isPinned && !b.isPinned) return -1; if(!a.isPinned && b.isPinned) return 1; let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : 0; let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : 0; return tb - ta; }); 
-    if(posts.length === 0) { list.innerHTML = '<div class="empty-feed">No posts yet</div>'; return; } 
-    list.innerHTML = posts.map(p => { let mediaHtml = ''; if(p.imgUrl) { if(p.imgUrl.match(/\.(mp4|webm|mov)$/i)) mediaHtml = `<video controls class="post-img" src="${p.imgUrl}"></video>`; else mediaHtml = `<img class="post-img" src="${p.imgUrl}" style="max-height:180px;">`; } let pinIcon = p.isPinned ? `<span class="material-symbols-outlined" style="font-size:14px; color:var(--accent); margin-left:6px; transform:rotate(45deg);" title="Pinned Post">push_pin</span>` : ''; return `<div class="post-card"><div class="post-header"><div class="post-name" style="flex:1;">${p.title ? p.title : 'Photo post'} ${pinIcon}</div><div class="post-time">${getRelativeTime(p.createdAt)}</div></div>${mediaHtml}<div class="post-actions"><span class="material-symbols-outlined" onclick="sharePost('${p.id}')" style="cursor:pointer; padding:4px; border-radius:30px;">share</span></div></div>`; }).join(''); 
+    const list = document.getElementById('other-user-posts-list'); if(!list) return;
+    list.innerHTML = '<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; 
+    try {
+        const snap = await db.collection('posts').where('uid', '==', uid).get(); 
+        let posts = snap.docs.map(d => ({ id: d.id, ...d.data() })); const now = Date.now(); 
+        posts = posts.filter(p => { if(!p.expiresAt) return true; const expMs = p.expiresAt.toMillis ? p.expiresAt.toMillis() : new Date(p.expiresAt).getTime(); return expMs > now; }); 
+        posts.sort((a,b) => { if(a.isPinned && !b.isPinned) return -1; if(!a.isPinned && b.isPinned) return 1; let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : 0; let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : 0; return tb - ta; }); 
+        if(posts.length === 0) { list.innerHTML = '<div class="empty-feed">No posts yet</div>'; return; } 
+        list.innerHTML = posts.map(p => { let mediaHtml = ''; if(p.imgUrl) { if(p.imgUrl.match(/\.(mp4|webm|mov)$/i)) mediaHtml = `<video controls class="post-img" src="${p.imgUrl}"></video>`; else mediaHtml = `<img class="post-img" src="${p.imgUrl}" style="max-height:180px;">`; } let pinIcon = p.isPinned ? `<span class="material-symbols-outlined" style="font-size:14px; color:var(--accent); margin-left:6px; transform:rotate(45deg);" title="Pinned Post">push_pin</span>` : ''; return `<div class="post-card"><div class="post-header"><div class="post-name" style="flex:1;">${p.title ? p.title : 'Photo post'} ${pinIcon}</div><div class="post-time">${getRelativeTime(p.createdAt)}</div></div>${mediaHtml}<div class="post-actions"><span class="material-symbols-outlined" onclick="sharePost('${p.id}')" style="cursor:pointer; padding:4px; border-radius:30px;">share</span></div></div>`; }).join(''); 
+    } catch(e) { list.innerHTML = '<div class="empty-feed">Failed to load. Network error.</div>'; }
+}
+
+// SAFE UI LOADER: Prevents crash if HTML is missed during copy-paste or internet is slow
+function loadUserUI(){ 
+    if(!currentUser || !currentUserData) return; // Prevent crashes if data hasn't arrived
+    const name = currentUserData.name || currentUser.displayName || 'User'; 
+    const av = currentUserData.avatar; 
+    const avHtml = av ? '<img src="'+av+'">' : avatarInitial(name); 
+    
+    const setSafeHTML = (id, html) => { const el = document.getElementById(id); if(el) el.innerHTML = html; };
+
+    setSafeHTML('composer-avatar-trigger', avHtml); 
+    setSafeHTML('modal-composer-avatar', avHtml); 
+    setSafeHTML('modal-composer-name', name + getVerifiedBadge(currentUserData.email)); 
+    setSafeHTML('profile-name-display', name + getVerifiedBadge(currentUserData.email)); 
+    
+    const fCount = currentUserData.friends ? currentUserData.friends.length : 0;
+    setSafeHTML('profile-friend-count', `<span onclick="openFriendsListModal('${currentUser.uid}')">${fCount} friends</span>`);
+    
+    setSafeHTML('profile-my-status', '<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:4px;">● Active Now</div>'); 
+    
+    const bioEl = document.getElementById('profile-bio-display');
+    if(bioEl) bioEl.textContent = currentUserData.bio || ''; 
+    
+    setSafeHTML('profile-avatar-big', avHtml); 
+    
+    let dHtml = ''; 
+    if(currentUserData.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">person</span> Gender: <strong>${currentUserData.gender}</strong></div>`; 
+    if(currentUserData.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">location_on</span> Lives in <strong>${currentUserData.location}</strong></div>`; 
+    if(currentUserData.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">home</span> From <strong>${currentUserData.hometown}</strong></div>`; 
+    if(currentUserData.relationship) { if((currentUserData.relationship === 'In a relationship' || currentUserData.relationship === 'Married') && currentUserData.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined">favorite</span> <strong>${currentUserData.relationship}</strong> with <strong>${currentUserData.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined">favorite</span> <strong>${currentUserData.relationship}</strong></div>`; } } 
+    setSafeHTML('profile-details-display', dHtml); 
 }
 
 async function loadMyPosts(){ 
-    const list=document.getElementById('my-posts-list'); list.innerHTML='<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; 
-    const snap=await db.collection('posts').orderBy('createdAt','desc').get(); const now=Date.now(); 
-    let mine=snap.docs.map(d=>({id: d.id, ...d.data()})).filter(p=>{if(p.uid!==currentUser.uid)return false;if(!p.expiresAt)return true;const expMs=p.expiresAt.toMillis?p.expiresAt.toMillis():new Date(p.expiresAt).getTime();return expMs>now;}); 
-    mine.sort((a,b) => { if(a.isPinned && !b.isPinned) return -1; if(!a.isPinned && b.isPinned) return 1; let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : 0; let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : 0; return tb - ta; });
-    if(mine.length===0){list.innerHTML='<div class="empty-feed">No posts yet</div>';return;} 
-    list.innerHTML=mine.map(p=>{ 
-        let taggedText = ''; if(p.tagged && p.tagged.length > 0) { taggedText = `<span style="font-weight:normal; color:var(--muted); font-size:12px; margin-left:4px;"> is with <b>${p.tagged.length} others</b></span>`; } 
-        let mediaHtml = ''; if(p.imgUrl) { if(p.imgUrl.match(/\.(mp4|webm|mov)$/i)) mediaHtml = `<video controls class="post-img" src="${p.imgUrl}"></video>`; else mediaHtml = `<img class="post-img" src="${p.imgUrl}" style="max-height:180px;">`; } 
-        let postDropdownHtml = '';
-        if(p.uid === currentUser.uid) {
-            const safeTitle = (p.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
-            postDropdownHtml = `
-            <div style="position:relative; margin-left:auto;">
-                <span class="material-symbols-outlined" onclick="event.stopPropagation(); closeAllDropdowns(); document.getElementById('post-drop-my-${p.id}').classList.toggle('open')" style="cursor:pointer; padding:4px; border-radius:30px; color:var(--text);">more_vert</span>
-                <div id="post-drop-my-${p.id}" class="story-dropdown-menu" style="top:30px; right:0; width:160px; z-index:100; font-weight:normal; color:var(--text);">
-                    <div class="chat-dropdown-item" onclick="event.stopPropagation(); openEditPostModal('${p.id}', '${safeTitle}')"><span class="material-symbols-outlined" style="font-size:18px;">edit</span> Edit Title</div>
-                    <div class="chat-dropdown-item" onclick="event.stopPropagation(); togglePinPost('${p.id}', ${p.isPinned?true:false})"><span class="material-symbols-outlined" style="font-size:18px;">push_pin</span> ${p.isPinned?'Unpin Post':'Pin Post'}</div>
-                    <div class="chat-dropdown-item" style="color:var(--danger);" onclick="event.stopPropagation(); deletePost('${p.id}')"><span class="material-symbols-outlined" style="font-size:18px;">delete</span> Delete Post</div>
-                </div>
-            </div>`;
-        }
-        let pinIcon = p.isPinned ? `<span class="material-symbols-outlined" style="font-size:14px; color:var(--accent); margin-left:6px; transform:rotate(45deg);" title="Pinned Post">push_pin</span>` : '';
-        return`<div class="post-card"><div class="post-header"><div class="post-name" style="flex:1;">${(p.title?p.title:(p.text?p.text.substring(0,40):'Photo post'))}${taggedText}</div><div class="post-time">${getRelativeTime(p.createdAt)} ${pinIcon}</div> ${postDropdownHtml}</div>${mediaHtml}<div class="post-actions"><span class="material-symbols-outlined" onclick="sharePost('${p.id}')" style="cursor:pointer; margin-right:15px; padding:4px;">share</span></div></div>`; 
-    }).join(''); 
+    const list=document.getElementById('my-posts-list'); if(!list) return;
+    list.innerHTML='<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; 
+    try {
+        const snap=await db.collection('posts').orderBy('createdAt','desc').get(); const now=Date.now(); 
+        let mine=snap.docs.map(d=>({id: d.id, ...d.data()})).filter(p=>{if(p.uid!==currentUser.uid)return false;if(!p.expiresAt)return true;const expMs=p.expiresAt.toMillis?p.expiresAt.toMillis():new Date(p.expiresAt).getTime();return expMs>now;}); 
+        mine.sort((a,b) => { if(a.isPinned && !b.isPinned) return -1; if(!a.isPinned && b.isPinned) return 1; let ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : 0; let tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : 0; return tb - ta; });
+        if(mine.length===0){list.innerHTML='<div class="empty-feed">No posts yet</div>';return;} 
+        list.innerHTML=mine.map(p=>{ 
+            let taggedText = ''; if(p.tagged && p.tagged.length > 0) { taggedText = `<span style="font-weight:normal; color:var(--muted); font-size:12px; margin-left:4px;"> is with <b>${p.tagged.length} others</b></span>`; } 
+            let mediaHtml = ''; if(p.imgUrl) { if(p.imgUrl.match(/\.(mp4|webm|mov)$/i)) mediaHtml = `<video controls class="post-img" src="${p.imgUrl}"></video>`; else mediaHtml = `<img class="post-img" src="${p.imgUrl}" style="max-height:180px;">`; } 
+            let postDropdownHtml = '';
+            if(p.uid === currentUser.uid) {
+                const safeTitle = (p.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+                postDropdownHtml = `
+                <div style="position:relative; margin-left:auto;">
+                    <span class="material-symbols-outlined" onclick="event.stopPropagation(); closeAllDropdowns(); document.getElementById('post-drop-my-${p.id}').classList.toggle('open')" style="cursor:pointer; padding:4px; border-radius:30px; color:var(--text);">more_vert</span>
+                    <div id="post-drop-my-${p.id}" class="story-dropdown-menu" style="top:30px; right:0; width:160px; z-index:100; font-weight:normal; color:var(--text);">
+                        <div class="chat-dropdown-item" onclick="event.stopPropagation(); openEditPostModal('${p.id}', '${safeTitle}')"><span class="material-symbols-outlined" style="font-size:18px;">edit</span> Edit Title</div>
+                        <div class="chat-dropdown-item" onclick="event.stopPropagation(); togglePinPost('${p.id}', ${p.isPinned?true:false})"><span class="material-symbols-outlined" style="font-size:18px;">push_pin</span> ${p.isPinned?'Unpin Post':'Pin Post'}</div>
+                        <div class="chat-dropdown-item" style="color:var(--danger);" onclick="event.stopPropagation(); deletePost('${p.id}')"><span class="material-symbols-outlined" style="font-size:18px;">delete</span> Delete Post</div>
+                    </div>
+                </div>`;
+            }
+            let pinIcon = p.isPinned ? `<span class="material-symbols-outlined" style="font-size:14px; color:var(--accent); margin-left:6px; transform:rotate(45deg);" title="Pinned Post">push_pin</span>` : '';
+            return`<div class="post-card"><div class="post-header"><div class="post-name" style="flex:1;">${(p.title?p.title:(p.text?p.text.substring(0,40):'Photo post'))}${taggedText}</div><div class="post-time">${getRelativeTime(p.createdAt)} ${pinIcon}</div> ${postDropdownHtml}</div>${mediaHtml}<div class="post-actions"><span class="material-symbols-outlined" onclick="sharePost('${p.id}')" style="cursor:pointer; margin-right:15px; padding:4px;">share</span></div></div>`; 
+        }).join(''); 
+    } catch(e) { list.innerHTML = '<div class="empty-feed">Network issue. Could not load posts.</div>'; }
 }
 
-function viewUserProfile(uid) { if(uid === currentUser.uid) { showPage('profile'); return; } document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-other-profile').classList.add('active'); db.collection('users').doc(uid).get().then(snap => { if(snap.exists) { const data = snap.data(); const name = data.name || 'User'; document.getElementById('other-profile-name').innerHTML = name + getVerifiedBadge(data.email); document.getElementById('other-profile-friend-count').innerHTML = `<span onclick="openFriendsListModal('${uid}')">${data.friends ? data.friends.length : 0} friends</span>`; document.getElementById('other-profile-avatar').innerHTML = data.avatar ? `<img src="${data.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(name); const isOnline = data.online; document.getElementById('other-profile-status').innerHTML = isOnline ? '<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:4px;">● Active Now</div>' : '<div style="color:var(--muted); font-size:11px; margin-bottom:4px;">Offline</div>'; document.getElementById('other-profile-bio').textContent = data.bio || ''; let dHtml = ''; if(data.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">person</span> Gender: <strong>${data.gender}</strong></div>`; if(data.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">location_on</span> Lives in <strong>${data.location}</strong></div>`; if(data.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">home</span> From <strong>${data.hometown}</strong></div>`; if(data.relationship) { if((data.relationship === 'In a relationship' || data.relationship === 'Married') && data.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined">favorite</span> <strong>${data.relationship}</strong> with <strong>${data.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined">favorite</span> <strong>${data.relationship}</strong></div>`; } } document.getElementById('other-profile-details').innerHTML = dHtml; const isFriend = currentUserData.friends && currentUserData.friends.includes(uid); if(isFriend) { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Message'; document.getElementById('other-unfriend-btn').style.display = 'inline-block'; document.getElementById('other-unfriend-btn').onclick = () => unfriendUser(uid); } else { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Send Message'; document.getElementById('other-unfriend-btn').style.display = 'none'; } document.getElementById('other-msg-btn').onclick = () => openChatByUid(uid, name, data.avatar||'', isOnline, data.email); loadOtherUserPosts(uid); } }); }
-function closeUserProfile() { document.getElementById('page-other-profile').classList.remove('active'); showPage('feed'); }
-async function unfriendUser(uid) { if(!confirm('Unfriend?')) return; await db.collection('users').doc(currentUser.uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(uid) }); await db.collection('users').doc(uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) }); showToast('Unfriended!'); viewUserProfile(uid); }
-async function cleanupExpiredPosts(){ const now=Date.now(); const pSnap=await db.collection('posts').get(); pSnap.forEach(d=>{const exp=d.data().expiresAt; if(exp && (exp.toMillis?exp.toMillis():new Date(exp).getTime())<now) d.ref.delete();}); const sSnap=await db.collection('stories').get(); sSnap.forEach(d=>{const exp=d.data().expiresAt; if(exp && (exp.toMillis?exp.toMillis():new Date(exp).getTime())<now) d.ref.delete();}); } setInterval(cleanupExpiredPosts,5*60000);
+function uploadAvatar(input){ const file=input.files[0];if(!file)return; showToast('Uploading profile photo...'); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat'); fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/image/upload', { method: 'POST', body: formData }).then(res => res.json()).then(async data => { if(data.secure_url) { await db.collection('users').doc(currentUser.uid).set({avatar: data.secure_url},{merge:true}); currentUserData.avatar=data.secure_url; loadUserUI(); showToast('Profile photo updated! ✅'); } else { showToast('Upload failed.'); } }).catch(e => showToast('Network error.')); }
 
-async function loadMessages(){ const list=document.getElementById('msg-list');list.innerHTML='<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; const snap=await db.collection('chats').get();const myChats=snap.docs.filter(d=>d.id.includes(currentUser.uid)); if(myChats.length===0){list.innerHTML='<div class="empty-feed">No messages yet</div>';return;} let html = ''; for(let d of myChats) { const data=d.data(); const otherUid=d.id.replace(currentUser.uid,'').replace('_',''); const otherName=(data.names&&data.names[otherUid])?data.names[otherUid]:'User'; const otherAvatar=(data.avatars&&data.avatars[otherUid])?data.avatars[otherUid]:''; const userSnap = await db.collection('users').doc(otherUid).get(); const isOnline = userSnap.exists && userSnap.data().online; const email = userSnap.exists ? userSnap.data().email : ''; const av=otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName); const dot = isOnline ? '<div class="online-dot"></div>' : ''; html += '<div class="msg-item" onclick="openChatById(\''+d.id+'\',\''+otherUid+'\',\''+otherName+'\',\''+otherAvatar+'\','+isOnline+',\''+email+'\')">'+'<div class="avatar" style="width:44px;height:44px;position:relative;">'+av+dot+'</div>'+'<div class="msg-info"><div class="msg-name">'+otherName+' '+getVerifiedBadge(email)+'</div><div class="msg-preview">'+(data.lastMsg||'...')+'</div></div>'+'<div class="msg-time">'+(data.lastAt?timeAgo(data.lastAt):'')+'</div></div>'; } list.innerHTML = html; }
+function viewUserProfile(uid) { if(uid === currentUser?.uid) { showPage('profile'); return; } document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-other-profile').classList.add('active'); db.collection('users').doc(uid).get().then(snap => { if(snap.exists) { const data = snap.data(); const name = data.name || 'User'; document.getElementById('other-profile-name').innerHTML = name + getVerifiedBadge(data.email); document.getElementById('other-profile-friend-count').innerHTML = `<span onclick="openFriendsListModal('${uid}')">${data.friends ? data.friends.length : 0} friends</span>`; document.getElementById('other-profile-avatar').innerHTML = data.avatar ? `<img src="${data.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarInitial(name); const isOnline = data.online; document.getElementById('other-profile-status').innerHTML = isOnline ? '<div style="color:var(--success); font-size:11px; font-weight:bold; margin-bottom:4px;">● Active Now</div>' : '<div style="color:var(--muted); font-size:11px; margin-bottom:4px;">Offline</div>'; document.getElementById('other-profile-bio').textContent = data.bio || ''; let dHtml = ''; if(data.gender) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">person</span> Gender: <strong>${data.gender}</strong></div>`; if(data.location) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">location_on</span> Lives in <strong>${data.location}</strong></div>`; if(data.hometown) dHtml += `<div class="detail-item"><span class="material-symbols-outlined">home</span> From <strong>${data.hometown}</strong></div>`; if(data.relationship) { if((data.relationship === 'In a relationship' || data.relationship === 'Married') && data.partnerName) { dHtml += `<div class="detail-item"><span class="material-symbols-outlined">favorite</span> <strong>${data.relationship}</strong> with <strong>${data.partnerName}</strong></div>`; } else { dHtml += `<div class="detail-item"><span class="material-symbols-outlined">favorite</span> <strong>${data.relationship}</strong></div>`; } } document.getElementById('other-profile-details').innerHTML = dHtml; const isFriend = currentUserData?.friends && currentUserData.friends.includes(uid); if(isFriend) { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Message'; document.getElementById('other-unfriend-btn').style.display = 'inline-block'; document.getElementById('other-unfriend-btn').onclick = () => unfriendUser(uid); } else { document.getElementById('other-msg-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">chat</span> Send Message'; document.getElementById('other-unfriend-btn').style.display = 'none'; } document.getElementById('other-msg-btn').onclick = () => openChatByUid(uid, name, data.avatar||'', isOnline, data.email); loadOtherUserPosts(uid); } }); }
+function closeUserProfile() { document.getElementById('page-other-profile').classList.remove('active'); showPage('feed'); }
+
+async function loadMessages(){ const list=document.getElementById('msg-list'); if(!list) return; list.innerHTML='<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; const snap=await db.collection('chats').get();const myChats=snap.docs.filter(d=>d.id.includes(currentUser.uid)); if(myChats.length===0){list.innerHTML='<div class="empty-feed">No messages yet</div>';return;} let html = ''; for(let d of myChats) { const data=d.data(); const otherUid=d.id.replace(currentUser.uid,'').replace('_',''); const otherName=(data.names&&data.names[otherUid])?data.names[otherUid]:'User'; const otherAvatar=(data.avatars&&data.avatars[otherUid])?data.avatars[otherUid]:''; const userSnap = await db.collection('users').doc(otherUid).get(); const isOnline = userSnap.exists && userSnap.data().online; const email = userSnap.exists ? userSnap.data().email : ''; const av=otherAvatar?'<img src="'+otherAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':avatarInitial(otherName); const dot = isOnline ? '<div class="online-dot"></div>' : ''; html += '<div class="msg-item" onclick="openChatById(\''+d.id+'\',\''+otherUid+'\',\''+otherName+'\',\''+otherAvatar+'\','+isOnline+',\''+email+'\')">'+'<div class="avatar" style="width:44px;height:44px;position:relative;">'+av+dot+'</div>'+'<div class="msg-info"><div class="msg-name">'+otherName+' '+getVerifiedBadge(email)+'</div><div class="msg-preview">'+(data.lastMsg||'...')+'</div></div>'+'<div class="msg-time">'+(data.lastAt?timeAgo(data.lastAt):'')+'</div></div>'; } list.innerHTML = html; }
 function openChatByUid(uid,name,avatar,isOnline=false,email=''){openChatById([currentUser.uid,uid].sort().join('_'),uid,name,avatar,isOnline,email);}
 async function unsendMessage(msgId) { if(!confirm('Remove message?')) return; await db.collection('chats').doc(currentChatId).collection('messages').doc(msgId).delete(); }
 
@@ -834,13 +883,6 @@ document.body.appendChild(shareModalDiv);
 function sharePost(postId) { currentShareUrl = window.location.href.split('?')[0]; document.getElementById('custom-share-modal').style.display = 'flex'; }
 function closeShareMenu() { document.getElementById('custom-share-modal').style.display = 'none'; }
 function shareToApp(platform) { const text = "GoChat-see-this-post! ✨"; const url = encodeURIComponent(currentShareUrl); const textEncoded = encodeURIComponent(text); if(platform === 'facebook') { window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank'); } else if(platform === 'messenger') { window.open(`fb-messenger://share/?link=${url}`, '_blank'); } else if(platform === 'whatsapp') { window.open(`https://api.whatsapp.com/send?text=${textEncoded} ${url}`, '_blank'); } else if(platform === 'gochat' || platform === 'copy') { navigator.clipboard.writeText(currentShareUrl); showToast('Link copied!'); } closeShareMenu(); }
-
-function getRelativeTime(timestamp) { if (!timestamp) return "Just now"; const now = new Date(); const past = timestamp.toDate ? timestamp.toDate() : new Date(timestamp); const diffInSeconds = Math.floor((now - past) / 1000); if (diffInSeconds < 60) return "Just now"; const diffInMinutes = Math.floor(diffInSeconds / 60); if (diffInMinutes < 60) return diffInMinutes + "m ago"; const diffInHours = Math.floor(diffInMinutes / 60); if (diffInHours < 24) return diffInHours + "h ago"; const diffInDays = Math.floor(diffInHours / 24); if (diffInDays < 30) return diffInDays + "d ago"; const diffInMonths = Math.floor(diffInDays / 30); if (diffInMonths < 12) return diffInMonths + "mo ago"; return Math.floor(diffInMonths / 12) + "y ago"; }
-
-let isNotifEditMode = false;
-function toggleNotifEditMode() { isNotifEditMode = !isNotifEditMode; const btn = document.getElementById('notif-edit-btn'); const actionBar = document.getElementById('notif-action-bar'); const checkboxes = document.querySelectorAll('.notif-checkbox'); if(isNotifEditMode) { btn.textContent = 'Cancel'; actionBar.style.display = 'flex'; checkboxes.forEach(cb => cb.style.display = 'block'); } else { btn.textContent = 'Edit'; actionBar.style.display = 'none'; checkboxes.forEach(cb => { cb.style.display = 'none'; cb.checked = false; }); updateNotifCount(); } }
-function updateNotifCount() { const count = document.querySelectorAll('.notif-checkbox:checked').length; document.getElementById('notif-select-count').textContent = count; }
-async function deleteSelectedNotifs() { const selected = Array.from(document.querySelectorAll('.notif-checkbox:checked')).map(cb => cb.value); if(selected.length === 0) { showToast('No notification selected!'); return; } if(!confirm(`Delete ${selected.length} notifications?`)) return; showToast('Deleting...'); try { await Promise.all(selected.map(id => db.collection('notifications').doc(id).delete())); showToast('Deleted successfully! ✅'); toggleNotifEditMode(); } catch(e) { showToast('Error deleting!'); } }
 
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').then(reg => { console.log('SW setup!'); }).catch(err => console.log('SW fail', err)); }); }
 </script>

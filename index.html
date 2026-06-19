@@ -57,17 +57,19 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .story-add-btn { position: absolute; bottom: 2px; right: 2px; background: #ff5e7e; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 2px solid var(--bg); z-index:10; }
 .story-name { font-size: 11px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; display:flex; align-items:center; justify-content:center; gap:2px; font-weight:500;}
 
-/* Story Viewer Modal */
+/* Story Viewer Modal & Options */
 #story-viewer-screen { display:none; position:fixed; inset:0; background:#000; z-index:9999; flex-direction:column; }
 #story-viewer-screen.open { display:flex; }
 .story-progress-bar { width:100%; height:3px; background:rgba(255,255,255,0.3); position:absolute; top:10px; left:0; z-index:10001; }
 .story-progress-inner { height:100%; width:0%; background:#fff; }
 .story-viewer-header { position:absolute; top:20px; left:0; width:100%; padding:16px; display:flex; align-items:center; gap:12px; z-index:10001; background:linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); }
 .story-viewer-content { flex:1; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
-.story-viewer-content img { width:100%; max-height:100vh; object-fit:contain; }
+.story-viewer-content img, .story-viewer-content video { width:100%; max-height:100vh; object-fit:contain; }
 .story-tap-area { position:absolute; top:0; bottom:0; width:50%; z-index:10000; }
 .story-tap-left { left:0; }
 .story-tap-right { right:0; }
+.story-dropdown-menu { display:none; position:absolute; top:45px; right:0; background:var(--surface); border:1px solid var(--border); border-radius:16px; width:130px; box-shadow:0 4px 12px rgba(0,0,0,0.3); overflow:hidden; z-index:10005; }
+.story-dropdown-menu.open { display:block; }
 
 .compose-btn{padding:8px 20px;background:var(--accent);color:#fff;border:none;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer; display:flex; align-items:center; gap:6px; transition:0.2s;}
 .img-btn{padding:8px 16px;background:var(--card);color:var(--accent2);border:1px solid var(--border);border-radius:30px;font-size:13px;cursor:pointer; display:flex; align-items:center; gap:6px;}
@@ -193,7 +195,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   
   <div class="page active" id="page-feed">
     
-    <!-- ১. সবার আগে কম্পোজার (What's on your mind) -->
     <div class="composer" onclick="openCreatePost()" style="cursor:pointer;">
       <div class="composer-top">
         <div class="avatar" id="composer-avatar-trigger">?</div>
@@ -202,24 +203,17 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       </div>
     </div>
 
-    <!-- ২. এরপর স্টোরি সেকশন -->
     <div class="story-container" id="story-container">
-        <!-- Stories will load here -->
-    </div>
+        </div>
     <input type="file" id="story-upload-input" accept="image/*,video/*" style="display:none;" onchange="handleStoryUpload(this)">
 
-    <!-- ৩. তারপর ফিড ট্যাব (For You / Friends) -->
     <div class="feed-tabs">
         <div class="feed-tab active" id="tab-foryou" onclick="setFeedTab('foryou')">For You</div>
         <div class="feed-tab" id="tab-friends" onclick="setFeedTab('friends')">Friends</div>
     </div>
-    
-    <!-- ৪. সবার নিচে পোস্টের লিস্ট -->
     <div id="feed-loading" class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>
     <div id="feed-list"></div>
-    
   </div>
-  
 
   <div class="page" id="page-search">
     <div class="chat-topbar" style="position:sticky;top:0;z-index:100;gap:10px;">
@@ -377,7 +371,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   <div class="single-post-content" id="single-post-container"></div>
 </div>
 
-<!-- Story Viewer Modal -->
 <div id="story-viewer-screen">
     <div class="story-progress-bar"><div class="story-progress-inner" id="story-progress-inner"></div></div>
     <div class="story-viewer-header">
@@ -386,9 +379,17 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
             <div id="story-viewer-name" style="font-weight:700; color:#fff; font-size:14px; text-shadow:0 1px 3px rgba(0,0,0,0.8);">Name</div>
             <div id="story-viewer-time" style="color:rgba(255,255,255,0.8); font-size:11px; text-shadow:0 1px 3px rgba(0,0,0,0.8);">Time</div>
         </div>
+        
+        <div style="position:relative;">
+          <button onclick="event.stopPropagation(); toggleStoryDropdownMenu()" style="background:none; border:none; color:#fff; display:flex; padding:8px; cursor:pointer;"><span class="material-symbols-outlined" style="font-size:28px; text-shadow:0 1px 3px rgba(0,0,0,0.8);">more_vert</span></button>
+          <div id="story-dropdown-menu" class="story-dropdown-menu">
+              <div class="chat-dropdown-item" style="color:var(--danger);" onclick="event.stopPropagation(); deleteCurrentStory()"><span class="material-symbols-outlined" style="font-size:18px;">delete</span> Delete Story</div>
+          </div>
+        </div>
+
         <button onclick="closeStoryViewer()" style="background:none; border:none; color:#fff; display:flex; padding:8px; cursor:pointer;"><span class="material-symbols-outlined" style="font-size:28px; text-shadow:0 1px 3px rgba(0,0,0,0.8);">close</span></button>
     </div>
-    <div class="story-viewer-content">
+    <div class="story-viewer-content" id="story-viewer-content-zone">
         <img id="story-viewer-img" src="" alt="Story">
         <div class="story-tap-area story-tap-left" onclick="prevStory()"></div>
         <div class="story-tap-area story-tap-right" onclick="nextStory()"></div>
@@ -433,8 +434,8 @@ const auth=firebase.auth(); const db=firebase.firestore();
 let currentUser=null,currentUserData=null,currentChatId=null,currentChatUser=null,feedUnsub=null,chatUnsub=null,notifUnsub=null,activeCommentPostId=null,commentPanelListener=null;
 let chatCounters = {}; let currentFeedTab = 'foryou'; let currentTaggedFriends = []; let currentMentionPostId = null; let pendingMentions = {}; let amIBlockedByCurrent = false;
 
-/* Story Variables */
-let storiesUnsub = null; let globalStoriesGrouped = {}; let currentViewerUid = null; let activeStoryIndex = 0; let storyTimer = null;
+/* Multi-User Advanced Story Control Variables */
+let storiesUnsub = null; let globalStoriesGrouped = {}; let storyUserOrder = []; let currentUserOrderIndex = 0; let activeStoryIndex = 0; let storyTimer = null;
 
 if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
 function toggleDarkMode() { document.body.classList.toggle('light-mode'); localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark'); }
@@ -513,7 +514,7 @@ function showPage(page){
 }
 async function markNotifAsRead(id) { await db.collection('notifications').doc(id).update({read: true}); }
 
-/* --- STORY LOGIC STARTS HERE --- */
+/* --- ADVANCED CROSS-USER STORY LOGIC SYSTEM --- */
 
 function loadStories() {
     if(storiesUnsub) storiesUnsub();
@@ -533,28 +534,33 @@ function loadStories() {
         
         for(let uid in globalStoriesGrouped) { globalStoriesGrouped[uid].sort((a,b) => a.createdAt - b.createdAt); }
         
+        storyUserOrder = [];
         let html = '';
-        // My Story Button
         let myAv = currentUserData?.avatar ? `<img src="${currentUserData.avatar}">` : `<div class="avatar-placeholder">${avatarInitial(currentUserData?.name || 'User')}</div>`;
+        
+        // ১. "Create story" বাটন সবসময় প্রথমে থাকবে
+        html += `<div class="story-item" onclick="document.getElementById('story-upload-input').click()">
+                    <div class="story-ring" style="background:var(--border);">
+                        ${myAv}
+                        <div class="story-add-btn"><span class="material-symbols-outlined" style="font-size:16px; font-weight:bold;">add</span></div>
+                    </div>
+                    <div class="story-name">Create story</div>
+                 </div>`;
+        
+        // ২. নিজের দেওয়া স্টোরিগুলো দেখার বাটন
         if(globalStoriesGrouped[currentUser.uid]) {
+            storyUserOrder.push(currentUser.uid);
             html += `<div class="story-item" onclick="openStoryViewer('${currentUser.uid}')">
                         <div class="story-ring active">${myAv}</div>
                         <div class="story-name">Your story</div>
                      </div>`;
-        } else {
-            html += `<div class="story-item" onclick="document.getElementById('story-upload-input').click()">
-                        <div class="story-ring" style="background:var(--border);">
-                            ${myAv}
-                            <div class="story-add-btn"><span class="material-symbols-outlined" style="font-size:16px; font-weight:bold;">add</span></div>
-                        </div>
-                        <div class="story-name">Create story</div>
-                     </div>`;
         }
         
-        // Friends Stories
+        // ৩. বন্ধুদের স্টোরি
         const friends = currentUserData?.friends || [];
         friends.forEach(fId => {
             if(globalStoriesGrouped[fId]) {
+                storyUserOrder.push(fId);
                 const firstStory = globalStoriesGrouped[fId][0];
                 const avHtml = firstStory.avatar ? `<img src="${firstStory.avatar}">` : `<div class="avatar-placeholder">${avatarInitial(firstStory.name)}</div>`;
                 const vBadge = getVerifiedBadge(firstStory.email) ? `<span class="material-symbols-outlined" style="color:#ff4f4f; font-size:12px; font-variation-settings: 'FILL' 1; margin-left:2px;">verified</span>` : '';
@@ -569,16 +575,16 @@ function loadStories() {
     });
 }
 
+
 async function handleStoryUpload(input) {
     const file = input.files[0]; if(!file) return;
     showToast('Uploading story...');
     const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'gochat');
-    // Using auto resource type to support video in the future
     try { 
         const res = await fetch('https://api.cloudinary.com/v1_1/dsnqmwyvt/auto/upload', { method: 'POST', body: formData }); 
         const data = await res.json(); 
         if (data.secure_url) { 
-            const expireAt = new Date(Date.now() + 24 * 3600000); // 24 hours
+            const expireAt = new Date(Date.now() + 24 * 3600000);
             await db.collection('stories').add({ 
                 uid: currentUser.uid, 
                 name: currentUserData.name, 
@@ -596,16 +602,66 @@ async function handleStoryUpload(input) {
 }
 
 function openStoryViewer(uid) {
-    if(!globalStoriesGrouped[uid]) return;
-    currentViewerUid = uid; activeStoryIndex = 0;
+    currentUserOrderIndex = storyUserOrder.indexOf(uid);
+    if(currentUserOrderIndex === -1) return;
+    activeStoryIndex = 0;
     document.getElementById('story-viewer-screen').classList.add('open');
     renderStoryFrame();
 }
 
+function toggleStoryDropdownMenu() {
+    const dropdown = document.getElementById('story-dropdown-menu');
+    dropdown.classList.toggle('open');
+}
+
+async function deleteCurrentStory() {
+    document.getElementById('story-dropdown-menu').classList.remove('open');
+    const currentUid = storyUserOrder[currentUserOrderIndex];
+    if (currentUid !== currentUser.uid) {
+        showToast("You can only delete your own story!");
+        return;
+    }
+    const userStories = globalStoriesGrouped[currentUid];
+    const targetStory = userStories[activeStoryIndex];
+    if(!targetStory) return;
+
+    if(!confirm("Delete this story permanently?")) return;
+    showToast("Deleting story...");
+    try {
+        await db.collection('stories').doc(targetStory.id).delete();
+        showToast("Story deleted successfully! 🗑");
+        nextStory(); // Advance frame automatically
+    } catch(e) {
+        showToast("Error deleting story.");
+    }
+}
+
 function renderStoryFrame() {
-    const userStories = globalStoriesGrouped[currentViewerUid];
-    if(!userStories || activeStoryIndex >= userStories.length) { closeStoryViewer(); return; }
-    if(activeStoryIndex < 0) { activeStoryIndex = 0; }
+    document.getElementById('story-dropdown-menu').classList.remove('open');
+    if(currentUserOrderIndex < 0 || currentUserOrderIndex >= storyUserOrder.length) { closeStoryViewer(); return; }
+    
+    const currentUid = storyUserOrder[currentUserOrderIndex];
+    const userStories = globalStoriesGrouped[currentUid];
+    
+    if(!userStories || activeStoryIndex >= userStories.length) {
+        // Move to the next user's story sequence!
+        currentUserOrderIndex++;
+        activeStoryIndex = 0;
+        if(currentUserOrderIndex >= storyUserOrder.length) { closeStoryViewer(); return; }
+        renderStoryFrame();
+        return;
+    }
+    
+    if(activeStoryIndex < 0) {
+        currentUserOrderIndex--;
+        if(currentUserOrderIndex < 0) {
+            currentUserOrderIndex = 0; activeStoryIndex = 0; // Boundary locked
+        } else {
+            activeStoryIndex = globalStoriesGrouped[storyUserOrder[currentUserOrderIndex]].length - 1;
+        }
+        renderStoryFrame();
+        return;
+    }
     
     clearTimeout(storyTimer);
     const st = userStories[activeStoryIndex];
@@ -615,20 +671,33 @@ function renderStoryFrame() {
     document.getElementById('story-viewer-name').innerHTML = st.name + getVerifiedBadge(st.email);
     document.getElementById('story-viewer-time').innerHTML = getRelativeTime(st.createdAt);
     
-    // Check if video or image
-    const contentBox = document.getElementById('story-viewer-img');
-    if(st.imgUrl.match(/\.(mp4|webm|mov)$/i) || st.type === 'video') {
-        contentBox.outerHTML = `<video id="story-viewer-img" src="${st.imgUrl}" autoplay muted style="width:100%; max-height:100vh; object-fit:contain;"></video>`;
+    // Dynamic Duration logic: 5s for images, max 20s for video with sound (unmuted)
+    let frameDuration = 5000;
+    const isVideo = st.imgUrl.match(/\.(mp4|webm|mov)$/i) || st.type === 'video';
+    const zone = document.getElementById('story-viewer-content-zone');
+    
+    if(isVideo) {
+        frameDuration = 20000; // Cap video slide progress bar at 20 seconds maximum
+        zone.innerHTML = `
+            <video id="story-viewer-img" src="${st.imgUrl}" autoplay playsinline style="width:100%; max-height:100vh; object-fit:contain;" onended="nextStory()"></video>
+            <div class="story-tap-area story-tap-left" onclick="prevStory()"></div>
+            <div class="story-tap-area story-tap-right" onclick="nextStory()"></div>`;
     } else {
-        contentBox.outerHTML = `<img id="story-viewer-img" src="${st.imgUrl}" alt="Story">`;
+        zone.innerHTML = `
+            <img id="story-viewer-img" src="${st.imgUrl}" alt="Story">
+            <div class="story-tap-area story-tap-left" onclick="prevStory()"></div>
+            <div class="story-tap-area story-tap-right" onclick="nextStory()"></div>`;
     }
     
-    // Progress Bar Animation
+    // Progress Animation Sync
     const bar = document.getElementById('story-progress-inner');
     bar.style.transition = 'none'; bar.style.width = '0%';
-    setTimeout(() => { bar.style.transition = 'width 5s linear'; bar.style.width = '100%'; }, 50);
+    setTimeout(() => { 
+        bar.style.transition = `width ${frameDuration / 1000}s linear`; 
+        bar.style.width = '100%'; 
+    }, 50);
     
-    storyTimer = setTimeout(() => { nextStory(); }, 5000);
+    storyTimer = setTimeout(() => { nextStory(); }, frameDuration);
 }
 
 function nextStory() { activeStoryIndex++; renderStoryFrame(); }
@@ -667,7 +736,6 @@ function loadFeed(){
             const isLiked = p.likedBy && p.likedBy.includes(currentUser.uid); const likeColor = isLiked ? '#ff4f4f' : 'var(--text)'; const fillProp = isLiked ? '1' : '0'; const commentCount = p.comments ? p.comments.length : 0;
             let taggedText = ''; if(p.tagged && p.tagged.length > 0) { taggedText = `<span style="font-weight:normal; color:var(--muted); font-size:12px; margin-left:4px;"> is with <b>${p.tagged.length} others</b></span>`; }
             
-            // Video vs Image display
             let mediaHtml = '';
             if(p.imgUrl) {
                if(p.imgUrl.match(/\.(mp4|webm|mov)$/i)) mediaHtml = `<video controls class="post-img" src="${p.imgUrl}"></video>`;
@@ -800,12 +868,8 @@ async function unfriendUser(uid) { if(!confirm('Unfriend?')) return; await db.co
 async function deletePost(postId){if(!confirm('Delete post?'))return;await db.collection('posts').doc(postId).delete();showToast('Deleted.');}
 async function cleanupExpiredPosts(){
     const now=Date.now();
-    // Cleanup Posts
-    const pSnap=await db.collection('posts').get();
-    pSnap.forEach(d=>{const exp=d.data().expiresAt; if(exp && (exp.toMillis?exp.toMillis():new Date(exp).getTime())<now) d.ref.delete();});
-    // Cleanup Stories
-    const sSnap=await db.collection('stories').get();
-    sSnap.forEach(d=>{const exp=d.data().expiresAt; if(exp && (exp.toMillis?exp.toMillis():new Date(exp).getTime())<now) d.ref.delete();});
+    const pSnap=await db.collection('posts').get(); pSnap.forEach(d=>{const exp=d.data().expiresAt; if(exp && (exp.toMillis?exp.toMillis():new Date(exp).getTime())<now) d.ref.delete();});
+    const sSnap=await db.collection('stories').get(); sSnap.forEach(d=>{const exp=d.data().expiresAt; if(exp && (exp.toMillis?exp.toMillis():new Date(exp).getTime())<now) d.ref.delete();});
 } setInterval(cleanupExpiredPosts,5*60000);
 
 async function loadMyPosts(){ const list=document.getElementById('my-posts-list'); list.innerHTML='<div class="loading"><span class="material-symbols-outlined">autorenew</span> Loading...</div>'; const snap=await db.collection('posts').orderBy('createdAt','desc').get(); const now=Date.now(); const mine=snap.docs.filter(d=>{if(d.data().uid!==currentUser.uid)return false;const data=d.data();if(!data.expiresAt)return true;const expMs=data.expiresAt.toMillis?data.expiresAt.toMillis():new Date(data.expiresAt).getTime();return expMs>now;}); if(mine.length===0){list.innerHTML='<div class="empty-feed">No posts yet</div>';return;} list.innerHTML=mine.map(d=>{ const p=d.data(); let taggedText = ''; if(p.tagged && p.tagged.length > 0) { taggedText = `<span style="font-weight:normal; color:var(--muted); font-size:12px; margin-left:4px;"> is with <b>${p.tagged.length} others</b></span>`; } let mediaHtml = ''; if(p.imgUrl) { if(p.imgUrl.match(/\.(mp4|webm|mov)$/i)) mediaHtml = `<video controls class="post-img" src="${p.imgUrl}"></video>`; else mediaHtml = `<img class="post-img" src="${p.imgUrl}" style="max-height:180px;">`; } return'<div class="post-card"><div class="post-header"><div class="post-name">'+(p.title?p.title:(p.text?p.text.substring(0,40):'Photo post'))+taggedText+'</div><div class="post-time">'+getRelativeTime(p.createdAt)+'</div></div>'+mediaHtml+'<div class="post-actions"><span class="material-symbols-outlined" onclick="sharePost(\''+d.id+'\')" style="cursor:pointer; margin-right:15px; padding:4px;">share</span><button class="post-action-btn" style="padding:6px 12px; border-radius:30px;" onclick="deletePost(\''+d.id+'\')"><span class="material-symbols-outlined">delete</span> Delete</button></div></div>'; }).join(''); }

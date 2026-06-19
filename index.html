@@ -198,6 +198,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   
   <div class="page active" id="page-feed">
     
+    <!-- 1. Composer Box At the Top -->
     <div class="composer" onclick="openCreatePost()" style="cursor:pointer;">
       <div class="composer-top">
         <div class="avatar" id="composer-avatar-trigger">?</div>
@@ -206,10 +207,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       </div>
     </div>
 
+    <!-- 2. Instagram Style Story Container below Composer -->
     <div class="story-container" id="story-container">
-        </div>
+        <!-- Stories will load here -->
+    </div>
     <input type="file" id="story-upload-input" accept="image/*,video/*" style="display:none;" onchange="handleStoryUpload(this)">
 
+    <!-- 3. Feed Tabs -->
     <div class="feed-tabs">
         <div class="feed-tab active" id="tab-foryou" onclick="setFeedTab('foryou')">For You</div>
         <div class="feed-tab" id="tab-friends" onclick="setFeedTab('friends')">Friends</div>
@@ -373,6 +377,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   <div class="single-post-content" id="single-post-container"></div>
 </div>
 
+<!-- Advanced Story Viewer Modal -->
 <div id="story-viewer-screen">
     <div class="story-progress-bar"><div class="story-progress-inner" id="story-progress-inner"></div></div>
     <div class="story-viewer-header">
@@ -438,6 +443,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   <div id="chat-blocked-area" style="display:none; padding:16px; background:var(--surface); text-align:center; border-top:1px solid var(--border); color:var(--muted); font-size:13px; font-weight:600;"></div>
 </div>
 
+<!-- All Modals Overlay Container -->
 <div class="modal-overlay" id="tag-modal"><div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;"><button class="modal-close" onclick="closeTagModal()"><span class="material-symbols-outlined">close</span></button><div class="modal-title" style="font-weight:800; font-size:18px; margin-bottom:15px;">Tag Friends</div><div id="tag-friends-list" style="overflow-y:auto; flex:1; margin-bottom:15px; max-height:300px;"></div><button class="btn-primary" onclick="closeTagModal()">Done</button></div></div>
 <div class="modal-overlay" id="mention-modal"><div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;"><button class="modal-close" onclick="closeMentionModal()"><span class="material-symbols-outlined">close</span></button><div class="modal-title" style="font-weight:800; font-size:18px; margin-bottom:15px;">Mention Friends</div><div id="mention-friends-list" style="overflow-y:auto; flex:1; max-height:300px;"></div></div></div>
 <div class="modal-overlay" id="friends-list-modal"><div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;"><button class="modal-close" onclick="closeFriendsListModal()"><span class="material-symbols-outlined">close</span></button><div class="modal-title" style="font-weight:800; font-size:18px; margin-bottom:15px;">Friends</div><div id="friends-list-container" style="overflow-y:auto; flex:1; max-height:400px;"></div></div></div>
@@ -461,7 +467,17 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
 const MY_SPECIAL_EMAIL = "gochat.official@gmail.com"; 
-firebase.initializeApp({ apiKey:"AIzaSyCb5kNVWdeSEqMgCONh3HiiJfUSOgEnIQo", authDomain:"my-social-app-4bb92.firebaseapp.com", projectId:"my-social-app-4bb92", storageBucket:"my-social-app-4bb92.firebasestorage.app", messagingSenderId:"460346507844", appId:"1:460346507844:web:78bf03761c020dc322b211" });
+
+// YOUR BRAND NEW FIREBASE CONFIGURATION (GoChat V2)
+firebase.initializeApp({
+  apiKey: "AIzaSyDp5n99i-3OM1BIhECAEBGZHkgWxltmvgA",
+  authDomain: "gochat-v2.firebaseapp.com",
+  projectId: "gochat-v2",
+  storageBucket: "gochat-v2.firebasestorage.app",
+  messagingSenderId: "565637163174",
+  appId: "1:565637163174:web:57758997b94f22cb91ec67"
+});
+
 const auth=firebase.auth(); const db=firebase.firestore();
 let currentUser=null,currentUserData=null,currentChatId=null,currentChatUser=null,feedUnsub=null,chatUnsub=null,notifUnsub=null,activeCommentPostId=null,commentPanelListener=null;
 let chatCounters = {}; let currentFeedTab = 'foryou'; let currentTaggedFriends = []; let currentMentionPostId = null; let pendingMentions = {}; let amIBlockedByCurrent = false;
@@ -494,6 +510,12 @@ async function signInWithGoogle() {
     try { const result = await auth.signInWithPopup(provider); const user = result.user; const snap = await db.collection('users').doc(user.uid).get(); if(!snap.exists) { await db.collection('users').doc(user.uid).set({ name: user.displayName || 'GoChat User', email: user.email, avatar: '', bio: '', location: '', hometown: '', relationship: '', partnerName: '', gender: '', friends: [], sentRequests: [], receivedRequests: [], online: true, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); } else { await db.collection('users').doc(user.uid).update({ online: true }); } } catch(e) { msg.textContent = 'Login failed: ' + e.message; msg.className = 'auth-msg error'; }
 }
 async function doLogout(){ try{ setOnlineStatus(false); } catch(e){} try{ await auth.signOut(); } catch(e){} window.location.reload(); }
+
+async function handleDeleteAccount() {
+    if (!confirm("If you delete this account, all your activities will be deleted forever.")) return; if (!confirm("Are you absolutely sure? This action is permanent.")) return;
+    showToast("Processing account destruction..."); const uid = currentUser.uid;
+    try { await db.collection('users').doc(uid).delete(); const postsSnap = await db.collection('posts').where('uid', '==', uid).get(); const batch = db.batch(); postsSnap.forEach(doc => batch.delete(doc.ref)); await batch.commit(); await auth.currentUser.delete(); showToast("Account deleted forever! Goodbye."); setTimeout(() => window.location.reload(), 1500); } catch(e) { if(e.code === 'auth/requires-recent-login') { showToast("Security notice: Please log out and sign back in to authorize account deletion."); } else { showToast("Failed to delete account: " + e.message); } }
+}
 
 auth.onAuthStateChanged(async(user)=>{
     if(user){

@@ -93,6 +93,20 @@ async function doRegister(){
   const email=document.getElementById('reg-email').value.trim();
   const pass=document.getElementById('reg-pass').value;
   const confirmPass=document.getElementById('reg-confirm-pass').value;
+  if(!name||!email||!pass||!confirmPass){showMsg('Please fill in all fields.','error');return;}
+  if(pass.length<6){showMsg('Password must be at least 6 characters.','error');return;}
+  if(pass!==confirmPass){showMsg('Passwords do not match!','error');return;}
+
+  const {data, error} = await supabase.auth.signUp({
+    email: email,
+    password: pass,
+    options: { data: { name: name } }
+  });
+
+  if(error){showMsg('Error: '+error.message,'error');return;}
+  showMsg('Account created successfully! Please login.','success');
+  setTimeout(()=>switchTab('login'),1500);
+}
 
   if(!name||!email||!pass||!confirmPass){showMsg('Please fill in all fields.','error');return;}
   if(pass.length<6){showMsg('Password must be at least 6 characters.','error');return;}

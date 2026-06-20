@@ -1,34 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoChat AI Edition</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { font-family: sans-serif; background: #0f0f13; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .box { text-align: center; padding: 2rem; background: #1a1a24; border-radius: 20px; }
-        button { padding: 12px 24px; cursor: pointer; border-radius: 20px; border: none; font-weight: bold; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoChat</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+--bg:#0f0f13;--surface:#1a1a24;--card:#22222f;--border:#2e2e3f;
+--accent:#6c63ff;--accent2:#a78bfa;--text:#e8e8f0;--muted:#8888aa;
+--danger:#ff4f4f;--success:#4fbe79;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh;}
+#auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0f13 0%,#1a1228 100%);}
+.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 32px;width:92%;max-width:380px;}
+.auth-logo{font-size:28px;font-weight:800;color:var(--accent2);text-align:center;margin-bottom:6px;}
+.auth-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:28px;}
+.auth-tabs{display:flex;background:var(--bg);border-radius:10px;padding:4px;margin-bottom:24px;}
+.auth-tab{flex:1;padding:9px;text-align:center;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);}
+.auth-tab.active{background:var(--accent);color:#fff;}
+.input-group{margin-bottom:14px;}
+.input-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;}
+.input-group input{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;}
+.input-group input:focus{border-color:var(--accent);}
+.btn-primary{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;}
+.auth-msg{text-align:center;font-size:13px;margin-top:14px;padding:10px;border-radius:8px;display:none;}
+.auth-msg.error{background:#ff4f4f22;color:var(--danger);display:block;}
+.auth-msg.success{background:#4fbe7922;color:var(--success);display:block;}
+#app-screen{display:none;max-width:480px;margin:0 auto;padding:40px 20px;text-align:center;}
+.welcome-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 24px;}
+.welcome-box h2{color:var(--accent2);margin-bottom:10px;}
+.welcome-box p{color:var(--muted);margin-bottom:20px;}
+.btn-danger{padding:10px 24px;background:transparent;color:var(--danger);border:1px solid var(--danger);border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;}
+</style>
 </head>
 <body>
 
-    <div class="box">
-        <h1>GoChat AI</h1>
-        <p>নতুন করে পথচলা শুরু</p>
-        <button onclick="login()">Google দিয়ে শুরু করুন</button>
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">✦ GoChat</div>
+    <div class="auth-sub">Your own social space</div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</div>
+      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</div>
     </div>
+    <div id="login-form">
+      <div class="input-group"><label>Email</label><input type="email" id="login-email" placeholder="example@gmail.com"></div>
+      <div class="input-group"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••"></div>
+      <button class="btn-primary" onclick="doLogin()">Login</button>
+    </div>
+    <div id="register-form" style="display:none">
+      <div class="input-group"><label>Name</label><input type="text" id="reg-name" placeholder="Your name"></div>
+      <div class="input-group"><label>Email</label><input type="email" id="reg-email" placeholder="example@gmail.com"></div>
+      <div class="input-group"><label>Password</label><input type="password" id="reg-pass" placeholder="At least 6 characters"></div>
+      <div class="input-group"><label>Confirm Password</label><input type="password" id="reg-confirm-pass" placeholder="Re-enter password"></div>
+      <button class="btn-primary" onclick="doRegister()">Create Account</button>
+    </div>
+    <div id="auth-msg" class="auth-msg"></div>
+  </div>
+</div>
 
-    <script>
-        // আপনার সুপাবেস কানেকশন
-        const SUPABASE_URL = 'https://oahvnmsaldyshcsckckbr.supabase.co';
-        const SUPABASE_ANON_KEY = 'Sb_publishable_tRRmFVvanxnNR96tL8dd8A_7iXQyxMv';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<div id="app-screen">
+  <div class="welcome-box">
+    <h2>✦ Welcome to GoChat!</h2>
+    <p id="welcome-text">Loading...</p>
+    <button class="btn-danger" onclick="doLogout()">Logout</button>
+  </div>
+</div>
 
-        async function login() {
-            const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
-            if (error) alert(error.message);
-        }
-    </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://czkgmxluugegzrjugaxr.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_aLoBLK3CV7A19JSQIC-7sQ_gp6pCXKl';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function switchTab(tab){
+  document.getElementById('tab-login').classList.toggle('active',tab==='login');
+  document.getElementById('tab-register').classList.toggle('active',tab==='register');
+  document.getElementById('login-form').style.display=tab==='login'?'block':'none';
+  document.getElementById('register-form').style.display=tab==='register'?'block':'none';
+  document.getElementById('auth-msg').className='auth-msg';
+}
+
+function showMsg(text, type){
+  const msg=document.getElementById('auth-msg');
+  msg.textContent=text;
+  msg.className='auth-msg '+type;
+}
+
+async function doRegister(){
+  const name=document.getElementById('reg-name').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const pass=document.getElementById('reg-pass').value;
+  const confirmPass=document.getElementById('reg-confirm-pass').value;
+
+  if(!name||!email||!pass||!confirmPass){showMsg('Please fill in all fields.','error');return;}
+  if(pass.length<6){showMsg('Password must be at least 6 characters.','error');return;}
+  if(pass!==confirmPass){showMsg('Passwords do not match!','error');return;}
+
+  const {data, error} = await supabase.auth.signUp({
+    email: email,
+    password: pass,
+    options: { data: { name: name } }
+  });
+
+  if(error){showMsg('Error: '+error.message,'error');return;}
+  showMsg('Account created successfully! Please login.','success');
+  setTimeout(()=>switchTab('login'),1500);
+}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  if(!email||!pass){showMsg('Please fill in all fields.','error');return;}
+
+  const {data, error} = await supabase.auth.signInWithPassword({
+    email: email,
+    password: pass
+  });
+
+  if(error){showMsg('Incorrect email or password.','error');return;}
+  checkUser();
+}
+
+async function doLogout(){
+  await supabase.auth.signOut();
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('app-screen').style.display='none';
+}
+
+async function checkUser(){
+  const {data:{session}} = await supabase.auth.getSession();
+  if(session){
+    const name = session.user.user_metadata.name || session.user.email;
+    document.getElementById('welcome-text').textContent = 'Logged in as: '+name;
+    document.getElementById('auth-screen').style.display='none';
+    document.getElementById('app-screen').style.display='block';
+  } else {
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('app-screen').style.display='none';
+  }
+}
+
+checkUser();
+</script>
 </body>
 </html>

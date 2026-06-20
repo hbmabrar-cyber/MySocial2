@@ -527,7 +527,7 @@ auth.onAuthStateChanged(async(user)=>{
             currentUserData = {name:user.displayName||'User',email:user.email};
         }
         document.getElementById('auth-screen').style.display='none'; document.getElementById('app-screen').style.display='block';
-        loadUserUI(); loadFeed(); loadMessages(); loadStories(); cleanupExpiredPosts();
+        loadUserUI(); loadFeed(); loadMessages(); cleanupExpiredPosts();
 
         db.collection('users').doc(user.uid).onSnapshot(doc => {
             if(doc.exists) {

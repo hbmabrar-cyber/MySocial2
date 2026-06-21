@@ -25,20 +25,21 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .input-group input:focus{border-color:var(--accent);}
 .btn-primary{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;}
 .auth-msg{text-align:center;font-size:13px;margin-top:14px;padding:10px;border-radius:8px;display:none;}
-.auth-msg.error{background:#ff4f4f22;color:var(--danger);display:block;}
-.auth-msg.success{background:#4fbe7922;color:var(--success);display:block;}
+.auth-msg.error{background:#ff4f4f22;color:#ff4f4f;display:block;}
+.auth-msg.success{background:#4fbe7922;color:#4fbe79;display:block;}
 #app-screen{display:none;max-width:480px;margin:0 auto;padding:40px 20px;text-align:center;}
 .welcome-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 24px;}
 .welcome-box h2{color:var(--accent2);margin-bottom:10px;}
 .welcome-box p{color:var(--muted);margin-bottom:20px;}
 .btn-danger{padding:10px 24px;background:transparent;color:var(--danger);border:1px solid var(--danger);border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;}
+#debug-box{background:#000;color:#0f0;font-size:11px;padding:10px;margin-top:10px;border-radius:8px;text-align:left;display:none;max-height:150px;overflow-y:auto;word-break:break-all;}
 </style>
 </head>
 <body>
 
 <div id="auth-screen">
   <div class="auth-box">
-    <div class="auth-logo">✦ GoChat</div>
+    <div class="auth-logo">GoChat</div>
     <div class="auth-sub">Your own social space</div>
     <div class="auth-tabs">
       <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</div>
@@ -46,7 +47,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
     </div>
     <div id="login-form">
       <div class="input-group"><label>Email</label><input type="email" id="login-email" placeholder="example@gmail.com"></div>
-      <div class="input-group"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••"></div>
+      <div class="input-group"><label>Password</label><input type="password" id="login-pass" placeholder="********"></div>
       <button class="btn-primary" onclick="doLogin()">Login</button>
     </div>
     <div id="register-form" style="display:none">
@@ -57,122 +58,143 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
       <button class="btn-primary" onclick="doRegister()">Create Account</button>
     </div>
     <div id="auth-msg" class="auth-msg"></div>
+    <div id="debug-box"></div>
   </div>
 </div>
 
 <div id="app-screen">
   <div class="welcome-box">
-    <h2>✦ Welcome to GoChat!</h2>
+    <h2>Welcome to GoChat!</h2>
     <p id="welcome-text">Loading...</p>
     <button class="btn-danger" onclick="doLogout()">Logout</button>
   </div>
 </div>
 
 <script>
-const SUPABASE_URL = 'https://czkgmxluugegzrjugaxr.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_aLoBLK3CV7A19JSQIC-7sQ_gp6pCXKl';
+var SUPABASE_URL = 'https://czkgmxluugegzrjugaxr.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_aLoBLK3CV7A19JSQIC-7sQ_gp6pCXKl';
+
+function debugLog(msg){
+  var box = document.getElementById('debug-box');
+  box.style.display='block';
+  box.innerHTML += msg + '<br>';
+}
 
 function switchTab(tab){
-  document.getElementById('tab-login').classList.toggle('active',tab==='login');
-  document.getElementById('tab-register').classList.toggle('active',tab==='register');
-  document.getElementById('login-form').style.display=tab==='login'?'block':'none';
-  document.getElementById('register-form').style.display=tab==='register'?'block':'none';
-  document.getElementById('auth-msg').className='auth-msg';
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('auth-msg').className = 'auth-msg';
 }
 
 function showMsg(text, type){
-  const msg=document.getElementById('auth-msg');
-  msg.textContent=text;
-  msg.className='auth-msg '+type;
+  var msg = document.getElementById('auth-msg');
+  msg.textContent = text;
+  msg.className = 'auth-msg ' + type;
 }
 
-async function doRegister(){
-  const name=document.getElementById('reg-name').value.trim();
-  const email=document.getElementById('reg-email').value.trim();
-  const pass=document.getElementById('reg-pass').value;
-  const confirmPass=document.getElementById('reg-confirm-pass').value;
-  if(!name||!email||!pass||!confirmPass){showMsg('Please fill in all fields.','error');return;}
-  if(pass.length<6){showMsg('Password must be at least 6 characters.','error');return;}
-  if(pass!==confirmPass){showMsg('Passwords do not match!','error');return;}
+function doRegister(){
+  debugLog('Register button clicked');
+  var name = document.getElementById('reg-name').value.trim();
+  var email = document.getElementById('reg-email').value.trim();
+  var pass = document.getElementById('reg-pass').value;
+  var confirmPass = document.getElementById('reg-confirm-pass').value;
 
-  try{
-    const res = await fetch(SUPABASE_URL+'/auth/v1/signup',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'apikey':SUPABASE_KEY
-      },
-      body:JSON.stringify({email:email,password:pass,data:{name:name}})
-    });
-    const data = await res.json();
-    if(data.error||data.msg){showMsg('Error: '+(data.error||data.msg),'error');return;}
-    showMsg('Account created successfully! Please login.','success');
-    setTimeout(()=>switchTab('login'),1500);
-  }catch(e){
-    showMsg('Network error: '+e.message,'error');
+  if(!name || !email || !pass || !confirmPass){
+    showMsg('Please fill in all fields.', 'error');
+    return;
   }
-}
+  if(pass.length < 6){
+    showMsg('Password must be at least 6 characters.', 'error');
+    return;
+  }
+  if(pass !== confirmPass){
+    showMsg('Passwords do not match!', 'error');
+    return;
+  }
 
-  if(error){showMsg('Error: '+error.message,'error');return;}
-  showMsg('Account created successfully! Please login.','success');
-  setTimeout(()=>switchTab('login'),1500);
-}
+  debugLog('Sending request to Supabase...');
 
-  if(!name||!email||!pass||!confirmPass){showMsg('Please fill in all fields.','error');return;}
-  if(pass.length<6){showMsg('Password must be at least 6 characters.','error');return;}
-  if(pass!==confirmPass){showMsg('Passwords do not match!','error');return;}
-
-  const {data, error} = await supabase.auth.signUp({
-    email: email,
-    password: pass,
-    options: { data: { name: name } }
+  fetch(SUPABASE_URL + '/auth/v1/signup', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY
+    },
+    body: JSON.stringify({
+      email: email,
+      password: pass,
+      data: { name: name }
+    })
+  })
+  .then(function(res){ return res.json(); })
+  .then(function(data){
+    debugLog('Response: ' + JSON.stringify(data).substring(0,200));
+    if(data.error || data.msg){
+      showMsg('Error: ' + (data.msg || data.error), 'error');
+      return;
+    }
+    showMsg('Account created successfully! Please login.', 'success');
+    setTimeout(function(){ switchTab('login'); }, 1500);
+  })
+  .catch(function(e){
+    debugLog('Catch error: ' + e.message);
+    showMsg('Network error: ' + e.message, 'error');
   });
-
-  if(error){showMsg('Error: '+error.message,'error');return;}
-  showMsg('Account created successfully! Please login.','success');
-  setTimeout(()=>switchTab('login'),1500);
 }
 
-async function doLogin(){
-  const email=document.getElementById('login-email').value.trim();
-  const pass=document.getElementById('login-pass').value;
-  if(!email||!pass){showMsg('Please fill in all fields.','error');return;}
+function doLogin(){
+  debugLog('Login button clicked');
+  var email = document.getElementById('login-email').value.trim();
+  var pass = document.getElementById('login-pass').value;
 
-  try{
-    const res = await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'apikey':SUPABASE_KEY
-      },
-      body:JSON.stringify({email:email,password:pass})
-    });
-    const data = await res.json();
-    if(data.error||data.error_description){showMsg('Incorrect email or password.','error');return;}
-    localStorage.setItem('gochat_session',JSON.stringify(data));
-    checkUser();
-  }catch(e){
-    showMsg('Network error: '+e.message,'error');
+  if(!email || !pass){
+    showMsg('Please fill in all fields.', 'error');
+    return;
   }
+
+  fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY
+    },
+    body: JSON.stringify({ email: email, password: pass })
+  })
+  .then(function(res){ return res.json(); })
+  .then(function(data){
+    debugLog('Login response: ' + JSON.stringify(data).substring(0,200));
+    if(data.error || data.error_description){
+      showMsg('Incorrect email or password.', 'error');
+      return;
+    }
+    localStorage.setItem('gochat_session', JSON.stringify(data));
+    checkUser();
+  })
+  .catch(function(e){
+    debugLog('Catch error: ' + e.message);
+    showMsg('Network error: ' + e.message, 'error');
+  });
 }
 
 function doLogout(){
   localStorage.removeItem('gochat_session');
-  document.getElementById('auth-screen').style.display='flex';
-  document.getElementById('app-screen').style.display='none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
 }
 
 function checkUser(){
-  const session = localStorage.getItem('gochat_session');
+  var session = localStorage.getItem('gochat_session');
   if(session){
-    const data = JSON.parse(session);
-    const name = data.user.user_metadata.name || data.user.email;
-    document.getElementById('welcome-text').textContent = 'Logged in as: '+name;
-    document.getElementById('auth-screen').style.display='none';
-    document.getElementById('app-screen').style.display='block';
+    var data = JSON.parse(session);
+    var name = (data.user && data.user.user_metadata && data.user.user_metadata.name) || (data.user && data.user.email) || 'User';
+    document.getElementById('welcome-text').textContent = 'Logged in as: ' + name;
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
   } else {
-    document.getElementById('auth-screen').style.display='flex';
-    document.getElementById('app-screen').style.display='none';
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app-screen').style.display = 'none';
   }
 }
 

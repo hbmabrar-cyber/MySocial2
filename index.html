@@ -68,11 +68,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script>
 const SUPABASE_URL = 'https://czkgmxluugegzrjugaxr.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_aLoBLK3CV7A19JSQIC-7sQ_gp6pCXKl';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function switchTab(tab){
   document.getElementById('tab-login').classList.toggle('active',tab==='login');
@@ -97,11 +95,23 @@ async function doRegister(){
   if(pass.length<6){showMsg('Password must be at least 6 characters.','error');return;}
   if(pass!==confirmPass){showMsg('Passwords do not match!','error');return;}
 
-  const {data, error} = await supabase.auth.signUp({
-    email: email,
-    password: pass,
-    options: { data: { name: name } }
-  });
+  try{
+    const res = await fetch(SUPABASE_URL+'/auth/v1/signup',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'apikey':SUPABASE_KEY
+      },
+      body:JSON.stringify({email:email,password:pass,data:{name:name}})
+    });
+    const data = await res.json();
+    if(data.error||data.msg){showMsg('Error: '+(data.error||data.msg),'error');return;}
+    showMsg('Account created successfully! Please login.','success');
+    setTimeout(()=>switchTab('login'),1500);
+  }catch(e){
+    showMsg('Network error: '+e.message,'error');
+  }
+}
 
   if(error){showMsg('Error: '+error.message,'error');return;}
   showMsg('Account created successfully! Please login.','success');
@@ -128,25 +138,35 @@ async function doLogin(){
   const pass=document.getElementById('login-pass').value;
   if(!email||!pass){showMsg('Please fill in all fields.','error');return;}
 
-  const {data, error} = await supabase.auth.signInWithPassword({
-    email: email,
-    password: pass
-  });
-
-  if(error){showMsg('Incorrect email or password.','error');return;}
-  checkUser();
+  try{
+    const res = await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'apikey':SUPABASE_KEY
+      },
+      body:JSON.stringify({email:email,password:pass})
+    });
+    const data = await res.json();
+    if(data.error||data.error_description){showMsg('Incorrect email or password.','error');return;}
+    localStorage.setItem('gochat_session',JSON.stringify(data));
+    checkUser();
+  }catch(e){
+    showMsg('Network error: '+e.message,'error');
+  }
 }
 
-async function doLogout(){
-  await supabase.auth.signOut();
+function doLogout(){
+  localStorage.removeItem('gochat_session');
   document.getElementById('auth-screen').style.display='flex';
   document.getElementById('app-screen').style.display='none';
 }
 
-async function checkUser(){
-  const {data:{session}} = await supabase.auth.getSession();
+function checkUser(){
+  const session = localStorage.getItem('gochat_session');
   if(session){
-    const name = session.user.user_metadata.name || session.user.email;
+    const data = JSON.parse(session);
+    const name = data.user.user_metadata.name || data.user.email;
     document.getElementById('welcome-text').textContent = 'Logged in as: '+name;
     document.getElementById('auth-screen').style.display='none';
     document.getElementById('app-screen').style.display='block';
